@@ -12,6 +12,7 @@ BlendedModel(
   description = "A collection of bundles to develop OSGi application on top of Scala and Akka and Camel.",
 
   modules = Seq(
+    "blended.launcher.features", 
     "container"
   ),
   profiles = Seq(
