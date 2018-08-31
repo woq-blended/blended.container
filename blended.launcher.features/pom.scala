@@ -148,8 +148,8 @@ val features = Seq(
       FeatureBundle(dependency = Blended.securityLoginApi),
       FeatureBundle(dependency = Blended.securityLoginImpl, start = true),
       FeatureBundle(dependency = Blended.mgmtWs, start = true),
-      FeatureBundle(dependency = Blended.securityLoginRest, start = true)
-      //FeatureBundle(dependency = Dependency(gav = Blended.mgmtApp, `type` = "war"), start = true)
+      FeatureBundle(dependency = Blended.securityLoginRest, start = true),
+      FeatureBundle(dependency = Dependency(gav = Blended.mgmtUi), start = true)
     )
   ),
   FeatureDef(
