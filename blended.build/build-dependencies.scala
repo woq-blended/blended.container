@@ -25,11 +25,15 @@ object Deps {
   def akka(m: String) = "com.typesafe.akka" %% s"akka-${m}" % BlendedVersions.akkaVersion
   def akka_Http(m: String) = "com.typesafe.akka" %% s"akka-${m}" % BlendedVersions.akkaHttpVersion
   val akkaActor = akka("actor")
+  val akkaActorTyped = akka("actor-typed")
   val akkaCamel = akka("camel")
   val akkaHttp = akka_Http("http")
   val akkaHttpCore = akka_Http("http-core")
   val akkaHttpTestkit = akka_Http("http-testkit")
   val akkaParsing = akka_Http("parsing")
+  val akkaPersistence = akka("persistence")
+  val akkaPersistenceTyped = akka("persistence-typed")
+  val akkaProtobuf = akka("protobuf")
   val akkaOsgi = akka("osgi")
   val akkaStream = akka("stream")
   val akkaTestkit = akka("testkit")

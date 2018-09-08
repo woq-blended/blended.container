@@ -33,10 +33,8 @@ class TestContainerProxy extends BlendedTestContextManager with TestContextConfi
     val t = 60.seconds
 
     SequentialComposedCondition(
-      ParallelComposedCondition(
-        JMSAvailableCondition(new ActiveMQConnectionFactory(amqUrl(cuts)), Some(t)),
-        JolokiaAvailableCondition(jmxRest(cuts), Some(t), Some("root"), Some("mysecret"))
-      ),
+      JMSAvailableCondition(new ActiveMQConnectionFactory(amqUrl(cuts)), Some(t)),
+      JolokiaAvailableCondition(jmxRest(cuts), Some(t), Some("root"), Some("mysecret")),
       CamelContextExistsCondition(jmxRest(cuts), Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(t))
     )
   }
