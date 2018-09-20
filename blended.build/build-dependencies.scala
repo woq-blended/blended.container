@@ -225,7 +225,7 @@ import Deps._
 // Blended Projects
 
 object Blended {
-  def blended(name: String) = BlendedVersions.blendedGroupId % name % BlendedVersions.blendedVersion
+  def blended(name: String) = BlendedVersions.blendedGroupId %% name % BlendedVersions.blendedVersion
 
   val activemqBrokerstarter = blended("blended.activemq.brokerstarter")
   val activemqClient = blended("blended.activemq.client")
@@ -262,6 +262,7 @@ object Blended {
   val jmx = blended("blended.jmx")
   val jolokia = blended("blended.jolokia")
   val launcher = blended("blended.launcher")
+  val launcherZip = BlendedVersions.blendedGroupId % "blended.launcher" % BlendedVersions.blendedVersion
   val launcherFeatures = blended("blended.launcher.features")
   val mgmtAgent = blended("blended.mgmt.agent")
   val mgmtBase = blended("blended.mgmt.base")
@@ -270,7 +271,7 @@ object Blended {
   val mgmtMock = blended("blended.mgmt.mock")
   val mgmtRest = blended("blended.mgmt.rest")
   val mgmtServiceJmx = blended("blended.mgmt.service.jmx")
-  val mgmtUi = BlendedVersions.blendedGroupId %% "blended-mgmt-ui-server" % "0.1.1-SNAPSHOT"
+  val mgmtUi = BlendedVersions.blendedGroupId %% "blended.mgmt.ui.server" % "0.1.1-SNAPSHOT"
   val mgmtWs = blended("blended.mgmt.ws")
   val persistence = blended("blended.persistence")
   val persistenceH2 = blended("blended.persistence.h2")
@@ -293,7 +294,7 @@ object Blended {
   val testSupportPojosr = blended("blended.testsupport.pojosr")
   val updater = blended("blended.updater")
   val updaterConfig = blended("blended.updater.config")
-  val updaterMavenPlugin = blended("blended-updater-maven-plugin")
+  val updaterMavenPlugin = BlendedVersions.blendedGroupId % "blended-updater-maven-plugin" % "2.5.0-SNAPSHOT"
   val updaterRemote = blended("blended.updater.remote")
   val updaterTools = blended("blended.updater.tools")
   val util = blended("blended.util")

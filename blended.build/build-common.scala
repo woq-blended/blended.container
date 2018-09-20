@@ -564,13 +564,15 @@ object BlendedContainer {
       ) ++ properties,
       dependencies = features ++ Seq(
         Dependency(
-          Blended.launcher,
-          `type` = "zip",
-          classifier = "bin"
+          Blended.launcherZip,
+          `type` = "zip"
         )
       ) ++
         // the profile resources dep as ZIP file
-        Option(blendedProfileResouces).map(g => Dependency(gav = g, `type` = "zip")).toList,
+        Option(blendedProfileResouces).map{ g => 
+          println(g.toString())
+          Dependency(gav = g, `type` = "zip")
+        }.toList,
       plugins = Seq(
         Plugin(
           gav = Blended.updaterMavenPlugin,
@@ -606,7 +608,6 @@ object BlendedContainer {
                   artifactItem = Config(
                     groupId = "${project.groupId}",
                     artifactId = "blended.launcher",
-                    classifier = "bin",
                     `type` = "zip",
                     outputDirectory = "${project.build.directory}/launcher"
                   )
