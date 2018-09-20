@@ -570,7 +570,6 @@ object BlendedContainer {
       ) ++
         // the profile resources dep as ZIP file
         Option(blendedProfileResouces).map{ g => 
-          println(g.toString())
           Dependency(gav = g, `type` = "zip")
         }.toList,
       plugins = Seq(

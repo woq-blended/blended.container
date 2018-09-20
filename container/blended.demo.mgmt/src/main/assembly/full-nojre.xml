@@ -20,7 +20,7 @@
     </fileSet>
 
     <fileSet>
-      <directory>${project.build.directory}/launcher/blended.launcher-${blended.version}</directory>
+      <directory>${project.build.directory}/launcher</directory>
       <outputDirectory>.</outputDirectory>
     </fileSet>
 
