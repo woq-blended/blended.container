@@ -262,7 +262,6 @@ object Blended {
   val jmx = blended("blended.jmx")
   val jolokia = blended("blended.jolokia")
   val launcher = blended("blended.launcher")
-  val launcherZip = BlendedVersions.blendedGroupId % "blended.launcher" % BlendedVersions.blendedVersion
   val launcherFeatures = blended("blended.launcher.features")
   val mgmtAgent = blended("blended.mgmt.agent")
   val mgmtBase = blended("blended.mgmt.base")
@@ -294,7 +293,7 @@ object Blended {
   val testSupportPojosr = blended("blended.testsupport.pojosr")
   val updater = blended("blended.updater")
   val updaterConfig = blended("blended.updater.config")
-  val updaterMavenPlugin = BlendedVersions.blendedGroupId % "blended-updater-maven-plugin" % "2.5.0-SNAPSHOT"
+  val updaterMavenPlugin = BlendedVersions.blendedGroupId % "blended-updater-maven-plugin" % "2.6.0-M1-SNAPSHOT"
   val updaterRemote = blended("blended.updater.remote")
   val updaterTools = blended("blended.updater.tools")
   val util = blended("blended.util")

@@ -564,7 +564,7 @@ object BlendedContainer {
       ) ++ properties,
       dependencies = features ++ Seq(
         Dependency(
-          Blended.launcherZip,
+          Blended.launcher,
           `type` = "zip"
         )
       ) ++
@@ -606,7 +606,7 @@ object BlendedContainer {
                 artifactItems = Config(
                   artifactItem = Config(
                     groupId = "${project.groupId}",
-                    artifactId = "blended.launcher",
+                    artifactId = "blended.launcher_2.12",
                     `type` = "zip",
                     outputDirectory = "${project.build.directory}/launcher"
                   )
