@@ -45,7 +45,6 @@ val features = Seq(
     FeatureBundle(dependency = typesafeConfigSSL),
     FeatureBundle(dependency = reactiveStreams),
     FeatureBundle(dependency = akkaActor),
-    FeatureBundle(dependency = akkaOsgi),
     FeatureBundle(dependency = akkaSlf4j),
     //FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
