@@ -12,4 +12,4 @@ build:
 
 .PHONY: show-log # Open the container logfile
 show-log:
-	less -i target/blended.demo.*-*-SNAPSHOT/log/blended.log
+	$${PAGER} -i target/blended.demo.*-*-SNAPSHOT/log/blended.log
