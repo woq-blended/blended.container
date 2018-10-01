@@ -67,7 +67,6 @@ val features = Seq(
       FeatureBundle(dependency = geronimoJms11Spec),
       FeatureBundle(dependency = geronimoJ2eeMgmtSpec),
       FeatureBundle(dependency = servicemixStaxApi),
-      FeatureBundle(dependency = xbeanSpring),
       FeatureBundle(dependency = activeMqOsgi),
       FeatureBundle(dependency = Blended.activemqBrokerstarter),
       FeatureBundle(dependency = Blended.jmsUtils, start = true),
