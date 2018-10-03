@@ -8,7 +8,13 @@ import scala.collection.immutable.Seq
 
 val features = Seq(
   FeatureDef("blended-base-felix", bundles = Seq(
-    FeatureBundle(dependency = felixFramework, startLevel = 0, start = true)
+    FeatureBundle(dependency = felixFramework, startLevel = 0, start = true),
+    FeatureBundle(dependency = jline, startLevel = 1),
+    FeatureBundle(dependency = jlineBuiltins, startLevel = 1),
+    FeatureBundle(dependency = felixGogoJline, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoRuntime, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoShell, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoCommand, startLevel = 1, start = true)
   )),
   FeatureDef("blended-base-equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = 0, start = true),
@@ -37,9 +43,6 @@ val features = Seq(
     FeatureBundle(dependency = slf4j),
     FeatureBundle(dependency = logbackCore),
     FeatureBundle(dependency = logbackClassic),
-    FeatureBundle(dependency = felixGogoRuntime, start = true),
-    FeatureBundle(dependency = felixGogoShell, start = true),
-    FeatureBundle(dependency = felixGogoCommand, start = true),
     FeatureBundle(dependency = felixMetatype, start = true),
     FeatureBundle(dependency = typesafeConfig),
     FeatureBundle(dependency = typesafeConfigSSL),
@@ -95,7 +98,7 @@ val features = Seq(
     FeatureBundle(dependency = commonsCollections),
     FeatureBundle(dependency = commonsDiscovery),
     FeatureBundle(dependency = commonsLang),
-    FeatureBundle(dependency = commonsPool),
+    FeatureBundle(dependency = commonsPool2),
     FeatureBundle(dependency = commonsNet),
     FeatureBundle(dependency = commonsExec),
     FeatureBundle(dependency = commonsIo),

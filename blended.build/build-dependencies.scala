@@ -72,7 +72,7 @@ object Deps {
   val commonsLang2 = "commons-lang" % "commons-lang" % "2.6"
   val commonsLang = commonsLang3
   val commonsNet = "commons-net" % "commons-net" % "3.3"
-  val commonsPool = "commons-pool" % "commons-pool" % "1.6"
+  val commonsPool2 = "org.apache.commons" % "commons-pool2" % "2.6.0"
 
   val cmdOption = "de.tototec" % "de.tototec.cmdoption" % "0.6.0"
   val concurrentLinkedHashMapLru = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
@@ -89,9 +89,10 @@ object Deps {
   val felixEventAdmin = "org.apache.felix" % "org.apache.felix.eventadmin" % "1.3.2"
   val felixFramework = "org.apache.felix" % "org.apache.felix.framework" % "6.0.1"
   val felixFileinstall = "org.apache.felix" % "org.apache.felix.fileinstall" % "3.4.2"
-  val felixGogoCommand = "org.apache.felix" % "org.apache.felix.gogo.command" % "0.14.0"
-  val felixGogoShell = "org.apache.felix" % "org.apache.felix.gogo.shell" % "0.10.0"
-  val felixGogoRuntime = "org.apache.felix" % "org.apache.felix.gogo.runtime" % "0.16.2"
+  val felixGogoCommand = "org.apache.felix" % "org.apache.felix.gogo.command" % "1.0.2"
+  val felixGogoJline = "org.apache.felix" % "org.apache.felix.gogo.jline" % "1.1.0"
+  val felixGogoShell = "org.apache.felix" % "org.apache.felix.gogo.shell" % "1.1.0"
+  val felixGogoRuntime = "org.apache.felix" % "org.apache.felix.gogo.runtime" % "1.1.0"
   val felixHttpApi = "org.apache.felix" % "org.apache.felix.http.api" % "3.0.0"
   val felixHttpJetty = "org.apache.felix" % "org.apache.felix.http.jetty" % "3.0.0"
   val felixMetatype = "org.apache.felix" % "org.apache.felix.metatype" % "1.0.12"
@@ -117,6 +118,9 @@ object Deps {
 
   val jcip = "net.jcip" % "jcip-annotations" % "1.0"
   val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % BlendedVersions.slf4jVersion
+
+  val jline = "org.jline" % "jline" % "3.9.0"
+  val jlineBuiltins = "org.jline" % "jline-builtins" % "3.9.0"
 
   private def jetty(n: String) = "org.eclipse.jetty" % s"jetty-${n}" % BlendedVersions.jettyVersion
   private def jettyOsgi(n: String) = "org.eclipse.jetty.osgi" % s"jetty-${n}" % BlendedVersions.jettyVersion
