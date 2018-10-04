@@ -21,7 +21,7 @@ object BlendedVersions {
   val akkaVersion = "2.5.9"
   val akkaHttpVersion = "10.1.1"
 
-  val camelVersion = "2.17.7"
+  val camelVersion = "2.19.5"
 
   val dockerJavaVersion = "3.0.13"
 
@@ -34,7 +34,7 @@ object BlendedVersions {
   val slf4jVersion = "1.7.25"
   val sprayVersion = "1.3.4"
   // from apache servicemix
-  val springVersion = "3.2.18.RELEASE_1"
+  val springVersion = "4.3.12.RELEASE_1"
 
   val prickle = "1.1.14"
 
