@@ -18,7 +18,7 @@ val features = Seq(
   )),
   FeatureDef("blended-base-equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = 0, start = true),
-    FeatureBundle(dependency = eclipseEquinoxConsole, start = true)
+    FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = 1, start = true)
   )),
   FeatureDef("blended-base", bundles = Seq(
     FeatureBundle(dependency = Blended.securityBoot),
