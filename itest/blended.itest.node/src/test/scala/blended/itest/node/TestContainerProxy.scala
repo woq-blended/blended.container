@@ -1,7 +1,7 @@
 package blended.itest.node
 
 import blended.itestsupport.{BlendedTestContextManager, ContainerUnderTest, TestContextConfigurator}
-import blended.itestsupport.condition.{Condition, ParallelComposedCondition, SequentialComposedCondition}
+import blended.itestsupport.condition.{Condition, SequentialComposedCondition}
 import blended.itestsupport.jms.JMSAvailableCondition
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
 import org.apache.activemq.ActiveMQConnectionFactory
