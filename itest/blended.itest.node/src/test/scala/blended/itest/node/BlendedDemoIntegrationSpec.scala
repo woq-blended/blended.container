@@ -5,7 +5,7 @@ import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.BlendedIntegrationTestSupport
@@ -23,9 +23,9 @@ class BlendedDemoIntegrationSpec
 
   private[this] val log = Logger[BlendedDemoIntegrationSpec]
 
-  private[this] val ctProxy = testkit.system.actorOf(Props(new TestContainerProxy()))
+  private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props())
   private[this] implicit val timeout = Timeout(60.seconds)
-  
+
   override def nestedSuites = IndexedSeq(new BlendedDemoSpec(ctProxy: ActorRef))
 
   override def beforeAll() {

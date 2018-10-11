@@ -1,20 +1,16 @@
 package blended.itest.node
 
 import blended.itestsupport.{BlendedTestContextManager, ContainerUnderTest, TestContextConfigurator}
-import blended.itestsupport.condition.{SequentialComposedCondition, Condition, ParallelComposedCondition}
+import blended.itestsupport.condition.{Condition, ParallelComposedCondition, SequentialComposedCondition}
 import blended.itestsupport.jms.JMSAvailableCondition
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
 import org.apache.activemq.ActiveMQConnectionFactory
 import org.apache.camel.CamelContext
 import org.apache.camel.component.jms.JmsComponent
-
 import scala.concurrent.duration._
 
-object TestContainerProxy {
-  def amqUrl(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = cuts("node_0").url("jms", dockerHost, "tcp")
-  def jmxRest(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
-  def ldapUrl(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = cuts("apacheds_0").url("ldap", dockerHost, "ldap")
-}
+import akka.actor.Props
+
 
 class TestContainerProxy extends BlendedTestContextManager with TestContextConfigurator {
 
@@ -38,4 +34,13 @@ class TestContainerProxy extends BlendedTestContextManager with TestContextConfi
       CamelContextExistsCondition(jmxRest(cuts), Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(t))
     )
   }
+}
+
+
+object TestContainerProxy {
+  def amqUrl(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = cuts("node_0").url("jms", dockerHost, "tcp")
+  def jmxRest(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
+  def ldapUrl(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = cuts("apacheds_0").url("ldap", dockerHost, "ldap")
+
+  def props(): Props = Props(new TestContainerProxy())
 }
