@@ -2,20 +2,30 @@ package blended.itest.node
 
 import java.io.File
 
+import scala.concurrent.Await
+import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
-import scala.util.{ Failure, Success }
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 import akka.actor.ActorRef
 import akka.camel.CamelExtension
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerSpecSupport}
+import blended.itestsupport.BlendedIntegrationTestSupport
+import blended.itestsupport.ContainerSpecSupport
 import blended.testsupport.camel._
+import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.FileHelper
-import org.scalatest.{ DoNotDiscover, FreeSpec, Matchers }
+import org.scalactic.source
+import org.scalatest.Assertions
+import org.scalatest.DoNotDiscover
+import org.scalatest.Matchers
 
 @DoNotDiscover
-class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends FreeSpec
+class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
+  extends LoggingFreeSpec
   with Matchers
   with BlendedIntegrationTestSupport
   with ContainerSpecSupport
@@ -52,7 +62,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
         entry = "jms:queue:SampleIn",
         outcome = outcome,
         testCooldown = 5.seconds
-      ) should be (empty)
+      ) should be(empty)
     }
 
     "Allow to read and write directories via the docker API" in {
@@ -60,6 +70,14 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
       import blended.testsupport.BlendedTestSupport.projectTestOutput
 
       val file = new File(s"${projectTestOutput}/data")
+
+      val test = Promise[Unit]()
+
+      def fail(message: String)(implicit pos: source.Position): Unit = {
+        test.complete(Try {
+          Assertions.fail(message)(pos)
+        })
+      }
 
       writeContainerDirectory(ctProxy, "blended_node_0", "/opt/node", file).onComplete {
         case Failure(t) => fail(t.getMessage())
@@ -76,17 +94,23 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
                     cd.content.get("data/testFile.txt") match {
                       case None => fail("expected file [/opt/node/data/testFile.txt] not found in container")
                       case Some(c) =>
-                        val fContent = FileHelper.readFile("data/testFile.txt")
-                        c should equal(fContent)
+                        test.complete(Try {
+                          val fContent = FileHelper.readFile("data/testFile.txt")
+                          c should equal(fContent)
+                        })
                     }
                 }
               }
             }
         }
       }
+
+      Await.result(test.future, timeOut.duration)
     }
 
     "Allow to execute an arbitrary command on the container" in {
+
+      val test = Promise[Unit]()
 
       execContainerCommand(
         ctProxy = ctProxy,
@@ -95,15 +119,20 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
         user = "blended",
         cmd = "ls -al /opt/node".split(" "): _*
       ) onComplete {
-        case Failure(t) => fail(t.getMessage())
+        case Failure(t) => test.failure(fail(t.getMessage()))
         case Success(r) =>
           r.result match {
-            case Left(t) => fail(t.getMessage())
+            case Left(t) => test.failure(fail(t.getMessage()))
             case Right(er) =>
-              log.info(s"Command output is [\n${new String(er._2.out)}\n]")
-              er._2.rc should be(0)
+              test.complete(Try {
+                log.info(s"Command output is [\n${new String(er._2.out)}\n]")
+                er._2.rc should be(0)
+              })
           }
       }
+
+      Await.result(test.future, timeOut.duration)
     }
+
   }
 }
