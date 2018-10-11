@@ -5,7 +5,7 @@ import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.BlendedIntegrationTestSupport
