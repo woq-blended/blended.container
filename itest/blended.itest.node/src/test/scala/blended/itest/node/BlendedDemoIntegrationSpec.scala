@@ -24,7 +24,7 @@ class BlendedDemoIntegrationSpec
   private[this] val log = Logger[BlendedDemoIntegrationSpec]
 
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props())
-  private[this] implicit val timeout = Timeout(60.seconds)
+  private[this] implicit val timeout = Timeout(180.seconds)
 
   override def nestedSuites = IndexedSeq(new BlendedDemoSpec(ctProxy: ActorRef))
 
@@ -32,9 +32,11 @@ class BlendedDemoIntegrationSpec
     log.info(s"Using testkit [${testkit}]")
     testContext(ctProxy)(timeout, testkit)
     containerReady(ctProxy)(timeout, testkit)
+    log.info("Container is ready: Starting tests...")
   }
-  
+
   override def afterAll() {
+    log.info("Running afterAll...")
 
     val ctr = "node_0"
     val dir = "/opt/node/log"
