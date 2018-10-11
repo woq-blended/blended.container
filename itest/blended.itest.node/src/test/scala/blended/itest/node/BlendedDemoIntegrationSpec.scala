@@ -36,7 +36,7 @@ class BlendedDemoIntegrationSpec
   
   override def afterAll() {
 
-    val ctr = "blended_node_0"
+    val ctr = "node_0"
     val dir = "/opt/node/log"
 
     readContainerDirectory(ctProxy, ctr, dir).onComplete {
