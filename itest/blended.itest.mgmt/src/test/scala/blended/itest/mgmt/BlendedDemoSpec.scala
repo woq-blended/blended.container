@@ -1,13 +1,9 @@
 package blended.itest.mgmt
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.duration.FiniteDuration
 
 import akka.actor.ActorRef
-import akka.actor.Scheduler
 import akka.pattern._
 import akka.testkit.TestKit
 import akka.util.Timeout
@@ -15,6 +11,7 @@ import blended.itestsupport.BlendedIntegrationTestSupport
 import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers
 import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers_?
 import blended.itestsupport.ContainerUnderTest
+import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config.RemoteContainerState
 import blended.updater.config.json.PrickleProtocol._
@@ -61,12 +58,12 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
   }
 
   "Get a running mgmt container profile" in {
-    val rcs = unsafeRetry(delay = 2.seconds, retries = 20) {
+    val rcs = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
       val remoteContState = Unpickle[Seq[RemoteContainerState]].fromString(body).get
       log.info(s"remote container states: [${remoteContState}]")
-      // we expect the mgmt-container + 2 node containers
+      // we expect the mgmt container + 2 node containers
       assert(remoteContState.size >= 3)
       remoteContState
     }
@@ -80,44 +77,6 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     // TODO: restart node-container
     // TODO: check restarted node-container for new profile+overlay
 
-  }
-
-  /**
-   * Executed and in case of an failure retries an operation `op`. As long as there are retries left, the next retry starts after `delay` times.
-   *
-   * @param delay The time between a failure and the next retry.
-   * @param retries The max count of retries, before giving up.
-   * @param onRetry Action to be run before a retry.
-   * @param op The operation to be executed and, iff failed, retried.
-   * @param ex ExecutionContext to run the inner futures with.
-   * @param s The Scheduler used to schedule the next retry.
-   *
-   * @return The Future containing the result of `op` or the last failure.
-   */
-  def retry[T](
-    delay: FiniteDuration,
-    retries: Int,
-    onRetry: (Int, Throwable) => Unit = (n, e) => log.debug(e)(s"Retrying after unfulfilled condition (${n} retries left)")
-  )(
-    op: => T
-  )(implicit ec: ExecutionContext, s: Scheduler): Future[T] =
-    Future { op } recoverWith {
-      case e: Throwable if retries > 0 => akka.pattern.after(delay, s)({
-        onRetry(retries - 1, e)
-        retry(delay, retries - 1, onRetry)(op)(ec, s)
-      })
-    }
-
-  def unsafeRetry[T](
-    delay: FiniteDuration,
-    retries: Int,
-    onRetry: (Int, Throwable) => Unit = (n, e) => log.debug(e)(s"Retrying after unfulfilled condition (${n} retries left)"),
-    finalDelay: Option[FiniteDuration] = None
-  )(
-    op: => T
-  )(implicit ec: ExecutionContext, s: Scheduler): T = {
-    val res = retry(delay, retries, onRetry)(op)(ec, s)
-    Await.result(res, finalDelay.getOrElse(delay * retries + 2.seconds))
   }
 
 }
