@@ -21,7 +21,8 @@ BlendedModel(
         activeByDefault = false
       ),
       modules = Seq(
-        "blended.itest.node"
+        "blended.itest.node",
+        "blended.itest.mgmt"
       )
     )
   )

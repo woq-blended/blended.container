@@ -1,4 +1,4 @@
-package blended.itest.node
+package blended.itest.mgmt
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration._
@@ -13,6 +13,10 @@ import blended.util.logging.Logger
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.refspec.RefSpec
 
+/**
+ * This Spec contains mostly test setup and teardown logic.
+ * The real test cases are nested in [[nestedSuites]].
+ */
 class BlendedDemoIntegrationSpec
   extends RefSpec
   with BeforeAndAfterAll
@@ -23,12 +27,14 @@ class BlendedDemoIntegrationSpec
 
   private[this] val log = Logger[BlendedDemoIntegrationSpec]
 
-  private[this] implicit val timeout = Timeout(180.seconds)
+  /**
+   * Timeout in which we wait for container ready (before nested tests).
+   * Also used when stopping containers.
+   */
+  private[this] implicit val timeout = Timeout(60.seconds)
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
 
-  override def nestedSuites = IndexedSeq(
-    new BlendedDemoSpec(ctProxy: ActorRef)
-  )
+  override def nestedSuites = IndexedSeq(new BlendedDemoSpec(ctProxy: ActorRef))
 
   override def beforeAll() {
     log.info(s"Using testkit [${testkit}]")
@@ -40,21 +46,24 @@ class BlendedDemoIntegrationSpec
   override def afterAll() {
     log.info("Running afterAll...")
 
-    val ctr = "node_0"
-    val dir = "/opt/node/log"
+    def writeLog(ctr: String, dir: String): Unit = {
+      readContainerDirectory(ctProxy, ctr, dir).onComplete {
+        case Success(cdr) => cdr.result match {
+          case Left(_) =>
+          case Right(cd) =>
+            val outputDir = s"${testOutput}/testlog/${ctr}"
+            saveContainerDirectory(outputDir, cd)
+            log.info(s"Saved container output to [${outputDir}]")
 
-    readContainerDirectory(ctProxy, ctr, dir).onComplete {
-      case Success(cdr) => cdr.result match {
-        case Left(_) =>
-        case Right(cd) =>
-          val outputDir = s"${testOutput}/testlog"
-          saveContainerDirectory(outputDir, cd)
-          log.info(s"Saved container output to [${outputDir}]")
-
+        }
+        case Failure(e) =>
+          log.error(e)(s"Could not read containder directory [${dir}] of container [${ctr}]")
       }
-      case Failure(e) =>
-        log.error(e)(s"Could not read containder directory [${dir}] of container [${ctr}]")
     }
+
+    writeLog("mgmt_0", "opt/mgnt/log")
+    writeLog("node1_0", "opt/mgnt/log")
+    writeLog("node2_0", "opt/mgnt/log")
 
     stopContainers(ctProxy)(timeout, testkit)
   }

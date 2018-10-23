@@ -200,7 +200,7 @@ object Deps {
   val springJms = spring("jms")
   val springTx = spring("tx")
 
-  val sttp = "com.softwaremill.sttp" %% "core" % "1.2.1"
+  val sttp = "com.softwaremill.sttp" %% "core" % "1.3.7"
   val sttpAkka = "com.softwaremill.sttp" %% "akka-http-backend" % "1.2.1"
 
   val shapeless = "com.chuusai" %% "shapeless" % BlendedVersions.shapelessVersion
@@ -255,6 +255,7 @@ object Blended {
   val hawtioLogin = blended("blended.hawtio.login")
   val itestReactor = blended("blended.itest.reactor")
   val itestSupport = blended("blended.itestsupport")
+  val itestMgmt = blended("blended.itest.mgmt")
   val itestNode = blended("blended.itest.node")
   val jettyBoot = blended("blended.jetty.boot")
   val jmsUtils = blended("blended.jms.utils")

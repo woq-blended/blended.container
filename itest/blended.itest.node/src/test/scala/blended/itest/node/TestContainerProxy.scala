@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 import akka.actor.Props
 
 
-class TestContainerProxy extends BlendedTestContextManager with TestContextConfigurator {
+class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextManager with TestContextConfigurator {
 
   import TestContainerProxy._
   
@@ -26,12 +26,11 @@ class TestContainerProxy extends BlendedTestContextManager with TestContextConfi
   override def containerReady(cuts: Map[String, ContainerUnderTest]) : Condition = {
     
     implicit val system = context.system
-    val t = 60.seconds
 
     SequentialComposedCondition(
-      JMSAvailableCondition(new ActiveMQConnectionFactory(amqUrl(cuts)), Some(t)),
-      JolokiaAvailableCondition(jmxRest(cuts), Some(t), Some("root"), Some("mysecret")),
-      CamelContextExistsCondition(jmxRest(cuts), Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(t))
+      JMSAvailableCondition(new ActiveMQConnectionFactory(amqUrl(cuts)), Some(timeout)),
+      JolokiaAvailableCondition(jmxRest(cuts), Some(timeout), Some("root"), Some("mysecret")),
+      CamelContextExistsCondition(jmxRest(cuts), Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(timeout))
     )
   }
 }
@@ -42,5 +41,5 @@ object TestContainerProxy {
   def jmxRest(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
   def ldapUrl(cuts: Map[String, ContainerUnderTest])(implicit dockerHost: String) : String = cuts("apacheds_0").url("ldap", dockerHost, "ldap")
 
-  def props(): Props = Props(new TestContainerProxy())
+  def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
 }
