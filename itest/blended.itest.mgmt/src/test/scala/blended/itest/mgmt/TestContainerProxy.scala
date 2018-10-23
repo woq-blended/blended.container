@@ -8,7 +8,6 @@ import blended.itestsupport.ContainerUnderTest
 import blended.itestsupport.TestContextConfigurator
 import blended.itestsupport.condition.Condition
 import blended.itestsupport.condition.ParallelComposedCondition
-import blended.itestsupport.condition.SequentialComposedCondition
 import blended.itestsupport.http.HttpAvailableCondition
 import blended.util.logging.Logger
 import org.apache.camel.CamelContext
