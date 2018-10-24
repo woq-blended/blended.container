@@ -6,6 +6,13 @@ import scala.collection.immutable.Seq
 //#include ../../blended.build/build-plugins.scala
 //#include ../../blended.build/build-common.scala
 
+val deploymentPackForTest = Dependency(
+      gav = Blended.demoNode,
+      scope = "test",
+      classifier = "deploymentpack",
+      `type` = "zip"
+    )
+
 BlendedModel(
   gav = Blended.itestMgmt,
   packaging = "jar",
@@ -22,10 +29,35 @@ BlendedModel(
     Deps.akkaSlf4j % "test",
     Deps.logbackCore % "test",
     Deps.logbackClassic % "test",
-    Deps.sttp % "test"
+    Deps.sttp % "test",
+    // we use this in test cases as resource
+    deploymentPackForTest
   ),
   plugins = Seq(
     scalaCompilerPlugin,
-    scalatestMavenPlugin
+    scalatestMavenPlugin,
+    Plugin(
+      gav = Plugins.dependency,
+      executions = Seq(
+        Execution(
+          id = "copy-deploymentpack",
+          phase = "process-test-resources",
+          goals = Seq("copy"),
+          configuration = Config(
+            artifactItems = Config(
+              artifactItem = Config(
+                groupId = deploymentPackForTest.gav.groupId.get,
+                artifactId = deploymentPackForTest.gav.artifactId,
+                version = deploymentPackForTest.gav.version.get,
+                classifier = deploymentPackForTest.classifier,
+                `type` = deploymentPackForTest.`type`,
+                outputDirectory = "${project.build.testOutputDirectory}",
+                destFileName = s"${deploymentPackForTest.gav.artifactId}${deploymentPackForTest.classifier.map(c => s"-${c}").getOrElse("")}.${deploymentPackForTest.`type`}"
+              )
+            )
+          )
+        )
+      )
+    )
   )
 )
