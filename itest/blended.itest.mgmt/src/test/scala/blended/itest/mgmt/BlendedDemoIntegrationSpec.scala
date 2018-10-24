@@ -61,7 +61,7 @@ class BlendedDemoIntegrationSpec
       }
     }
 
-    writeLog("mgmt_0", "opt/mgnt/log")
+    writeLog("mgmt_0", "opt/mgmt/log")
     writeLog("node1_0", "opt/node/log")
     writeLog("node2_0", "opt/node/log")
 
