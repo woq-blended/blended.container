@@ -266,7 +266,7 @@ val scalaMavenPlugin = Plugin(
 
 val scalaCompilerPlugin = if (System.getenv("USE_SBT") == "1") sbtCompilerPlugin else scalaMavenPlugin
 
-def ant_write(file: String, lines: Seq[String]): Seq[(String, Option[Any])] = {
+def ant_write(file: String, lines: Seq[String]): Config = {
   var line = 0
   val tasks = Config(
     echo = Config(
@@ -282,6 +282,7 @@ def ant_write(file: String, lines: Seq[String]): Seq[(String, Option[Any])] = {
         `@message` = line + "${line.separator}"
       )))
   tasks
+  new Config(tasks)
 }
 
 val antrunExecution_logbackXml: Execution = Execution(
@@ -289,72 +290,42 @@ val antrunExecution_logbackXml: Execution = Execution(
   phase = "generate-test-resources",
   goals = Seq("run"),
   configuration = Config(
-    target = new Config(ant_write(
-      "${basedir}/target/test-classes/logback-test.xml",
-      Seq(
-        "<configuration scan=\"true\" scanPeriod=\"30 seconds\">",
-        "",
-        "  <appender name=\"FILE\" class=\"ch.qos.logback.core.FileAppender\">",
-        "    <file>target/test.log</file>",
-        "    <encoder>",
-        "      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%thread] %logger{36} : %msg%n</pattern>",
-        "    </encoder>",
-        "  </appender>",
-        "",
-        "  <appender name=\"ASYNC_FILE\" class=\"ch.qos.logback.classic.AsyncAppender\">",
-        "    <appender-ref ref=\"FILE\" />",
-        "  </appender>",
-        "",
-        "  <logger name=\"blended\" level=\"DEBUG\" />",
-        "",
-        "  <root level=\"DEBUG\">",
-        "    <appender-ref ref=\"FILE\" />",
-        "  </root>",
-        "</configuration>",
-        ""
+    target = Config(
+      taskdef = Config(`@resource` = "net/sf/antcontrib/antcontrib.properties"),
+      `if` = Config(
+        available = Config(`@file` = "${basedir}/src/test/resources/logback-test.xml"),
+        `then` = Config(
+          echo = Config(
+            `@message` = "Skipping logback-test.xml generation because project already has one"
+          )
+        ),
+        `else` = ant_write(
+          "${basedir}/target/test-classes/logback-test.xml",
+          Seq(
+            "<configuration scan=\"true\" scanPeriod=\"30 seconds\">",
+            "",
+            "  <appender name=\"FILE\" class=\"ch.qos.logback.core.FileAppender\">",
+            "    <file>target/test.log</file>",
+            "    <encoder>",
+            "      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%thread] %logger{36} : %msg%n</pattern>",
+            "    </encoder>",
+            "  </appender>",
+            "",
+            "  <appender name=\"ASYNC_FILE\" class=\"ch.qos.logback.classic.AsyncAppender\">",
+            "    <appender-ref ref=\"FILE\" />",
+            "  </appender>",
+            "",
+            "  <logger name=\"blended\" level=\"DEBUG\" />",
+            "",
+            "  <root level=\"DEBUG\">",
+            "    <appender-ref ref=\"FILE\" />",
+            "  </root>",
+            "</configuration>",
+            ""
+          )
+        )
       )
-    ))
-  )
-)
-
-/**
- * Scala execution to generate logback-test.xml on the fly.
- */
-val scalaExecution_logbackXml: Execution = Execution(
-  id = "generateLogbackConfig",
-  phase = "generate-test-resources",
-  goals = Seq(
-    "script"
-  ),
-  configuration = Config(
-    script = scriptHelper +
-      """
-import java.io.File
-
-ScriptHelper.writeFile(
-  new File(project.getBasedir(), "target/test-classes/logback-test.xml"),
- "<configuration scan=\"true\" scanPeriod=\"30 seconds\">\n" +
- "\n" +
- "  <appender name=\"FILE\" class=\"ch.qos.logback.core.FileAppender\">\n" +
- "    <file>target/test.log</file>\n" +
- "    <encoder>\n" +
- "      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%thread] %logger{36} : %msg%n</pattern>\n" +
- "    </encoder>\n" +
- "  </appender>\n" +
- "\n" +
- "  <appender name=\"ASYNC_FILE\" class=\"ch.qos.logback.classic.AsyncAppender\">\n" +
- "    <appender-ref ref=\"FILE\" />\n" +
- "  </appender>\n" +
- "\n" +
- "  <logger name=\"blended\" level=\"DEBUG\" />\n" +
- "\n" +
- "  <root level=\"DEBUG\">\n" +
- "    <appender-ref ref=\"FILE\" />\n" +
- "  </root>\n" +
- "</configuration>\n" +
- "\n"
- )
-"""
+    )
   )
 )
 

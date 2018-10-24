@@ -269,6 +269,9 @@ object BlendedModel {
     ),
     Plugin(
       gav = Plugins.antrun,
+      dependencies = Seq(
+        Deps.antContrib.intransitive
+      ),
       executions = Seq(
         antrunExecution_logbackXml
       )

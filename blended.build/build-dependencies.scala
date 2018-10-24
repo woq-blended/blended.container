@@ -39,6 +39,7 @@ object Deps {
   val akkaTestkit = akka("testkit")
   val akkaSlf4j = akka("slf4j")
 
+  val antContrib = "ant-contrib" % "ant-contrib" % "1.0b3"
   val aopAlliance = "org.apache.servicemix.bundles" % "org.apache.servicemix.bundles.aopalliance" % "1.0_6"
 
   val ariesBlueprintApi = "org.apache.aries.blueprint" % "org.apache.aries.blueprint.api" % "1.0.1"
