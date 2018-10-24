@@ -90,9 +90,9 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
     assert(rcs.size >= 1)
+    assert(rcs.find(_.name == "blended.demo.node_2.12").isDefined)
   }
 
-  // TODO: register a deployment pack
   // TODO: register a profile
   // TODO: register a overlay
   // TODO: schedule a profile+overlay update for a node container
