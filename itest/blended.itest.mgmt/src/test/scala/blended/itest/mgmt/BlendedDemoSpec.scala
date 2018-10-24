@@ -1,5 +1,7 @@
 package blended.itest.mgmt
 
+import java.io.File
+
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
@@ -11,14 +13,17 @@ import blended.itestsupport.BlendedIntegrationTestSupport
 import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers
 import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers_?
 import blended.itestsupport.ContainerUnderTest
+import blended.testsupport.BlendedTestSupport
 import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config.RemoteContainerState
+import blended.updater.config.RuntimeConfig
 import blended.updater.config.json.PrickleProtocol._
 import blended.util.logging.Logger
+import com.softwaremill.sttp
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.UriContext
-import com.softwaremill.sttp.sttp
+//import com.softwaremill.sttp.sttp
 import org.scalatest.DoNotDiscover
 import org.scalatest.Matchers
 import prickle.Unpickle
@@ -46,7 +51,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
   def mgmtRequest(path: String) = {
     val uri = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}${path}"
     log.debug(s"Using uri: ${uri}")
-    val request = sttp.get(uri"${uri}")
+    val request = sttp.sttp.get(uri"${uri}")
     val response = request.send()
     response
   }
@@ -57,7 +62,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     assert(response.body.isRight)
   }
 
-  "Get a running mgmt container profile" in {
+  "Mgmt container sees node containers" in {
     val rcs = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
@@ -69,14 +74,29 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     }
     assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.mgmt_2.12")).size == 1)
     assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12")).size == 2)
-
-    // TODO: register a deployment pack
-    // TODO: register a profile
-    // TODO: register a overlay
-    // TODO: schedule a profile+overlay update for a node container
-    // TODO: restart node-container
-    // TODO: check restarted node-container for new profile+overlay
-
   }
+
+  "Upload a deployment pack to mgmt node" in {
+    val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
+    assert(packFile.exists() === true)
+
+    val uploadUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/profile/upload/deploymentpack/artifacts"
+    val uploadResponse = sttp.sttp.multipartBody(sttp.multipartFile("file", packFile)).
+      post(uri"${uploadUrl}").
+      send()
+
+    assert(uploadResponse.code === 200)
+
+    val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
+    val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
+    assert(rcs.size >= 1)
+  }
+
+  // TODO: register a deployment pack
+  // TODO: register a profile
+  // TODO: register a overlay
+  // TODO: schedule a profile+overlay update for a node container
+  // TODO: restart node-container
+  // TODO: check restarted node-container for new profile+overlay
 
 }
