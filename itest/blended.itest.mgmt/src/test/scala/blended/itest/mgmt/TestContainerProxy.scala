@@ -41,12 +41,6 @@ object TestContainerProxy {
   def nodeHttp(nr: Int, cuts: Map[String, ContainerUnderTest], host: String): String =
     cuts(s"node${nr}_0").url("http-akka", host, "http")
 
-  def akkaHttpsTestUrl(cuts: Map[String, ContainerUnderTest], dockerHost: String): String =
-    cuts("mgmt_0").url("https-akka", dockerHost, "https") + "/mgmt/version"
-
-  def jettyHttpTestUrl(cuts: Map[String, ContainerUnderTest], dockerHost: String): String =
-    cuts("mgmt_0").url("http-jetty", dockerHost, "http") + "/hawtio/dashboard"
-
   def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
 
 }

@@ -14,8 +14,12 @@ import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers
 import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers_?
 import blended.itestsupport.ContainerUnderTest
 import blended.testsupport.BlendedTestSupport
+import blended.testsupport.TestFile
+import blended.testsupport.TestFile.DeleteWhenNoFailure
 import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
+import blended.updater.config.OverlayConfig
+import blended.updater.config.OverlayConfigCompanion
 import blended.updater.config.RemoteContainerState
 import blended.updater.config.RuntimeConfig
 import blended.updater.config.json.PrickleProtocol._
@@ -23,6 +27,8 @@ import blended.util.logging.Logger
 import com.softwaremill.sttp
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.UriContext
+import com.typesafe.config.ConfigFactory
+import prickle.Pickle
 //import com.softwaremill.sttp.sttp
 import org.scalatest.DoNotDiscover
 import org.scalatest.Matchers
@@ -32,7 +38,8 @@ import prickle.Unpickle
 class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
   extends LoggingFreeSpec
   with Matchers
-  with BlendedIntegrationTestSupport {
+  with BlendedIntegrationTestSupport
+  with TestFile {
 
   implicit val system = testKit.system
   implicit val timeOut = Timeout(30.seconds)
@@ -56,13 +63,13 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     response
   }
 
-  "Reference test: Report Blended mgmt version" in {
+  "Reference test: Report Blended mgmt version" in logException {
     val response = mgmtRequest("/mgmt/version")
     assert(response.code === 200)
     assert(response.body.isRight)
   }
 
-  "Mgmt container sees node containers" in {
+  "Mgmt container sees node containers" in logException {
     val rcs = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
@@ -76,7 +83,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12")).size == 2)
   }
 
-  "Upload a deployment pack to mgmt node" in {
+  "Upload a deployment pack to mgmt node" in logException {
     val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
     assert(packFile.exists() === true)
 
@@ -93,8 +100,57 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     assert(rcs.find(_.name == "blended.demo.node_2.12").isDefined)
   }
 
+  "Upload two overlays to mgmt node" in logException {
+    implicit val deletePolicy = DeleteWhenNoFailure
+
+    val o1 =
+      """name = "jvm-medium"
+        |version = "1"
+        |properties = {
+        |  "blended.launcher.jvm.xms" = "768M"
+        |  "blended.launcher.jvm.xmx" = "768M"
+        |  "amq.systemMemoryLimit" = "500m"
+        |}
+        |""".stripMargin
+    val overlayConfig1 = OverlayConfigCompanion.read(ConfigFactory.parseString(o1)).get
+
+    val o2 =
+      """name = "jvm-large"
+        |version = "1"
+        |properties = {
+        |  "blended.launcher.jvm.xms" = "1024M"
+        |  "blended.launcher.jvm.xmx" = "1024M"
+        |  "amq.systemMemoryLimit" = "600m"
+        |}
+        |""".stripMargin
+    val overlayConfig2 = OverlayConfigCompanion.read(ConfigFactory.parseString(o2)).get
+
+    val uploadUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/overlayConfig"
+    val uploadResponse1 = sttp.sttp.
+      body(Pickle.intoString(overlayConfig1)).
+      header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
+      auth.basic("itest", "secret").
+      post(uri"${uploadUrl}").
+      send()
+    assert(uploadResponse1.code === 200)
+
+    val uploadResponse2 = sttp.sttp.
+      body(Pickle.intoString(overlayConfig2)).
+      header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
+      auth.basic("itest", "secret").
+      post(uri"${uploadUrl}").
+      send()
+    assert(uploadResponse2.code === 200)
+
+    val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
+    val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
+    assert(ocs.size >= 2)
+    assert(ocs.find(_.name == "jvm-medium").isDefined)
+    assert(ocs.find(_.name == "jvm-large").isDefined)
+
+  }
+
   // TODO: register a profile
-  // TODO: register a overlay
   // TODO: schedule a profile+overlay update for a node container
   // TODO: restart node-container
   // TODO: check restarted node-container for new profile+overlay
