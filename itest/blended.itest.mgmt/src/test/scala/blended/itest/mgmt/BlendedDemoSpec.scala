@@ -21,6 +21,7 @@ import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config.OverlayConfig
 import blended.updater.config.OverlayConfigCompanion
 import blended.updater.config.RemoteContainerState
+import blended.updater.config.RolloutProfile
 import blended.updater.config.RuntimeConfig
 import blended.updater.config.json.PrickleProtocol._
 import blended.util.logging.Logger
@@ -150,7 +151,70 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     assert(ocs.size >= 2)
     assert(ocs.find(_.name == "jvm-medium").isDefined)
     assert(ocs.find(_.name == "jvm-large").isDefined)
+  }
 
+  "Rollout a profile + overlay rollout for one node" in logException {
+    val containers = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
+      val response = mgmtRequest("/mgmt/container")
+      val body = response.body.right.get
+      val remoteContState = Unpickle[Seq[RemoteContainerState]].fromString(body).get
+      log.info(s"remote container states: [${remoteContState}]")
+      // we expect the mgmt container + 2 node containers
+      assert(remoteContState.size >= 3)
+      remoteContState
+    }
+
+    val nodeRcs = containers.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12"))
+    val containerIds = nodeRcs.map(_.containerInfo.containerId)
+    assert(containerIds.size === 2)
+
+    val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
+    val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
+    assert(rcs.size >= 1)
+
+    val profile = rcs.find(_.name == "blended.demo.node_2.12").get
+
+    val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
+    val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
+    val overlay = ocs.find(_.name == "jvm-medium").get
+
+    val id1 = containerIds.head
+
+    log.debug(s"Schedule a profile and overlay [${overlay}] update for node ${id1}")
+
+    val rollout = RolloutProfile(
+      profile.name, profile.version,
+      overlays = List(overlay.overlayRef),
+      containerIds = List(id1)
+    )
+
+    val rolloutUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/rollout/profile"
+    log.debug(s"Using rollout uri ${rolloutUrl}")
+    val response = sttp.sttp
+      .post(uri"${rolloutUrl}")
+      .auth.basic("itest", "secret")
+      .header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json)
+      .body(Pickle.intoString(rollout))
+      .send()
+    log.debug(s"Rollout request response: ${response}")
+    assert(response.code === 200)
+
+    log.info("Now wait for node container to update and restart...")
+    Retry.unsafeRetry(5.seconds, retries = 60) {
+      log.info(s"We expect the updated node container with ID [${id1}] to appear after some time")
+
+      val response = mgmtRequest("/mgmt/container")
+      val body = response.body.right.get
+      val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
+      log.info(s"remote container states: [${rcs}]")
+
+      val updatedNode = rcs.find(_.containerInfo.containerId == id1)
+      assert(updatedNode.isDefined)
+      val profiles = updatedNode.get.containerInfo.profiles.flatMap(_.toSingle)
+      val updatedProfile = profiles.find(p =>
+        p.name == "blended.demo.mgmt_2.12" && p.overlays.exists(o => o.name == "jvm-medium"))
+      assert(updatedProfile.isDefined)
+    }
   }
 
   // TODO: register a profile
