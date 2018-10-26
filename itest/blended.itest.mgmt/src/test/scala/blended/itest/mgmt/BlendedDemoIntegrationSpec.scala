@@ -31,7 +31,7 @@ class BlendedDemoIntegrationSpec
    * Timeout in which we wait for container ready (before nested tests).
    * Also used when stopping containers.
    */
-  private[this] implicit val timeout = Timeout(60.seconds)
+  private[this] implicit val timeout = Timeout(180.seconds)
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
 
   override def nestedSuites = IndexedSeq(new BlendedDemoSpec(ctProxy: ActorRef))
@@ -45,6 +45,9 @@ class BlendedDemoIntegrationSpec
 
   override def afterAll() {
     log.info("Running afterAll...")
+
+    // wait a second, to give container logs time to flush
+    Thread.sleep(1000)
 
     def writeLog(ctr: String, dir: String): Unit = {
       readContainerDirectory(ctProxy, ctr, dir).onComplete {
