@@ -174,7 +174,7 @@ object Deps {
 
   val scalaCompatJava8 = "org.scala-lang.modules" %% "scala-java8-compat" % "0.8.0"
   val scalaLib = "org.scala-lang" % "scala-library" % BlendedVersions.scalaVersion
-  val scalaParser = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6"
+  val scalaParser = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1"
   val scalaReflect = "org.scala-lang" % "scala-reflect" % BlendedVersions.scalaVersion
   val scalaTest = "org.scalatest" %% "scalatest" % BlendedVersions.scalaTestVersion
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
@@ -209,8 +209,8 @@ object Deps {
 
   val shapeless = "com.chuusai" %% "shapeless" % BlendedVersions.shapelessVersion
 
-  val typesafeConfig = "com.typesafe" % "config" % "1.3.1"
-  val typesafeConfigSSL = "com.typesafe" %% "ssl-config-core" % "0.2.2"
+  val typesafeConfig = "com.typesafe" % "config" % "1.3.3"
+  val typesafeConfigSSL = "com.typesafe" %% "ssl-config-core" % "0.3.6"
 
   val wiremock = "com.github.tomakehurst" % "wiremock" % "2.1.11"
   val wiremockStandalone = "com.github.tomakehurst" % "wiremock-standalone" % "2.1.11"

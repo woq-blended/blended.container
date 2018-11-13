@@ -49,10 +49,10 @@ val features = Seq(
     FeatureBundle(dependency = reactiveStreams),
     FeatureBundle(dependency = akkaActor),
     FeatureBundle(dependency = akkaSlf4j),
-    //FeatureBundle(dependency = akkaProtobuf),
+    FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
     //FeatureBundle(dependency = akkaActorTyped),
-    //FeatureBundle(dependency = akkaPersistence),
+    FeatureBundle(dependency = akkaPersistence),
     //FeatureBundle(dependency = akkaPersistenceTyped),
     FeatureBundle(dependency = domino),
     FeatureBundle(dependency = Blended.domino),
@@ -71,7 +71,7 @@ val features = Seq(
       FeatureBundle(dependency = geronimoJ2eeMgmtSpec),
       FeatureBundle(dependency = servicemixStaxApi),
       FeatureBundle(dependency = activeMqOsgi),
-      FeatureBundle(dependency = Blended.activemqBrokerstarter),
+      FeatureBundle(dependency = Blended.activemqBrokerstarter, start = true),
       FeatureBundle(dependency = Blended.jmsUtils, start = true),
       FeatureBundle(dependency = springJms)
     )
@@ -246,7 +246,6 @@ val features = Seq(
       "blended-camel"
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Blended.activemqDefaultbroker, start = true),
       FeatureBundle(dependency = Blended.activemqClient, start = true),
       FeatureBundle(dependency = Blended.samplesCamel, start = true),
       FeatureBundle(dependency = Blended.samplesJms, start = true),

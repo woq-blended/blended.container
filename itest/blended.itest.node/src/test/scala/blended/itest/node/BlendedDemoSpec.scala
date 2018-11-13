@@ -61,14 +61,14 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
 
       val file = new File(s"${projectTestOutput}/data")
 
-      writeContainerDirectory(ctProxy, "blended_node_0", "/opt/node", file).onComplete {
+      writeContainerDirectory(ctProxy, "node_0", "/opt/node", file).onComplete {
         case Failure(t) => fail(t.getMessage())
         case Success(r) => r.result match {
           case Left(t) => fail(t.getMessage())
           case Right(f) =>
             if (!f._2) fail("Error writing container directory")
             else {
-              readContainerDirectory(ctProxy, "blended_node_0", "/opt/node/data") onComplete {
+              readContainerDirectory(ctProxy, "node_0", "/opt/node/data") onComplete {
                 case Failure(t) => fail(t.getMessage())
                 case Success(cdr) => cdr.result match {
                   case Left(t) => fail(t.getMessage())
@@ -90,7 +90,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit : TestKit) extends Fre
 
       execContainerCommand(
         ctProxy = ctProxy,
-        ctName = "blended_node_0",
+        ctName = "node_0",
         cmdTimeout = 5.seconds,
         user = "blended",
         cmd = "ls -al /opt/node".split(" "): _*
