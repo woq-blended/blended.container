@@ -88,8 +88,11 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     assert(packFile.exists() === true)
 
     val uploadUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/profile/upload/deploymentpack/artifacts"
-    val uploadResponse = sttp.sttp.multipartBody(sttp.multipartFile("file", packFile)).
+    log.debug(s"Uploading to: ${uploadUrl}")
+    val uploadResponse = sttp.sttp.
       post(uri"${uploadUrl}").
+      auth.basic("itest", "secret").
+      multipartBody(sttp.multipartFile("file", packFile)).
       send()
 
     assert(uploadResponse.code === 200)
