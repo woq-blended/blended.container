@@ -8,7 +8,13 @@ import scala.collection.immutable.Seq
 
 val features = Seq(
   FeatureDef("blended-base-felix", bundles = Seq(
-    FeatureBundle(dependency = felixFramework, startLevel = 0, start = true)
+    FeatureBundle(dependency = felixFramework, startLevel = 0, start = true),
+    FeatureBundle(dependency = jline, startLevel = 1),
+    FeatureBundle(dependency = jlineBuiltins, startLevel = 1),
+    FeatureBundle(dependency = felixGogoJline, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoRuntime, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoShell, startLevel = 1, start = true),
+    FeatureBundle(dependency = felixGogoCommand, startLevel = 1, start = true)
   )),
   FeatureDef("blended-base-equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = 0, start = true),
@@ -37,19 +43,16 @@ val features = Seq(
     FeatureBundle(dependency = slf4j),
     FeatureBundle(dependency = logbackCore),
     FeatureBundle(dependency = logbackClassic),
-    FeatureBundle(dependency = felixGogoRuntime, start = true),
-    FeatureBundle(dependency = felixGogoShell, start = true),
-    FeatureBundle(dependency = felixGogoCommand, start = true),
     FeatureBundle(dependency = felixMetatype, start = true),
     FeatureBundle(dependency = typesafeConfig),
     FeatureBundle(dependency = typesafeConfigSSL),
     FeatureBundle(dependency = reactiveStreams),
     FeatureBundle(dependency = akkaActor),
     FeatureBundle(dependency = akkaSlf4j),
-    //FeatureBundle(dependency = akkaProtobuf),
+    FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
     //FeatureBundle(dependency = akkaActorTyped),
-    //FeatureBundle(dependency = akkaPersistence),
+    FeatureBundle(dependency = akkaPersistence),
     //FeatureBundle(dependency = akkaPersistenceTyped),
     FeatureBundle(dependency = domino),
     FeatureBundle(dependency = Blended.domino),
@@ -68,7 +71,7 @@ val features = Seq(
       FeatureBundle(dependency = geronimoJ2eeMgmtSpec),
       FeatureBundle(dependency = servicemixStaxApi),
       FeatureBundle(dependency = activeMqOsgi),
-      FeatureBundle(dependency = Blended.activemqBrokerstarter),
+      FeatureBundle(dependency = Blended.activemqBrokerstarter, start = true),
       FeatureBundle(dependency = Blended.jmsUtils, start = true),
       FeatureBundle(dependency = springJms)
     )
@@ -95,7 +98,7 @@ val features = Seq(
     FeatureBundle(dependency = commonsCollections),
     FeatureBundle(dependency = commonsDiscovery),
     FeatureBundle(dependency = commonsLang),
-    FeatureBundle(dependency = commonsPool),
+    FeatureBundle(dependency = commonsPool2),
     FeatureBundle(dependency = commonsNet),
     FeatureBundle(dependency = commonsExec),
     FeatureBundle(dependency = commonsIo),
@@ -243,7 +246,6 @@ val features = Seq(
       "blended-camel"
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Blended.activemqDefaultbroker, start = true),
       FeatureBundle(dependency = Blended.activemqClient, start = true),
       FeatureBundle(dependency = Blended.samplesCamel, start = true),
       FeatureBundle(dependency = Blended.samplesJms, start = true),
