@@ -239,6 +239,18 @@ val features = Seq(
     FeatureBundle(dependency = springTx)
   )),
   FeatureDef(
+    "blended-streams",
+    features = Seq(
+      "blended-base"
+    ),
+    bundles = Seq(
+      FeatureBundle(dependency = Deps.levelDbJni),
+      FeatureBundle(dependency = Blended.jmsBridge, start = true),
+      FeatureBundle(dependency = Blended.streams),
+      FeatureBundle(dependency = Blended.streamsDispatcher, start = true)
+    )
+  ),
+  FeatureDef(
     "blended-samples",
     features = Seq(
       "blended-akka-http",

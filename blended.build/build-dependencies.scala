@@ -155,6 +155,8 @@ object Deps {
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "3.0.1"
 
   val lambdaTest = "de.tototec" % "de.tobiasroeser.lambdatest" % "0.6.2"
+  val levelDbJava = "org.iq80.leveldb" % "leveldb" % "0.9"
+  val levelDbJni = "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
   val liquibase = "org.liquibase" % "liquibase-core" % "3.6.1"
   val logbackCore = "ch.qos.logback" % "logback-core" % "1.2.3"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
@@ -263,8 +265,9 @@ object Blended {
   val itestMgmt = blended("blended.itest.mgmt")
   val itestNode = blended("blended.itest.node")
   val jettyBoot = blended("blended.jetty.boot")
-  val jmsUtils = blended("blended.jms.utils")
+  val jmsBridge = blended("blended.jms.bridge")
   val jmsSampler = blended("blended.jms.sampler")
+  val jmsUtils = blended("blended.jms.utils")
   val jmx = blended("blended.jmx")
   val jolokia = blended("blended.jolokia")
   val launcher = blended("blended.launcher")
@@ -295,6 +298,8 @@ object Blended {
   val securityLoginImpl = blended("blended.security.login.impl")
   val securityLoginRest = blended("blended.security.login.rest")
   val sslContext = blended("blended.sslcontext")
+  val streams = blended("blended.streams")
+  val streamsDispatcher = blended("blended.streams.dispatcher")
   val testSupport = blended("blended.testsupport")
   val testSupportPojosr = blended("blended.testsupport.pojosr")
   val updater = blended("blended.updater")

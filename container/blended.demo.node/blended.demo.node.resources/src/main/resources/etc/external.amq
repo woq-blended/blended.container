@@ -9,14 +9,14 @@
        ">
 
   <amq:broker
-    brokerName="blended"
+    brokerName="external"
     useJmx="true"
     persistent="true"
     offlineDurableSubscriberTimeout="604800000"
     offlineDurableSubscriberTaskSchedule="86400000"
     advisorySupport="true"
-    dataDirectory="amq"
-    tmpDataDirectory="amq/tmp"
+    dataDirectory="external"
+    tmpDataDirectory="external/tmp"
     >
 
     <amq:managementContext>
@@ -24,13 +24,13 @@
     </amq:managementContext>
 
     <amq:persistenceAdapter>
-      <amq:kahaDB directory="amq/kahadb" indexWriteBatchSize="1000" enableIndexWriteAsync="true"
+      <amq:kahaDB directory="external/kahadb" indexWriteBatchSize="1000" enableIndexWriteAsync="true"
                   enableJournalDiskSyncs="false"/>
     </amq:persistenceAdapter>
 
     <amq:transportConnectors>
-      <amq:transportConnector name="openWire" uri="tcp://0.0.0.0:1883"/>
-      <amq:transportConnector name="ssl" uri="ssl://0.0.0.0:1884" />
+      <amq:transportConnector name="openWire" uri="tcp://0.0.0.0:1885"/>
+      <amq:transportConnector name="ssl" uri="ssl://0.0.0.0:1886" />
     </amq:transportConnectors>
 
     <amq:systemUsage>

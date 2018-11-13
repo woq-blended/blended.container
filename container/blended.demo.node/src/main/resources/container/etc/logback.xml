@@ -18,6 +18,7 @@
 
   <logger name="blended" level="debug" />
   <logger name="domino" level="debug" />
+  <logger name="App" level="debug" />
 
   <root level="info">
     <appender-ref ref="ASYNC_FILE" />
