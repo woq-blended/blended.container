@@ -50,7 +50,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
       )
 
       val outcome = Map(
-        "jms:queue:SampleOut" -> Seq(
+        "internal:queue:SampleOut" -> Seq(
           ExpectedMessageCount(1),
           ExpectedBodies("Hello Blended!"),
           ExpectedHeaders(Map("foo" -> "bar"))
@@ -59,7 +59,32 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
 
       blackboxTest(
         message = testMessage,
-        entry = "jms:queue:SampleIn",
+        entry = "internal:queue:SampleIn",
+        outcome = outcome,
+        testCooldown = 5.seconds
+      ) should be(empty)
+    }
+
+    "Define a dispatcher Route from DispatcherIn to DsipatcherOut" in {
+
+      val testMessage = createMessage(
+        message = "Hello Blended!",
+        properties = Map("ResourceType" -> "SampleIn"),
+        evaluateXML = false,
+        binary = false
+      )
+
+      val outcome = Map(
+        "external:queue:DispatcherOut" -> Seq(
+          ExpectedMessageCount(1),
+          ExpectedBodies("Hello Blended!"),
+          ExpectedHeaders(Map("ResourceType" -> "SampleIn"))
+        )
+      )
+
+      blackboxTest(
+        message = testMessage,
+        entry = "external:queue:DispatcherIn",
         outcome = outcome,
         testCooldown = 5.seconds
       ) should be(empty)
