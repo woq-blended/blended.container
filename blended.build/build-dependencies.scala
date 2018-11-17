@@ -300,6 +300,7 @@ object Blended {
   val sslContext = blended("blended.sslcontext")
   val streams = blended("blended.streams")
   val streamsDispatcher = blended("blended.streams.dispatcher")
+  val streamsTestsupport = blended("blended.streams.testsupport")
   val testSupport = blended("blended.testsupport")
   val testSupportPojosr = blended("blended.testsupport.pojosr")
   val updater = blended("blended.updater")

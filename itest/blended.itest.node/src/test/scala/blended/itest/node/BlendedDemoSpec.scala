@@ -2,99 +2,115 @@ package blended.itest.node
 
 import java.io.File
 
-import scala.concurrent.Await
-import scala.concurrent.Promise
-import scala.concurrent.duration.DurationInt
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
-
-import akka.actor.ActorRef
-import akka.camel.CamelExtension
+import akka.actor.{ActorRef, ActorSystem}
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.BlendedIntegrationTestSupport
-import blended.itestsupport.ContainerSpecSupport
-import blended.testsupport.camel._
+import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
+import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination}
+import blended.streams.jms.JmsStreamSupport
+import blended.streams.message.{FlowEnvelope, FlowMessage}
+import blended.streams.testsupport._
+import blended.streams.transaction.FlowHeaderConfig
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.FileHelper
+import blended.util.logging.Logger
 import org.scalactic.source
-import org.scalatest.Assertions
-import org.scalatest.DoNotDiscover
-import org.scalatest.Matchers
+import org.scalatest.{Assertions, DoNotDiscover, Matchers}
+
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Promise}
+import scala.util.{Failure, Success, Try}
 
 @DoNotDiscover
-class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
+class BlendedDemoSpec(
+  cuts: Map[String, ContainerUnderTest],
+  ctProxy: ActorRef
+)(implicit testKit: TestKit)
   extends LoggingFreeSpec
   with Matchers
   with BlendedIntegrationTestSupport
-  with ContainerSpecSupport
-  with CamelTestSupport {
+  with JmsStreamSupport {
 
-  implicit val system = testKit.system
-  implicit val timeOut = Timeout(30.seconds)
-  implicit val eCtxt = testKit.system.dispatcher
-  override implicit val camelContext = CamelExtension.get(system).context
+  implicit val system : ActorSystem = testKit.system
+  implicit val materializer : Materializer = ActorMaterializer()
+  implicit val timeOut : FiniteDuration = 10.seconds
+  implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
-  private[this] val log = testKit.system.log
+  private val dockerHost : String = system.settings.config.getString("docker.host")
+  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf(dockerHost)(cuts)
+  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf(dockerHost)(cuts)
+
+  private[this] val log = Logger[BlendedDemoSpec]
 
   "The demo container should" - {
 
     "Define the sample Camel Route from SampleIn to SampleOut" in {
 
-      val testMessage = createMessage(
-        message = "Hello Blended!",
-        properties = Map("foo" -> "bar"),
-        evaluateXML = false,
-        binary = false
+      val testMessage = FlowEnvelope(
+        FlowMessage("Hello Blended!")(FlowMessage.props("foo" -> "bar").get)
       )
 
-      val outcome = Map(
-        "internal:queue:SampleOut" -> Seq(
+      sendMessages(
+        cf = intCf,
+        dest = JmsDestination.create("SampleIn").get,
+        log = log,
+        testMessage
+      )
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig(prefix = "App"),
+        cf = intCf,
+        dest = JmsDestination.create("SampleOut").get
+      )
+
+      val errorsFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
           ExpectedBodies("Hello Blended!"),
-          ExpectedHeaders(Map("foo" -> "bar"))
+          ExpectedHeaders("foo" -> "bar")
         )
-      )
+      }
 
-      blackboxTest(
-        message = testMessage,
-        entry = "internal:queue:SampleIn",
-        outcome = outcome,
-        testCooldown = 5.seconds
-      ) should be(empty)
+      Await.result(errorsFut, timeOut + 1.second) should be (empty)
     }
 
-    "Define a dispatcher Route from DispatcherIn to DsipatcherOut" in {
+    "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
 
-      val testMessage = createMessage(
-        message = "Hello Blended!",
-        properties = Map("ResourceType" -> "SampleIn"),
-        evaluateXML = false,
-        binary = false
+      val testMessage = FlowEnvelope(
+        FlowMessage("Hello Blended!")(FlowMessage.props("ResourceType" -> "SampleIn").get)
       )
 
-      val outcome = Map(
-        "external:queue:DispatcherOut" -> Seq(
+      sendMessages(
+        cf = extCf,
+        dest = JmsDestination.create("DispatcherIn").get,
+        log = log,
+        testMessage
+      )
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig(prefix = "App"),
+        cf = extCf,
+        dest = JmsDestination.create("DispatcherOut").get
+      )
+
+      val errorsFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
           ExpectedBodies("Hello Blended!"),
-          ExpectedHeaders(Map("ResourceType" -> "SampleIn"))
+          ExpectedHeaders("ResourceType" -> "SampleIn")
         )
-      )
+      }
 
-      blackboxTest(
-        message = testMessage,
-        entry = "external:queue:DispatcherIn",
-        outcome = outcome,
-        testCooldown = 5.seconds
-      ) should be(empty)
+      Await.result(errorsFut, timeOut + 1.second) should be (empty)
     }
 
     "Allow to read and write directories via the docker API" in {
 
+      implicit val to : Timeout = Timeout(timeOut)
       import blended.testsupport.BlendedTestSupport.projectTestOutput
 
-      val file = new File(s"${projectTestOutput}/data")
+      val file = new File(s"$projectTestOutput/data")
 
       val test = Promise[Unit]()
 
@@ -130,11 +146,11 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
         }
       }
 
-      Await.result(test.future, timeOut.duration)
+      Await.result(test.future, timeOut)
     }
 
     "Allow to execute an arbitrary command on the container" in {
-
+      implicit val to : Timeout = Timeout(timeOut)
       val test = Promise[Unit]()
 
       execContainerCommand(
@@ -156,8 +172,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
           }
       }
 
-      Await.result(test.future, timeOut.duration)
+      Await.result(test.future, timeOut)
     }
-
   }
 }

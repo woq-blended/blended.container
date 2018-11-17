@@ -16,7 +16,7 @@
     </encoder>
   </appender>
 
-  <logger name="blended" level="debug" />
+  <logger name="blended" level="trace" />
   <logger name="domino" level="debug" />
   <logger name="App" level="debug" />
 

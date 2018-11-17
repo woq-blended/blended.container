@@ -17,6 +17,8 @@ BlendedModel(
     Blended.dockerDemoNode % "provided",
     activeMqClient % "test",
     Blended.itestSupport % "test",
+    Blended.streams % "test",
+    Blended.streamsTestsupport % "test",
     scalaTest % "test",
     slf4j % "test",
     akkaSlf4j % "test",
