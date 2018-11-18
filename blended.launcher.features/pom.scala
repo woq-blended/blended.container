@@ -245,9 +245,7 @@ val features = Seq(
     ),
     bundles = Seq(
       FeatureBundle(dependency = Deps.levelDbJni),
-      FeatureBundle(dependency = Blended.jmsBridge, start = true),
-      FeatureBundle(dependency = Blended.streams),
-      FeatureBundle(dependency = Blended.streamsDispatcher, start = true)
+      FeatureBundle(dependency = Blended.streams)
     )
   ),
   FeatureDef(
@@ -258,6 +256,8 @@ val features = Seq(
       "blended-camel"
     ),
     bundles = Seq(
+      FeatureBundle(dependency = Blended.jmsBridge, start = true),
+      FeatureBundle(dependency = Blended.streamsDispatcher, start = true),
       FeatureBundle(dependency = Blended.activemqClient, start = true),
       FeatureBundle(dependency = Blended.samplesCamel, start = true),
       FeatureBundle(dependency = Blended.samplesJms, start = true),
