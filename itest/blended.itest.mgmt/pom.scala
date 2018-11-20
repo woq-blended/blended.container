@@ -31,7 +31,8 @@ BlendedModel(
     Deps.logbackClassic % "test",
     Deps.sttp % "test",
     // we use this in test cases as resource, but express it as dependency to force proper build order
-    deploymentPackForTest % "test"
+    deploymentPackForTest % "test",
+    Deps.lihaoyiPprint % "test"
   ),
   plugins = Seq(
     scalaCompilerPlugin,

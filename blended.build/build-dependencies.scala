@@ -151,6 +151,7 @@ object Deps {
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "3.0.1"
 
   val lambdaTest = "de.tototec" % "de.tobiasroeser.lambdatest" % "0.6.2"
+  val lihaoyiPprint =  "com.lihaoyi" %% "pprint" % "0.5.3"
   val liquibase = "org.liquibase" % "liquibase-core" % "3.6.1"
   val logbackCore = "ch.qos.logback" % "logback-core" % "1.2.3"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
