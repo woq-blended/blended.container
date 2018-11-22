@@ -1,6 +1,6 @@
 package blended.itest.node
 
-import akka.actor.Props
+import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.{Condition, SequentialComposedCondition}
 import blended.itestsupport.jms.JMSAvailableCondition
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
@@ -26,7 +26,7 @@ class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextMana
 
   override def containerReady(cuts: Map[String, ContainerUnderTest]) : Condition = {
     
-    implicit val system = context.system
+    implicit val system : ActorSystem = context.system
 
     SequentialComposedCondition(
       JMSAvailableCondition(internalCf(dockerHost)(cuts), Some(timeout)),
@@ -38,6 +38,18 @@ class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextMana
 }
 
 object TestContainerProxy {
+
+  val internal : String => Map[String, ContainerUnderTest] => String =
+    dockerHost => cuts => cuts("node_0").url("internal", dockerHost, "tcp")
+
+  val external : String => Map[String, ContainerUnderTest] => String =
+    dockerHost => cuts => cuts("node_0").url("external", dockerHost, "tcp")
+
+  val jmxRest : String => Map[String, ContainerUnderTest] => String =
+    dockerHost => cuts => s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
+
+  val ldapUrl : String => Map[String, ContainerUnderTest] => String =
+    dockerHost => cuts => cuts("apacheds_0").url("ldap", dockerHost, "ldap")
 
   val internalCf : String => Map[String, ContainerUnderTest] => IdAwareConnectionFactory =
     host => cuts => new SimpleIdAwareConnectionFactory(
@@ -54,18 +66,6 @@ object TestContainerProxy {
       clientId = "external",
       cf = new ActiveMQConnectionFactory(external(host)(cuts))
     )
-
-  val internal : String => Map[String, ContainerUnderTest] => String =
-    dockerHost => cuts => cuts("node_0").url("internal", dockerHost, "tcp")
-
-  val external : String => Map[String, ContainerUnderTest] => String =
-    dockerHost => cuts => cuts("node_0").url("external", dockerHost, "tcp")
-
-  val jmxRest : String => Map[String, ContainerUnderTest] => String =
-    dockerHost => cuts => s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
-
-  val ldapUrl : String => Map[String, ContainerUnderTest] => String =
-    dockerHost => cuts => cuts("apacheds_0").url("ldap", dockerHost, "ldap")
 
   def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
 }

@@ -8,7 +8,7 @@ import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination}
-import blended.streams.jms.JmsStreamSupport
+import blended.streams.jms.{JmsEnvelopeHeader, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
 import blended.streams.testsupport._
 import blended.streams.transaction.FlowHeaderConfig
@@ -30,7 +30,8 @@ class BlendedDemoSpec(
   extends LoggingFreeSpec
   with Matchers
   with BlendedIntegrationTestSupport
-  with JmsStreamSupport {
+  with JmsStreamSupport
+  with JmsEnvelopeHeader {
 
   implicit val system : ActorSystem = testKit.system
   implicit val materializer : Materializer = ActorMaterializer()
@@ -61,7 +62,8 @@ class BlendedDemoSpec(
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),
         cf = intCf,
-        dest = JmsDestination.create("SampleOut").get
+        dest = JmsDestination.create("SampleOut").get,
+        log = log
       )
 
       val errorsFut = outColl.result.map { msgs =>
@@ -77,7 +79,7 @@ class BlendedDemoSpec(
 
     "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
 
-      val testMessage = FlowEnvelope(
+      val testMessage : FlowEnvelope = FlowEnvelope(
         FlowMessage("Hello Blended!")(FlowMessage.props("ResourceType" -> "SampleIn").get)
       )
 
@@ -91,7 +93,8 @@ class BlendedDemoSpec(
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),
         cf = extCf,
-        dest = JmsDestination.create("DispatcherOut").get
+        dest = JmsDestination.create("DispatcherOut").get,
+        log = log
       )
 
       val errorsFut = outColl.result.map { msgs =>
@@ -99,6 +102,74 @@ class BlendedDemoSpec(
           ExpectedMessageCount(1),
           ExpectedBodies("Hello Blended!"),
           ExpectedHeaders("ResourceType" -> "SampleIn")
+        )
+      }
+
+      Await.result(errorsFut, timeOut + 1.second) should be (empty)
+    }
+
+    "Define a replyTo Route Route (external)" in {
+
+      val testMessage : FlowEnvelope = FlowEnvelope(
+        FlowMessage("Hello Blended!")(FlowMessage.props(
+          "ResourceType" -> "SampleRequest",
+          replyToHeader("App") -> JmsDestination.create("response").get.asString
+        ).get)
+      )
+
+      sendMessages(
+        cf = extCf,
+        dest = JmsDestination.create("DispatcherIn").get,
+        log = log,
+        testMessage
+      )
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig(prefix = "App"),
+        cf = extCf,
+        dest = JmsDestination.create("response").get,
+        log = log
+      )
+
+      val errorsFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
+          ExpectedMessageCount(1),
+          ExpectedBodies("Hello Blended!"),
+          ExpectedHeaders("ResourceType" -> "SampleRequest")
+        )
+      }
+
+      Await.result(errorsFut, timeOut + 1.second) should be (empty)
+    }
+
+    "Define a replyTo Route Route (internal)" in {
+
+      val testMessage : FlowEnvelope = FlowEnvelope(
+        FlowMessage("Hello Blended!")(FlowMessage.props(
+          "ResourceType" -> "SampleRequest",
+          replyToHeader("App") -> JmsDestination.create("response").get.asString
+        ).get)
+      )
+
+      sendMessages(
+        cf = intCf,
+        dest = JmsDestination.create("internal.data.in").get,
+        log = log,
+        testMessage
+      )
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig(prefix = "App"),
+        cf = intCf,
+        dest = JmsDestination.create("response").get,
+        log = log
+      )
+
+      val errorsFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
+          ExpectedMessageCount(1),
+          ExpectedBodies("Hello Blended!"),
+          ExpectedHeaders("ResourceType" -> "SampleRequest")
         )
       }
 
