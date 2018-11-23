@@ -279,7 +279,7 @@ object Blended {
   val mgmtMock = blended("blended.mgmt.mock")
   val mgmtRest = blended("blended.mgmt.rest")
   val mgmtServiceJmx = blended("blended.mgmt.service.jmx")
-  val mgmtUi = BlendedVersions.blendedGroupId %% "blended.mgmt.ui.server" % "0.1.1-SNAPSHOT"
+  val mgmtUi = BlendedVersions.blendedGroupId %% "blended.mgmt.ui.server" % "0.2-SNAPSHOT"
   val mgmtWs = blended("blended.mgmt.ws")
   val persistence = blended("blended.persistence")
   val persistenceH2 = blended("blended.persistence.h2")
