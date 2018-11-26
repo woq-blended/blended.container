@@ -23,7 +23,7 @@ class BlendedDemoIntegrationSpec
 
   private[this] val log = Logger[BlendedDemoIntegrationSpec]
 
-  private[this] implicit val timeout : Timeout = Timeout(180.seconds)
+  private[this] implicit val timeout : Timeout = Timeout(300.seconds)
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
 
   private[this] val cuts : Map[String, ContainerUnderTest] = {
