@@ -2,20 +2,16 @@ package blended.itest.mgmt
 
 import java.io.File
 
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 
 import akka.actor.ActorRef
-import akka.pattern._
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.BlendedIntegrationTestSupport
-import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers
-import blended.itestsupport.BlendedTestContextManager.ConfiguredContainers_?
 import blended.itestsupport.ContainerUnderTest
 import blended.testsupport.BlendedTestSupport
 import blended.testsupport.TestFile
-import blended.testsupport.TestFile.DeleteWhenNoFailure
 import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config._
@@ -32,11 +28,14 @@ import org.scalatest.Matchers
 import prickle.Unpickle
 
 @DoNotDiscover
-class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
+class BlendedDemoSpec(
+                       cuts: Map[String, ContainerUnderTest],
+                       ctProxy: ActorRef
+                     )(implicit testKit: TestKit)
   extends LoggingFreeSpec
-  with Matchers
-  with BlendedIntegrationTestSupport
-  with TestFile {
+    with Matchers
+    with BlendedIntegrationTestSupport
+    with TestFile {
 
   implicit val system = testKit.system
   implicit val timeOut = Timeout(30.seconds)
@@ -47,9 +46,6 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
 
   private[this] val dockerHost = system.settings.config.getString("docker.host")
 
-  def cuts: Map[String, ContainerUnderTest] =
-    Await.result((ctProxy ? ConfiguredContainers_?).mapTo[ConfiguredContainers], timeOut.duration).cuts
-
   implicit val backend = HttpURLConnectionBackend()
 
   def mgmtRequest(path: String) = {
@@ -59,6 +55,8 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     val response = request.send()
     response
   }
+
+  // Tests written here are expected in order, means, they depend on each other and in the same ordering.
 
   "Reference test: Report Blended mgmt version" in logException {
     val response = mgmtRequest("/mgmt/version")
@@ -149,9 +147,10 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
   }
 
   case class RolloutCtx(overlayName: String, containerId: String)
+
   val rolloutCtx = Promise[RolloutCtx]()
 
-  "Rollout a profile + overlay rollout for one node" in logException {
+  "Rollout a profile+overlay for one node" in logException {
     // wait until all containers are present
     val containers = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
@@ -204,28 +203,30 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
     log.debug(s"Rollout request response: ${pp(response)}")
     assert(response.code === 200)
 
-    log.info("Now wait for node container to update and restart...")
+    log.info("Now wait for node container to report new profile")
     Retry.unsafeRetry(5.seconds, retries = 60) {
       log.info(s"We expect the updated node container with ID [${id1}] to appear after some time with the new profile")
-
-      log.info("All node containers: " + dumpProfiles(nodeRcs.map(_.containerInfo)))
 
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
       val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      log.info(s"remote container states: [${pp(rcs)}]")
+      // log.info(s"remote container states: [${pp(rcs)}]")
 
       val updatedNode = rcs.find(_.containerInfo.containerId == id1)
       assert(updatedNode.isDefined)
+
       val profiles = updatedNode.get.containerInfo.profiles
-      log.debug(s"profiles of node under test: [${profiles}]")
+      log.debug(s"profiles of node under test: [${pp(profiles)}]")
+
       val updatedProfile = profiles.find(p =>
-        p.name == "blended.demo.node_2.12" && p.overlays.exists(o => o.name == overlayName))
+        p.name == "blended.demo.node_2.12" &&
+          p.overlays.exists(o => o.name == overlayName)
+      )
       assert(updatedProfile.isDefined)
     }
   }
 
-  "Rolled-out profile becomes active" in logException {
+  "Rolled-out profile gets staged (valid)" in logException {
     // we depend on a part-result of previous test case
     assert(rolloutCtx.isCompleted, "Rollout test must complete before this test can run")
     val RolloutCtx(overlayName, containerId) = rolloutCtx.future.value.get.get
@@ -234,14 +235,14 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
       val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      log.info(s"remote container states: [${pp(rcs)}]")
+      // log.info(s"remote container states: [${pp(rcs)}]")
 
       val updatedNode = rcs.find(_.containerInfo.containerId == containerId)
       assert(updatedNode.isDefined)
       val profiles = updatedNode.get.containerInfo.profiles
-      log.debug(s"profiles of node under test: [${profiles}]")
+      log.debug(s"profiles of node under test: [${pp(profiles)}]")
       val updatedProfile = profiles.find(p =>
-        p.name == "blended.demo.node_2.12" && p.state == OverlayState.Active && p.overlays.exists(o => o.name == overlayName))
+        p.name == "blended.demo.node_2.12" && p.state == OverlayState.Valid && p.overlays.exists(o => o.name == overlayName))
       assert(updatedProfile.isDefined)
     }
   }
@@ -252,14 +253,12 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
 
   def dumpProfiles(cis: Seq[ContainerInfo]): Seq[String] = {
     cis.map { ci =>
-      s"Container [${ci.containerId}] has profiles [${pp(ci.profiles)}]"
+      s"Container [${pp(ci.containerId)}] has profiles [${pp(ci.profiles)}]"
     }
   }
 
   def pp(x: Any) = pprint.apply(x, width = 80, height = 1000000)
 
-  // TODO: register a profile
-  // TODO: schedule a profile+overlay update for a node container
   // TODO: restart node-container
   // TODO: check restarted node-container for new profile+overlay
 

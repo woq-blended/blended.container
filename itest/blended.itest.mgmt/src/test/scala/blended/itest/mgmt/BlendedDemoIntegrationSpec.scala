@@ -1,6 +1,7 @@
 package blended.itest.mgmt
 
 import scala.collection.immutable.IndexedSeq
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
@@ -8,7 +9,7 @@ import scala.util.Success
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.BlendedIntegrationTestSupport
+import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.refspec.RefSpec
@@ -34,7 +35,13 @@ class BlendedDemoIntegrationSpec
   private[this] implicit val timeout = Timeout(180.seconds)
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
 
-  override def nestedSuites = IndexedSeq(new BlendedDemoSpec(ctProxy: ActorRef))
+  private[this] val cuts: Map[String, ContainerUnderTest] = {
+    log.info(s"Using testkit [$testkit]")
+    testContext(ctProxy)(timeout, testkit)
+    Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
+  }
+
+  override def nestedSuites = IndexedSeq(new BlendedDemoSpec(cuts, ctProxy))
 
   override def beforeAll() {
     log.info(s"Using testkit [${testkit}]")
