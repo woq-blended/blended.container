@@ -217,7 +217,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
 
       val updatedNode = rcs.find(_.containerInfo.containerId == id1)
       assert(updatedNode.isDefined)
-      val profiles = updatedNode.get.containerInfo.profiles.flatMap(_.toSingle)
+      val profiles = updatedNode.get.containerInfo.profiles
       log.debug(s"profiles of node under test: [${profiles}]")
       val updatedProfile = profiles.find(p =>
         p.name == "blended.demo.node_2.12" && p.overlays.exists(o => o.name == overlayName))
@@ -238,7 +238,7 @@ class BlendedDemoSpec(ctProxy: ActorRef)(implicit testKit: TestKit)
 
       val updatedNode = rcs.find(_.containerInfo.containerId == containerId)
       assert(updatedNode.isDefined)
-      val profiles = updatedNode.get.containerInfo.profiles.flatMap(_.toSingle)
+      val profiles = updatedNode.get.containerInfo.profiles
       log.debug(s"profiles of node under test: [${profiles}]")
       val updatedProfile = profiles.find(p =>
         p.name == "blended.demo.node_2.12" && p.state == OverlayState.Active && p.overlays.exists(o => o.name == overlayName))
