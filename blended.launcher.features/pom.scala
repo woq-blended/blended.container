@@ -52,7 +52,7 @@ val features = Seq(
     FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
     //FeatureBundle(dependency = akkaActorTyped),
-    FeatureBundle(dependency = akkaPersistence),
+    //FeatureBundle(dependency = akkaPersistence),
     //FeatureBundle(dependency = akkaPersistenceTyped),
     FeatureBundle(dependency = domino),
     FeatureBundle(dependency = Blended.domino),
@@ -121,19 +121,11 @@ val features = Seq(
     FeatureBundle(dependency = Blended.mgmtAgent, start = true)
   )),
   FeatureDef(
-    "blended-mgmt-server",
+    "blended-persistence",
     features = Seq(
-      "blended-base",
-      "blended-akka-http",
-      "blended-security",
-      "blended-ssl",
-      "blended-spring"
+      "blended-base"
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Blended.mgmtRest, start = true),
-      FeatureBundle(dependency = Blended.mgmtRepo, start = true),
-      FeatureBundle(dependency = Blended.mgmtRepoRest, start = true),
-      FeatureBundle(dependency = Blended.updaterRemote, start = true),
       FeatureBundle(dependency = Blended.persistence),
       FeatureBundle(dependency = Blended.persistenceH2, start = true),
       // for Blended.persistenceH2
@@ -143,7 +135,24 @@ val features = Seq(
       // for Blended.persistenceH2
       FeatureBundle(dependency = Deps.liquibase),
       // for Deps.liquibase
-      FeatureBundle(dependency = Deps.snakeyaml),
+      FeatureBundle(dependency = Deps.snakeyaml)
+    )
+  ),
+  FeatureDef(
+    "blended-mgmt-server",
+    features = Seq(
+      "blended-base",
+      "blended-akka-http",
+      "blended-security",
+      "blended-ssl",
+      "blended-spring",
+      "blended-persistence"
+    ),
+    bundles = Seq(
+      FeatureBundle(dependency = Blended.mgmtRest, start = true),
+      FeatureBundle(dependency = Blended.mgmtRepo, start = true),
+      FeatureBundle(dependency = Blended.mgmtRepoRest, start = true),
+      FeatureBundle(dependency = Blended.updaterRemote, start = true),
       FeatureBundle(dependency = concurrentLinkedHashMapLru),
       FeatureBundle(dependency = jsr305),
       FeatureBundle(dependency = jacksonAnnotations),
@@ -241,10 +250,10 @@ val features = Seq(
   FeatureDef(
     "blended-streams",
     features = Seq(
-      "blended-base"
+      "blended-base",
+      "blended-persistence"
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Deps.levelDbJni),
       FeatureBundle(dependency = Blended.streams)
     )
   ),
@@ -253,7 +262,8 @@ val features = Seq(
     features = Seq(
       "blended-akka-http",
       "blended-activemq",
-      "blended-camel"
+      "blended-camel",
+      "blended-streams"
     ),
     bundles = Seq(
       FeatureBundle(dependency = Blended.jmsBridge, start = true),
