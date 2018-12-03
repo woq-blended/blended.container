@@ -1,6 +1,7 @@
 package blended.itest.mgmt
 
 import java.io.File
+import java.util.UUID
 
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
@@ -29,13 +30,13 @@ import prickle.Unpickle
 
 @DoNotDiscover
 class BlendedDemoSpec(
-                       cuts: Map[String, ContainerUnderTest],
-                       ctProxy: ActorRef
-                     )(implicit testKit: TestKit)
+  cuts: Map[String, ContainerUnderTest],
+  ctProxy: ActorRef
+)(implicit testKit: TestKit)
   extends LoggingFreeSpec
-    with Matchers
-    with BlendedIntegrationTestSupport
-    with TestFile {
+  with Matchers
+  with BlendedIntegrationTestSupport
+  with TestFile {
 
   implicit val system = testKit.system
   implicit val timeOut = Timeout(30.seconds)
@@ -146,7 +147,7 @@ class BlendedDemoSpec(
     assert(ocs.find(_.name == "jvm-large").isDefined)
   }
 
-  case class RolloutCtx(overlayName: String, containerId: String)
+  case class RolloutCtx(profileName: String, profileVersion: String, overlayName: String, overlayVersion: String, containerId: String)
 
   val rolloutCtx = Promise[RolloutCtx]()
 
@@ -171,7 +172,6 @@ class BlendedDemoSpec(
     // pick the first node container
     val id1 = containerIds.head
     val overlayName = "jvm-large"
-    rolloutCtx.success(RolloutCtx(overlayName, id1))
 
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
@@ -183,6 +183,8 @@ class BlendedDemoSpec(
     val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
     val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
     val overlay = ocs.find(_.name == overlayName).get
+
+    rolloutCtx.success(RolloutCtx(profile.name, profile.version, overlayName, overlay.version, id1))
 
     log.debug(s"Schedule a profile and overlay [${overlay}] update for node ${id1}")
 
@@ -220,8 +222,7 @@ class BlendedDemoSpec(
 
       val updatedProfile = profiles.find(p =>
         p.name == "blended.demo.node_2.12" &&
-          p.overlays.exists(o => o.name == overlayName)
-      )
+          p.overlays.exists(o => o.name == overlayName))
       assert(updatedProfile.isDefined)
     }
   }
@@ -229,7 +230,7 @@ class BlendedDemoSpec(
   "Rolled-out profile gets staged (valid)" in logException {
     // we depend on a part-result of previous test case
     assert(rolloutCtx.isCompleted, "Rollout test must complete before this test can run")
-    val RolloutCtx(overlayName, containerId) = rolloutCtx.future.value.get.get
+    val rCtx = rolloutCtx.future.value.get.get
 
     Retry.unsafeRetry(5.seconds, retries = 60) {
       val response = mgmtRequest("/mgmt/container")
@@ -237,18 +238,53 @@ class BlendedDemoSpec(
       val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
       // log.info(s"remote container states: [${pp(rcs)}]")
 
-      val updatedNode = rcs.find(_.containerInfo.containerId == containerId)
+      val updatedNode = rcs.find(_.containerInfo.containerId == rCtx.containerId)
       assert(updatedNode.isDefined)
       val profiles = updatedNode.get.containerInfo.profiles
       log.debug(s"profiles of node under test: [${pp(profiles)}]")
       val updatedProfile = profiles.find(p =>
-        p.name == "blended.demo.node_2.12" && p.state == OverlayState.Valid && p.overlays.exists(o => o.name == overlayName))
+        p.name == rCtx.profileName && p.state == OverlayState.Valid && p.overlays.exists(o => o.name == rCtx.overlayName))
       assert(updatedProfile.isDefined)
     }
   }
 
   "Container re-starts with newly rolled-out profile" in logException {
-    pending
+    // we depend on a part-result of previous test case
+    assert(rolloutCtx.isCompleted, "Rollout test must complete before this test can run")
+    val rCtx = rolloutCtx.future.value.get.get
+
+    val activateProfile = ActivateProfile(
+      id = UUID.randomUUID().toString(),
+      profileName = rCtx.profileName,
+      profileVersion = rCtx.profileVersion,
+      overlays = Set(OverlayRef(name = rCtx.overlayName, version = rCtx.overlayVersion))
+    )
+
+    val activateUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/container/${rCtx.containerId}/update"
+    log.info(s"Using activate uri [${activateUrl}] with body [${pp(activateProfile)}]")
+    val response = sttp.sttp
+      .post(uri"${activateUrl}")
+      .auth.basic("itest", "secret")
+      .header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json)
+      .body(Pickle.intoString[UpdateAction](activateProfile))
+      .send()
+    log.debug(s"Activate request response: ${pp(response)}")
+    assert(response.code === 200)
+
+    Retry.unsafeRetry(5.seconds, retries = 60) {
+      val response = mgmtRequest("/mgmt/container")
+      val body = response.body.right.get
+      val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
+      // log.info(s"remote container states: [${pp(rcs)}]")
+
+      val updatedNode = rcs.find(_.containerInfo.containerId == rCtx.containerId)
+      assert(updatedNode.isDefined)
+      val profiles = updatedNode.get.containerInfo.profiles
+      log.debug(s"profiles of node under test: [${pp(profiles)}]")
+      val updatedProfile = profiles.find(p =>
+        p.name == rCtx.profileName && p.state == OverlayState.Active && p.overlays.exists(o => o.name == rCtx.overlayName))
+      assert(updatedProfile.isDefined)
+    }
   }
 
   def dumpProfiles(cis: Seq[ContainerInfo]): Seq[String] = {
