@@ -39,8 +39,9 @@ class BlendedDemoSpec(
   implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
   private val dockerHost : String = system.settings.config.getString("docker.host")
-  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf(dockerHost)(cuts)
-  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf(dockerHost)(cuts)
+
+  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf(dockerHost, cuts)
+  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf(dockerHost, cuts)
 
   private[this] val log = Logger[BlendedDemoSpec]
 
@@ -69,7 +70,7 @@ class BlendedDemoSpec(
       val errorsFut = outColl.result.map { msgs =>
         FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
-          ExpectedBodies("Hello Blended!"),
+          ExpectedBodies(Some("Hello Blended!")),
           ExpectedHeaders("foo" -> "bar")
         )
       }
@@ -100,7 +101,7 @@ class BlendedDemoSpec(
       val errorsFut = outColl.result.map { msgs =>
         FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
-          ExpectedBodies("Hello Blended!"),
+          ExpectedBodies(Some("Hello Blended!")),
           ExpectedHeaders("ResourceType" -> "SampleIn")
         )
       }
@@ -134,7 +135,7 @@ class BlendedDemoSpec(
       val errorsFut = outColl.result.map { msgs =>
         FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
-          ExpectedBodies("Hello Blended!"),
+          ExpectedBodies(Some("Hello Blended!")),
           ExpectedHeaders("ResourceType" -> "SampleRequest")
         )
       }
@@ -168,7 +169,7 @@ class BlendedDemoSpec(
       val errorsFut = outColl.result.map { msgs =>
         FlowMessageAssertion.checkAssertions(msgs:_*)(
           ExpectedMessageCount(1),
-          ExpectedBodies("Hello Blended!"),
+          ExpectedBodies(Some("Hello Blended!")),
           ExpectedHeaders("ResourceType" -> "SampleRequest")
         )
       }

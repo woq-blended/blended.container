@@ -12,15 +12,16 @@ import org.apache.camel.component.jms.JmsComponent
 
 import scala.concurrent.duration._
 
-class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextManager with TestContextConfigurator {
+class TestContainerProxy(timeout: FiniteDuration)(implicit system: ActorSystem)
+  extends BlendedTestContextManager with TestContextConfigurator {
 
   import TestContainerProxy._
 
   val dockerHost : String = context.system.settings.config.getString("docker.host")
 
   override def configure(cuts: Map[String, ContainerUnderTest], camelCtxt : CamelContext): CamelContext = {
-    camelCtxt.addComponent("internal", JmsComponent.jmsComponent(internalCf(dockerHost)(cuts)))
-    camelCtxt.addComponent("external", JmsComponent.jmsComponent(externalCf(dockerHost)(cuts)))
+    camelCtxt.addComponent("internal", JmsComponent.jmsComponent(internalCf(dockerHost, cuts)))
+    camelCtxt.addComponent("external", JmsComponent.jmsComponent(externalCf(dockerHost, cuts)))
     camelCtxt
   }
 
@@ -29,8 +30,8 @@ class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextMana
     implicit val system : ActorSystem = context.system
 
     SequentialComposedCondition(
-      JMSAvailableCondition(internalCf(dockerHost)(cuts), Some(timeout)),
-      JMSAvailableCondition(externalCf(dockerHost)(cuts), Some(timeout)),
+      JMSAvailableCondition(internalCf(dockerHost, cuts), Some(timeout)),
+      JMSAvailableCondition(externalCf(dockerHost, cuts), Some(timeout)),
       JolokiaAvailableCondition(jmxRest(dockerHost)(cuts), Some(timeout), Some("root"), Some("mysecret")),
       CamelContextExistsCondition(jmxRest(dockerHost)(cuts), Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(timeout))
     )
@@ -51,21 +52,25 @@ object TestContainerProxy {
   val ldapUrl : String => Map[String, ContainerUnderTest] => String =
     dockerHost => cuts => cuts("apacheds_0").url("ldap", dockerHost, "ldap")
 
-  val internalCf : String => Map[String, ContainerUnderTest] => IdAwareConnectionFactory =
-    host => cuts => new SimpleIdAwareConnectionFactory(
+  def internalCf(
+    host : String, cuts: Map[String, ContainerUnderTest]
+  )(implicit system: ActorSystem) : IdAwareConnectionFactory =
+    new SimpleIdAwareConnectionFactory(
       vendor = "activemq",
       provider = "internal",
       clientId = "internal",
       cf = new ActiveMQConnectionFactory(internal(host)(cuts))
     )
 
-  val externalCf : String => Map[String, ContainerUnderTest] => IdAwareConnectionFactory =
-    host => cuts => new SimpleIdAwareConnectionFactory(
+  def externalCf(
+    host : String, cuts : Map[String, ContainerUnderTest]
+  )(implicit system: ActorSystem) : IdAwareConnectionFactory =
+    new SimpleIdAwareConnectionFactory(
       vendor = "activemq",
       provider = "external",
       clientId = "external",
       cf = new ActiveMQConnectionFactory(external(host)(cuts))
     )
 
-  def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
+  def props(timeout: FiniteDuration)(implicit system: ActorSystem) : Props = Props(new TestContainerProxy(timeout))
 }
