@@ -44,8 +44,6 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   "The demo container should" - {
 
-    val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
-
     "Define the sample Camel Route from SampleIn to SampleOut" in {
 
       val testMessage = FlowEnvelope(
@@ -178,6 +176,8 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
     "Allow to read and write directories via the docker API" in {
 
+      val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
+
       implicit val to : Timeout = Timeout(timeOut)
       import blended.testsupport.BlendedTestSupport.projectTestOutput
 
@@ -221,6 +221,9 @@ class BlendedDemoSpec(implicit testKit: TestKit)
     }
 
     "Allow to execute an arbitrary command on the container" in {
+
+      val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
+
       implicit val to : Timeout = Timeout(timeOut)
       val test = Promise[Unit]()
 

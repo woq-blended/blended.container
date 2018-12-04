@@ -21,7 +21,6 @@ class TestContainerProxy(timeout: FiniteDuration)
     val node_1_Http : String = cuts("node1_0").url("http-akka", dockerHost, "http")
     val node_2_Http : String = cuts("node2_0").url("http-akka", dockerHost, "http")
 
-    TestConnector.put("ctProxy", self)
     TestConnector.put("mgmtHttp", mgmtHttp)
     TestConnector.put("node1Http", node_1_Http)
     TestConnector.put("node2Http", node_2_Http)
