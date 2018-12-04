@@ -1,18 +1,17 @@
 package blended.itest.mgmt
 
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.util.Failure
-import scala.util.Success
-
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.scalatest.refspec.RefSpec
+
+import scala.collection.immutable.IndexedSeq
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
  * This Spec contains mostly test setup and teardown logic.
@@ -35,20 +34,13 @@ class BlendedDemoIntegrationSpec
   private[this] implicit val timeout = Timeout(180.seconds)
   private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
 
-  private[this] val cuts: Map[String, ContainerUnderTest] = {
+  private[this] val cuts : Map[String, ContainerUnderTest] = {
     log.info(s"Using testkit [$testkit]")
-    testContext(ctProxy)(timeout, testkit)
+    startContainers(ctProxy)(timeout, testkit)
     Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
   }
 
-  override def nestedSuites = IndexedSeq(new BlendedDemoSpec(cuts, ctProxy))
-
-  override def beforeAll() {
-    log.info(s"Using testkit [${testkit}]")
-    testContext(ctProxy)(timeout, testkit)
-    containerReady(ctProxy)(timeout, testkit)
-    log.info("Container is ready: Starting tests...")
-  }
+  override def nestedSuites : IndexedSeq[TestSuite] = IndexedSeq(new BlendedDemoSpec())
 
   override def afterAll() {
     log.info("Running afterAll...")

@@ -3,39 +3,29 @@ package blended.itest.mgmt
 import java.io.File
 import java.util.UUID
 
-import scala.concurrent.Promise
-import scala.concurrent.duration.DurationInt
-
-import akka.actor.ActorRef
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.BlendedIntegrationTestSupport
-import blended.itestsupport.ContainerUnderTest
-import blended.testsupport.BlendedTestSupport
-import blended.testsupport.TestFile
+import blended.testsupport.{BlendedTestSupport, TestFile}
 import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config._
 import blended.updater.config.json.PrickleProtocol._
 import blended.util.logging.Logger
 import com.softwaremill.sttp
-import com.softwaremill.sttp.HttpURLConnectionBackend
-import com.softwaremill.sttp.UriContext
+import com.softwaremill.sttp.{HttpURLConnectionBackend, UriContext}
 import com.typesafe.config.ConfigFactory
 import prickle.Pickle
+
+import scala.concurrent.Promise
+import scala.concurrent.duration.DurationInt
 //import com.softwaremill.sttp.sttp
-import org.scalatest.DoNotDiscover
-import org.scalatest.Matchers
+import org.scalatest.{DoNotDiscover, Matchers}
 import prickle.Unpickle
 
 @DoNotDiscover
-class BlendedDemoSpec(
-  cuts: Map[String, ContainerUnderTest],
-  ctProxy: ActorRef
-)(implicit testKit: TestKit)
+class BlendedDemoSpec()(implicit testKit: TestKit)
   extends LoggingFreeSpec
   with Matchers
-  with BlendedIntegrationTestSupport
   with TestFile {
 
   implicit val system = testKit.system
@@ -50,7 +40,7 @@ class BlendedDemoSpec(
   implicit val backend = HttpURLConnectionBackend()
 
   def mgmtRequest(path: String) = {
-    val uri = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}${path}"
+    val uri = s"${TestContainerProxy.mgmtHttp}${path}"
     log.debug(s"Using uri: ${uri}")
     val request = sttp.sttp.get(uri"${uri}")
     val response = request.send()
@@ -83,7 +73,7 @@ class BlendedDemoSpec(
     val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
     assert(packFile.exists() === true)
 
-    val uploadUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/profile/upload/deploymentpack/artifacts"
+    val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
     log.debug(s"Uploading to: ${uploadUrl}")
     val uploadResponse = sttp.sttp.
       post(uri"${uploadUrl}").
@@ -123,7 +113,7 @@ class BlendedDemoSpec(
         |""".stripMargin
     val overlayConfig2 = OverlayConfigCompanion.read(ConfigFactory.parseString(o2)).get
 
-    val uploadUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/overlayConfig"
+    val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/overlayConfig"
     val uploadResponse1 = sttp.sttp.
       body(Pickle.intoString(overlayConfig1)).
       header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
@@ -194,7 +184,7 @@ class BlendedDemoSpec(
       containerIds = List(id1)
     )
 
-    val rolloutUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/rollout/profile"
+    val rolloutUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/rollout/profile"
     log.info(s"Using rollout uri [${rolloutUrl}] with body [${pp(rollout)}]")
     val response = sttp.sttp
       .post(uri"${rolloutUrl}")
@@ -260,7 +250,7 @@ class BlendedDemoSpec(
       overlays = Set(OverlayRef(name = rCtx.overlayName, version = rCtx.overlayVersion))
     )
 
-    val activateUrl = s"${TestContainerProxy.mgmtHttp(cuts, dockerHost)}/mgmt/container/${rCtx.containerId}/update"
+    val activateUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/container/${rCtx.containerId}/update"
     log.info(s"Using activate uri [${activateUrl}] with body [${pp(activateProfile)}]")
     val response = sttp.sttp
       .post(uri"${activateUrl}")

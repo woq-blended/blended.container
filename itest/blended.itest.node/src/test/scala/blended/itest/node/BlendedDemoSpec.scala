@@ -6,7 +6,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
+import blended.itestsupport.{BlendedIntegrationTestSupport, TestConnector}
 import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination}
 import blended.streams.jms.{JmsEnvelopeHeader, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
@@ -23,10 +23,7 @@ import scala.concurrent.{Await, ExecutionContext, Promise}
 import scala.util.{Failure, Success, Try}
 
 @DoNotDiscover
-class BlendedDemoSpec(
-  cuts: Map[String, ContainerUnderTest],
-  ctProxy: ActorRef
-)(implicit testKit: TestKit)
+class BlendedDemoSpec(implicit testKit: TestKit)
   extends LoggingFreeSpec
   with Matchers
   with BlendedIntegrationTestSupport
@@ -40,12 +37,14 @@ class BlendedDemoSpec(
 
   private val dockerHost : String = system.settings.config.getString("docker.host")
 
-  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf(dockerHost, cuts)
-  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf(dockerHost, cuts)
+  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
+  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
 
   private[this] val log = Logger[BlendedDemoSpec]
 
   "The demo container should" - {
+
+    val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
 
     "Define the sample Camel Route from SampleIn to SampleOut" in {
 

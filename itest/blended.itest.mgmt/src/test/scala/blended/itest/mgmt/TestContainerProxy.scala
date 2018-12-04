@@ -1,46 +1,52 @@
 package blended.itest.mgmt
 
-import scala.concurrent.duration._
-
 import akka.actor.Props
-import blended.itestsupport.BlendedTestContextManager
-import blended.itestsupport.ContainerUnderTest
-import blended.itestsupport.TestContextConfigurator
-import blended.itestsupport.condition.Condition
-import blended.itestsupport.condition.ParallelComposedCondition
+import blended.itestsupport._
+import blended.itestsupport.condition.{Condition, ParallelComposedCondition}
 import blended.itestsupport.http.HttpAvailableCondition
 import blended.util.logging.Logger
-import org.apache.camel.CamelContext
 
-class TestContainerProxy(timeout: FiniteDuration) extends BlendedTestContextManager with TestContextConfigurator {
+import scala.concurrent.duration._
 
-  import TestContainerProxy._
+class TestContainerProxy(timeout: FiniteDuration)
+  extends DockerbasedTestconnectorSetup
+  with TestConnectorSetup {
 
+  private[this] val log : Logger = Logger[TestContainerProxy.type]
   private[this] val dockerHost = context.system.settings.config.getString("docker.host")
 
-  override def configure(cuts: Map[String, ContainerUnderTest], camelCtx: CamelContext): CamelContext = camelCtx
+  override def configure(cuts: Map[String, ContainerUnderTest]): Unit = {
 
-  override def containerReady(cuts: Map[String, ContainerUnderTest]): Condition = {
+    val mgmtHttp : String = cuts("mgmt_0").url("http-akka", dockerHost, "http")
+    val node_1_Http : String = cuts("node1_0").url("http-akka", dockerHost, "http")
+    val node_2_Http : String = cuts("node2_0").url("http-akka", dockerHost, "http")
+
+    TestConnector.put("ctProxy", self)
+    TestConnector.put("mgmtHttp", mgmtHttp)
+    TestConnector.put("node1Http", node_1_Http)
+    TestConnector.put("node2Http", node_2_Http)
+
+    log.debug(s"Configured TestConnector [${TestConnector.properties.mkString(",")}]")
+  }
+
+  override def containerReady(): Condition = {
+
     implicit val system = context.system
-
-    Logger[TestContainerProxy].debug(s"Checking container ready with cuts [${cuts}]")
+    import TestContainerProxy._
 
     ParallelComposedCondition(
-      HttpAvailableCondition(mgmtHttp(cuts, dockerHost) + "/mgmt/version", Some(timeout)),
-      HttpAvailableCondition(nodeHttp(1, cuts, dockerHost) + "/helloworld", Some(timeout)),
-      HttpAvailableCondition(nodeHttp(2, cuts, dockerHost) + "/helloworld", Some(timeout))
+      HttpAvailableCondition(mgmtHttp + "/mgmt/version", Some(timeout)),
+      HttpAvailableCondition(node1Http + "/helloworld", Some(timeout)),
+      HttpAvailableCondition(node2Http + "/helloworld", Some(timeout))
     )
   }
 }
 
 object TestContainerProxy {
 
-  def mgmtHttp(cuts: Map[String, ContainerUnderTest], dockerHost: String): String =
-    cuts("mgmt_0").url("http-akka", dockerHost, "http")
-
-  def nodeHttp(nr: Int, cuts: Map[String, ContainerUnderTest], host: String): String =
-    cuts(s"node${nr}_0").url("http-akka", host, "http")
+  def mgmtHttp : String = TestConnector.property[String]("mgmtHttp").get
+  def node1Http : String = TestConnector.property[String]("node1Http").get
+  def node2Http : String = TestConnector.property[String]("node2Http").get
 
   def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
-
 }
