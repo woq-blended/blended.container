@@ -306,7 +306,7 @@ object Blended {
   val testSupportPojosr = blended("blended.testsupport.pojosr")
   val updater = blended("blended.updater")
   val updaterConfig = blended("blended.updater.config")
-  val updaterMavenPlugin = BlendedVersions.blendedGroupId % "blended-updater-maven-plugin" % "2.6.0-M2-SNAPSHOT"
+  val updaterMavenPlugin = BlendedVersions.blendedGroupId % "blended-updater-maven-plugin" % BlendedVersions.blendedVersion
   val updaterRemote = blended("blended.updater.remote")
   val updaterTools = blended("blended.updater.tools")
   val util = blended("blended.util")
