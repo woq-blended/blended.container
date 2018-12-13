@@ -2,7 +2,7 @@ package blended.itest.node
 
 import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.{Condition, SequentialComposedCondition}
-import blended.itestsupport.jms.JMSAvailableCondition
+import blended.itestsupport.jms.{JMSAvailableCondition, JMSConnectedCondition}
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
 import blended.itestsupport.{ContainerUnderTest, DockerbasedTestconnectorSetup, TestConnector, TestConnectorSetup}
 import blended.jms.utils.{IdAwareConnectionFactory, SimpleIdAwareConnectionFactory}
@@ -64,7 +64,8 @@ class TestContainerProxy(timeout: FiniteDuration)
       JMSAvailableCondition(internalCf, Some(timeout)),
       JMSAvailableCondition(externalCf, Some(timeout)),
       JolokiaAvailableCondition(jmxRest, Some(timeout), Some("root"), Some("mysecret")),
-      CamelContextExistsCondition(jmxRest, Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(timeout))
+      CamelContextExistsCondition(jmxRest, Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(timeout)),
+      JMSConnectedCondition(jmxRest, Some("root"), Some("mysecret"), "activemq", "activemq", Some(timeout))
     )
   }
 }
