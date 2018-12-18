@@ -1,9 +1,27 @@
 import sbt._
 
-case class FeatureDef(name: String, features: Seq[FeatureDef] = Seq(), bundles: Seq[FeatureBundle]) {
+case class Feature(name: String, features: Seq[Feature] = Seq(), bundles: Seq[FeatureBundle]) {
 
   def libDeps: Seq[ModuleID] = (features.flatMap(_.libDeps) ++ bundles.map(_.dependency)).distinct
 
+  // This is the content of the feature file
+  def formatConfig(version: String): String = {
+    val prefix = s"""name="${name}"
+                    |version="${version}"
+                    |""".stripMargin
+
+    val bundlesList = bundles.map(_.formatConfig).mkString(
+      "bundles = [\n", ",\n", "\n]\n"
+    )
+
+    val featureRefs =
+      if (features.isEmpty) ""
+      else features.map(f => s"""{ name="${f.name}", version="${version}" }""").mkString(
+        "features = [\n", ",\n", "\n]\n"
+      )
+
+    prefix + featureRefs + bundlesList
+  }
 }
 
 case class FeatureBundle(
@@ -27,11 +45,12 @@ case class FeatureBundle(
     // if true, we render the long form with 5 parts (4 colons) instead of 3 parts (2 colons)
     //      val longForm = dependency.classifier.isDefined || !dependency.`type`.equals("jar")
 
-    val classifiersAndTypes: Seq[(String, String)] = dependency.explicitArtifacts.collect {
-      case a if a.classifier.isDefined && a.classifier != Some("jar") => a.classifier.get -> a.`type`
-    }
+    val longForm = !dependency.explicitArtifacts.isEmpty
 
-    val longForm = !classifiersAndTypes.isEmpty
+    val classifiersAndTypes: Seq[(String, String)] = dependency.explicitArtifacts.collect {
+      case a =>
+        a.classifier.getOrElse("") -> a.`type`
+    }
 
     if (longForm) {
       builder.append(classifiersAndTypes.head._1)
@@ -56,11 +75,11 @@ case class FeatureBundle(
   }
 }
 
-object Features {
+object Feature {
 
   import Dependencies._
 
-  lazy val blendedBaseFelix = FeatureDef(
+  lazy val blendedBaseFelix = Feature(
     "blended-base-felix",
     bundles = Seq(
       FeatureBundle(dependency = Dependencies.felixFramework, startLevel = Some(0), start = true),
@@ -73,12 +92,12 @@ object Features {
     )
   )
 
-  lazy val blendedBaseEquinox = FeatureDef("blended-base-equinox", bundles = Seq(
+  lazy val blendedBaseEquinox = Feature("blended-base-equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = Option(0), start = true),
     FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = Option(1), start = true)
   ))
 
-  lazy val blendedBase = FeatureDef("blended-base", bundles = Seq(
+  lazy val blendedBase = Feature("blended-base", bundles = Seq(
     FeatureBundle(dependency = Blended.securityBoot),
     FeatureBundle(dependency = asmAll, start = true),
     FeatureBundle(dependency = Blended.updater, start = true),
@@ -119,7 +138,7 @@ object Features {
     FeatureBundle(dependency = Blended.mgmtServiceJmx, start = true)
   ))
 
-  lazy val blendedActivemq = FeatureDef(
+  lazy val blendedActivemq = Feature(
     "blended-activemq",
     bundles = Seq(
       FeatureBundle(dependency = ariesProxyApi),
@@ -136,7 +155,7 @@ object Features {
     )
   )
 
-  lazy val blendedCamel = FeatureDef(
+  lazy val blendedCamel = Feature(
     "blended-camel",
     features = Seq(
       blendedSpring
@@ -151,7 +170,7 @@ object Features {
     )
   )
 
-  lazy val blendedCommons = FeatureDef("blended-commons", bundles = Seq(
+  lazy val blendedCommons = Feature("blended-commons", bundles = Seq(
     FeatureBundle(dependency = ariesUtil),
     FeatureBundle(dependency = ariesJmxApi),
     FeatureBundle(dependency = ariesJmxCore, start = true),
@@ -169,7 +188,7 @@ object Features {
     FeatureBundle(dependency = commonsConfiguration2)
   ))
 
-  lazy val blendedHawtio = FeatureDef(
+  lazy val blendedHawtio = Feature(
     "blended-hawtio",
     features = Seq(
       blendedJetty
@@ -180,14 +199,14 @@ object Features {
     )
   )
 
-  lazy val blendedMgmtClient = FeatureDef(
+  lazy val blendedMgmtClient = Feature(
     "blended-mgmt-client",
     bundles = Seq(
       FeatureBundle(dependency = Blended.mgmtAgent, start = true)
     )
   )
 
-  lazy val blendedPersistence = FeatureDef(
+  lazy val blendedPersistence = Feature(
     "blended-persistence",
     features = Seq(
       blendedBase
@@ -206,7 +225,7 @@ object Features {
     )
   )
 
-  lazy val blendedMgmtServer = FeatureDef(
+  lazy val blendedMgmtServer = Feature(
     "blended-mgmt-server",
     features = Seq(
       blendedBase,
@@ -235,7 +254,7 @@ object Features {
     )
   )
 
-  lazy val blendedJetty = FeatureDef(
+  lazy val blendedJetty = Feature(
     "blended-jetty",
     features = Seq(
       blendedBase
@@ -263,17 +282,17 @@ object Features {
     )
   )
 
-  lazy val blendedSecurity = FeatureDef(
+  lazy val blendedSecurity = Feature(
     "blended-security",
     features = Seq(
-     blendedBase
+      blendedBase
     ),
     bundles = Seq(
       FeatureBundle(dependency = Blended.security, start = true)
     )
   )
 
-  lazy val blendedSsl = FeatureDef(
+  lazy val blendedSsl = Feature(
     "blended-ssl",
     features = Seq(
       blendedBase
@@ -284,10 +303,10 @@ object Features {
     )
   )
 
-  lazy val blendedAkkaHttp = FeatureDef(
+  lazy val blendedAkkaHttp = Feature(
     "blended-akka-http",
     features = Seq(
-     blendedBase
+      blendedBase
     ),
     bundles = Seq(
       FeatureBundle(dependency = Blended.akkaHttpApi),
@@ -297,7 +316,7 @@ object Features {
     )
   )
 
-  lazy val blendedAkkaHttpModules = FeatureDef(
+  lazy val blendedAkkaHttpModules = Feature(
     "blended-akka-http-modules",
     features = Seq(
       blendedSpring,
@@ -311,7 +330,7 @@ object Features {
     )
   )
 
-  lazy val blendedSpring = FeatureDef("blended-spring", bundles = Seq(
+  lazy val blendedSpring = Feature("blended-spring", bundles = Seq(
     FeatureBundle(dependency = aopAlliance),
     FeatureBundle(dependency = springCore),
     FeatureBundle(dependency = springExpression),
@@ -324,41 +343,55 @@ object Features {
     FeatureBundle(dependency = springTx)
   ))
 
-  lazy val blendedStreams =
-    FeatureDef(
-      "blended-streams",
-      features = Seq(
-        blendedBase,
-        blendedPersistence
-      ),
-      bundles = Seq(
-        FeatureBundle(dependency = Blended.streams)
-      )
+  lazy val blendedStreams = Feature(
+    "blended-streams",
+    features = Seq(
+      blendedBase,
+      blendedPersistence
+    ),
+    bundles = Seq(
+      FeatureBundle(dependency = Blended.streams)
     )
+  )
 
-  lazy val blendedSamples =
-    FeatureDef(
-      "blended-samples",
-      features = Seq(
-        blendedAkkaHttp,
-        blendedActivemq,
-        blendedCamel,
-        blendedStreams
-      ),
-      bundles = Seq(
-        FeatureBundle(dependency = Blended.jmsBridge, start = true),
-        FeatureBundle(dependency = Blended.streamsDispatcher, start = true),
-        FeatureBundle(dependency = Blended.activemqClient, start = true),
-        FeatureBundle(dependency = Blended.samplesCamel, start = true),
-        FeatureBundle(dependency = Blended.samplesJms, start = true),
-        FeatureBundle(dependency = Blended.file),
-        FeatureBundle(dependency = Blended.akkaHttpSampleHelloworld, start = true)
-      )
+  lazy val blendedSamples = Feature(
+    "blended-samples",
+    features = Seq(
+      blendedAkkaHttp,
+      blendedActivemq,
+      blendedCamel,
+      blendedStreams
+    ),
+    bundles = Seq(
+      FeatureBundle(dependency = Blended.jmsBridge, start = true),
+      FeatureBundle(dependency = Blended.streamsDispatcher, start = true),
+      FeatureBundle(dependency = Blended.activemqClient, start = true),
+      FeatureBundle(dependency = Blended.samplesCamel, start = true),
+      FeatureBundle(dependency = Blended.samplesJms, start = true),
+      FeatureBundle(dependency = Blended.file),
+      FeatureBundle(dependency = Blended.akkaHttpSampleHelloworld, start = true)
     )
+  )
 
-}
-
-object Feature {
+  def allFeatures = Seq(
+    blendedActivemq,
+    blendedAkkaHttp,
+    blendedAkkaHttpModules,
+    blendedBase,
+    blendedBaseEquinox,
+    blendedBaseFelix,
+    blendedCamel,
+    blendedHawtio,
+    blendedJetty,
+    blendedMgmtClient,
+    blendedMgmtServer,
+    blendedPersistence,
+    blendedSamples,
+    blendedSecurity,
+    blendedSpring,
+    blendedStreams,
+    blendedSsl
+  )
 
   //  def apply(name: String) = Dependency(
   //    Blended.launcherFeatures,

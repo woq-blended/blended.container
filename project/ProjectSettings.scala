@@ -26,7 +26,7 @@ trait ProjectFactory {
 class ProjectSettings(
   val projectName: String,
   val description: String,
-  features: Seq[FeatureDef] = Seq.empty,
+  val features: Seq[Feature] = Seq.empty,
   deps: Seq[ModuleID] = Seq.empty,
   osgi: Boolean = true,
   osgiDefaultImports: Boolean = true,
@@ -35,7 +35,7 @@ class ProjectSettings(
   val projectDir: Option[String] = None
 ) {
 
-  def libDeps: Seq[ModuleID] = features.flatMap(_.libDeps) ++ deps
+  def libDeps: Seq[ModuleID] = features.flatMap(_.libDeps).map(_.intransitive()) ++ deps
 
   /**
    * Override this method to specify additional plugins for this project.

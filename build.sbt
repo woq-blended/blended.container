@@ -14,6 +14,7 @@ lazy val global = Def.settings(
   Global/pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
 )
 
+lazy val blendedLauncherFeatures = BlendedLauncherFeatures.project
 lazy val containerDemoNode = BlendedDemoNode.project
 
 lazy val root = {
@@ -21,6 +22,9 @@ lazy val root = {
     .in(file("."))
     .settings(global)
     .settings(PublishConfig.doPublish)
-    .aggregate(containerDemoNode)
+    .aggregate(
+      blendedLauncherFeatures,
+      containerDemoNode
+    )
 
 }

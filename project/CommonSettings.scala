@@ -44,6 +44,9 @@ object CommonSettings {
     scalacOptions ++= Seq("-deprecation", "-feature", "-Xlint", "-Ywarn-nullary-override"),
 
     scalariformAutoformat := false,
-    scalariformWithBaseDirectory := true
+    scalariformWithBaseDirectory := true,
+
+    // ignore pom.scala files
+    sourcesInBase := false
   )
 }

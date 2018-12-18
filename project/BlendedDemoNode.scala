@@ -7,22 +7,22 @@ object BlendedDemoNode extends ProjectFactory {
     description = "A sample container with some routes and Mgmt client functions",
     projectDir = Some("container/blended.demo.node"),
     features = Seq(
-      Features.blendedBaseFelix,
-      Features.blendedBaseEquinox,
-      Features.blendedBase,
-      Features.blendedCommons,
-      Features.blendedSsl,
-      Features.blendedJetty,
-      Features.blendedHawtio,
-      Features.blendedSpring,
-      Features.blendedActivemq,
-      Features.blendedCamel,
-      Features.blendedSecurity,
-      Features.blendedMgmtClient,
-      Features.blendedAkkaHttp,
-      Features.blendedPersistence,
-      Features.blendedStreams,
-      Features.blendedSamples
+      Feature.blendedBaseFelix,
+      Feature.blendedBaseEquinox,
+      Feature.blendedBase,
+      Feature.blendedCommons,
+      Feature.blendedSsl,
+      Feature.blendedJetty,
+      Feature.blendedHawtio,
+      Feature.blendedSpring,
+      Feature.blendedActivemq,
+      Feature.blendedCamel,
+      Feature.blendedSecurity,
+      Feature.blendedMgmtClient,
+      Feature.blendedAkkaHttp,
+      Feature.blendedPersistence,
+      Feature.blendedStreams,
+      Feature.blendedSamples
     ),
     deps = Seq(
       Dependencies.typesafeConfig,
@@ -30,6 +30,6 @@ object BlendedDemoNode extends ProjectFactory {
     )
   )
 
-  override val project = helper.baseProject.dependsOn()
+  override val project = helper.baseProject
 
 }
