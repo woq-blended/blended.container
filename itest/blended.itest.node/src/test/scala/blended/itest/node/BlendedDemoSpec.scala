@@ -7,8 +7,8 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, TestConnector}
-import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination}
-import blended.streams.jms.{JmsEnvelopeHeader, JmsStreamSupport}
+import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination, JmsQueue}
+import blended.streams.jms.{JmsEnvelopeHeader, JmsProducerSettings, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
 import blended.streams.testsupport._
 import blended.streams.transaction.FlowHeaderConfig
@@ -50,12 +50,12 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         FlowMessage("Hello Blended!")(FlowMessage.props("foo" -> "bar").get)
       )
 
-      sendMessages(
-        cf = intCf,
-        dest = JmsDestination.create("SampleIn").get,
-        log = log,
-        testMessage
+      val pSettings : JmsProducerSettings = JmsProducerSettings(
+        connectionFactory = intCf,
+        jmsDestination = Some(JmsQueue("SampleIn"))
       )
+
+      sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),
@@ -81,12 +81,12 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         FlowMessage("Hello Blended!")(FlowMessage.props("ResourceType" -> "SampleIn").get)
       )
 
-      sendMessages(
-        cf = extCf,
-        dest = JmsDestination.create("DispatcherIn").get,
-        log = log,
-        testMessage
+      val pSettings : JmsProducerSettings = JmsProducerSettings(
+        connectionFactory = extCf,
+        jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
+
+      sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),
@@ -115,12 +115,12 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         ).get)
       )
 
-      sendMessages(
-        cf = extCf,
-        dest = JmsDestination.create("DispatcherIn").get,
-        log = log,
-        testMessage
+      val pSettings : JmsProducerSettings = JmsProducerSettings(
+        connectionFactory = extCf,
+        jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
+
+      sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),
@@ -149,12 +149,12 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         ).get)
       )
 
-      sendMessages(
-        cf = intCf,
-        dest = JmsDestination.create("internal.data.in").get,
-        log = log,
-        testMessage
+      val pSettings : JmsProducerSettings = JmsProducerSettings(
+        connectionFactory = intCf,
+        jmsDestination = Some(JmsQueue("internal.data.in"))
       )
+
+      sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig(prefix = "App"),

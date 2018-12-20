@@ -9,7 +9,7 @@ import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.scalatest.refspec.RefSpec
 
 import scala.collection.immutable.IndexedSeq
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -22,8 +22,9 @@ class BlendedDemoIntegrationSpec
   with BeforeAndAfterAll
   with BlendedIntegrationTestSupport {
 
-  implicit val testkit = new TestKit(ActorSystem("Blended"))
-  implicit val eCtxt = testkit.system.dispatcher
+  private implicit val system : ActorSystem = ActorSystem("Blended")
+  private implicit val testkit : TestKit = new TestKit(system)
+  private implicit val eCtxt : ExecutionContext = testkit.system.dispatcher
 
   private[this] val log = Logger[BlendedDemoIntegrationSpec]
 
@@ -31,8 +32,8 @@ class BlendedDemoIntegrationSpec
    * Timeout in which we wait for container ready (before nested tests).
    * Also used when stopping containers.
    */
-  private[this] implicit val timeout = Timeout(180.seconds)
-  private[this] val ctProxy = testkit.system.actorOf(TestContainerProxy.props(timeout.duration))
+  private[this] implicit val timeout : Timeout = Timeout(180.seconds)
+  private[this] val ctProxy = system.actorOf(TestContainerProxy.props(timeout.duration))
 
   private[this] val cuts : Map[String, ContainerUnderTest] = {
     log.info(s"Using testkit [$testkit]")
@@ -53,13 +54,13 @@ class BlendedDemoIntegrationSpec
         case Success(cdr) => cdr.result match {
           case Left(_) =>
           case Right(cd) =>
-            val outputDir = s"${testOutput}/testlog/${ctr}"
+            val outputDir = s"$testOutput/testlog/$ctr"
             saveContainerDirectory(outputDir, cd)
-            log.info(s"Saved container output to [${outputDir}]")
+            log.info(s"Saved container output to [$outputDir]")
 
         }
         case Failure(e) =>
-          log.error(e)(s"Could not read containder directory [${dir}] of container [${ctr}]")
+          log.error(e)(s"Could not read containder directory [$dir] of container [$ctr]")
       }
     }
 
