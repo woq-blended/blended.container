@@ -32,14 +32,14 @@ class TestContainerProxy(timeout: FiniteDuration)
     // the url to the ldap server
     val ldapUrl : String = cuts("apacheds_0").url("ldap", dockerHost, "ldap")
 
-    val internalCf : IdAwareConnectionFactory = new SimpleIdAwareConnectionFactory(
+    val internalCf : IdAwareConnectionFactory = SimpleIdAwareConnectionFactory(
       vendor = "activemq",
       provider = "internal",
       clientId = "spec-internal",
       cf = new ActiveMQConnectionFactory(internal)
     )
 
-    val externalCf : IdAwareConnectionFactory = new SimpleIdAwareConnectionFactory(
+    val externalCf : IdAwareConnectionFactory = SimpleIdAwareConnectionFactory(
       vendor = "activemq",
       provider = "external",
       clientId = "spec-external",
