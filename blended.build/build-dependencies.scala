@@ -198,6 +198,7 @@ object Deps {
   val sprayJson = "io.spray" %% s"spray-json" % BlendedVersions.sprayVersion
 
   private def spring(n: String) = "org.apache.servicemix.bundles" % s"org.apache.servicemix.bundles.spring-${n}" % BlendedVersions.springVersion
+
   val springBeans = spring("beans")
   val springAop = spring("aop")
   val springContext = spring("context")

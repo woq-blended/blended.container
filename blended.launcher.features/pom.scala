@@ -33,6 +33,8 @@ val features = Seq(
     FeatureBundle(dependency = Blended.akka, start = true),
     FeatureBundle(dependency = Blended.utilLogging),
     FeatureBundle(dependency = Blended.util, start = true),
+    FeatureBundle(dependency = springCore),
+    FeatureBundle(dependency = springExpression),
     FeatureBundle(dependency = Blended.containerContextApi),
     FeatureBundle(dependency = Blended.containerContextImpl, start = true),
     FeatureBundle(dependency = felixConfigAdmin, start = true),
@@ -51,9 +53,6 @@ val features = Seq(
     FeatureBundle(dependency = akkaSlf4j),
     FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
-    //FeatureBundle(dependency = akkaActorTyped),
-    //FeatureBundle(dependency = akkaPersistence),
-    //FeatureBundle(dependency = akkaPersistenceTyped),
     FeatureBundle(dependency = domino),
     FeatureBundle(dependency = Blended.domino),
     FeatureBundle(dependency = Blended.mgmtBase, start = true),
@@ -72,7 +71,7 @@ val features = Seq(
       FeatureBundle(dependency = servicemixStaxApi),
       FeatureBundle(dependency = activeMqOsgi),
       FeatureBundle(dependency = Blended.activemqBrokerstarter, start = true),
-      FeatureBundle(dependency = Blended.jmsUtils, start = true),
+      FeatureBundle(dependency = Blended.jmsUtils),
       FeatureBundle(dependency = springJms)
     )
   ),
@@ -237,14 +236,11 @@ val features = Seq(
   ),
   FeatureDef("blended-spring", bundles = Seq(
     FeatureBundle(dependency = aopAlliance),
-    FeatureBundle(dependency = springCore),
-    FeatureBundle(dependency = springExpression),
     FeatureBundle(dependency = springBeans),
     FeatureBundle(dependency = springAop),
     FeatureBundle(dependency = springContext),
     FeatureBundle(dependency = springContextSupport),
     FeatureBundle(dependency = springJdbc),
-    FeatureBundle(dependency = springJms),
     FeatureBundle(dependency = springTx)
   )),
   FeatureDef(
