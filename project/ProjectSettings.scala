@@ -5,6 +5,7 @@ import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import sbt.internal.inc.Analysis
+import sbt.librarymanagement.InclExclRule
 import xerial.sbt.Sonatype
 import xsbti.api.{AnalyzedClass, Projection}
 
@@ -35,7 +36,7 @@ class ProjectSettings(
   val projectDir: Option[String] = None
 ) {
 
-  def libDeps: Seq[ModuleID] = features.flatMap(_.libDeps).map(_.intransitive()) ++ deps
+  def libDeps: Seq[ModuleID] = features.flatMap(_.libDeps).map(_.withExclusions(Vector(InclExclRule()))) ++ deps
 
   /**
    * Override this method to specify additional plugins for this project.
