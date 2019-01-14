@@ -17,6 +17,7 @@ lazy val global = Def.settings(
 lazy val blendedLauncherFeatures = BlendedLauncherFeatures.project
 lazy val blendedContainerDemoNode = BlendedDemoNode.project
 lazy val blendedContainerDemoNodeResources = BlendedDemoNodeResources.project
+lazy val blendedContainerDemoMgmtResources = BlendedDemoMgmtResources.project
 
 lazy val root = {
   project
@@ -26,6 +27,7 @@ lazy val root = {
     .aggregate(
       blendedLauncherFeatures,
       blendedContainerDemoNodeResources,
+      blendedContainerDemoMgmtResources,
       blendedContainerDemoNode
     )
 
