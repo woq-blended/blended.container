@@ -41,17 +41,18 @@ object BlendedLauncherFeatures extends ProjectFactory {
           classifier = feature.name
         )
 
-        val pkgd = packagedArtifacts := {
-          // trigger generator
-          generateFeatureConfigs.value
+        Seq(
+          artifacts += a,
+          packagedArtifacts := {
+            // trigger generator
+            generateFeatureConfigs.value
 
-          val featureDir: File = new File(target.value, "features")
-          val file = new File(featureDir, s"${feature.name}.conf")
+            val featureDir: File = new File(target.value, "features")
+            val file = new File(featureDir, s"${feature.name}.conf")
 
-          packagedArtifacts.value updated (a, file)
-        }
-
-        Seq(artifacts += a, pkgd)
+            packagedArtifacts.value updated (a, file)
+          }
+        )
 
       })
 
