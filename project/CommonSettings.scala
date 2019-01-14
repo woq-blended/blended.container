@@ -47,6 +47,8 @@ object CommonSettings {
     scalariformWithBaseDirectory := true,
 
     // ignore pom.scala files
-    sourcesInBase := false
+    sourcesInBase := false,
+
+    updateOptions := updateOptions.value.withLatestSnapshots(false)
   )
 }
