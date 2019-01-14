@@ -23,13 +23,39 @@ object BlendedLauncherFeatures extends ProjectFactory {
           file
         }
         files
+      },
+
+      // Trigger file generation to compile step
+      Compile / compile := {
+        generateFeatureConfigs.value
+        (Compile / compile).value
       }
 
-    )
+    // Attach feature files as artifacts
+    ) ++ (features.flatMap { feature: Feature =>
 
+        val a = Artifact(
+          name = projectName,
+          `type` = "conf",
+          extension = "conf",
+          classifier = feature.name
+        )
+
+        val pkgd = packagedArtifacts := {
+          // trigger generator
+          generateFeatureConfigs.value
+
+          val featureDir: File = new File(target.value, "features")
+          val file = new File(featureDir, s"${feature.name}.conf")
+
+          packagedArtifacts.value updated (a, file)
+        }
+
+        Seq(artifacts += a, pkgd)
+
+      })
 
   }
-
 
   override val project = helper.baseProject
 
