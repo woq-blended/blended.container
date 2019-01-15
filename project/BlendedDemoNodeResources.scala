@@ -18,7 +18,7 @@ object BlendedDemoNodeResources extends ProjectFactory {
 
     override def settings: Seq[sbt.Setting[_]] = {
 
-      val a = Artifact(
+      val artifact = Artifact(
         name = projectName,
         `type` = "zip",
         extension = "zip")
@@ -38,9 +38,9 @@ object BlendedDemoNodeResources extends ProjectFactory {
         Compile / packageBin / publishArtifact := false,
 
         // Attach the zip file as main artifact
-        artifacts += a,
+        artifacts += artifact,
         packagedArtifacts := {
-          packagedArtifacts.value updated(a, (Universal /packageBin).value)
+          packagedArtifacts.value updated(artifact, (Universal /packageBin).value)
         }
       )
     }
