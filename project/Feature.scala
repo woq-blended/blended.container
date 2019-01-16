@@ -6,9 +6,10 @@ case class Feature(name: String, features: Seq[Feature] = Seq(), bundles: Seq[Fe
 
   // This is the content of the feature file
   def formatConfig(version: String): String = {
-    val prefix = s"""name="${name}"
-                    |version="${version}"
-                    |""".stripMargin
+    val prefix =
+      s"""name="${name}"
+         |version="${version}"
+         |""".stripMargin
 
     val bundlesList = bundles.map(_.formatConfig).mkString(
       "bundles = [\n", ",\n", "\n]\n"
@@ -170,23 +171,26 @@ object Feature {
     )
   )
 
-  lazy val blendedCommons = Feature("blended-commons", bundles = Seq(
-    FeatureBundle(dependency = ariesUtil),
-    FeatureBundle(dependency = ariesJmxApi),
-    FeatureBundle(dependency = ariesJmxCore, start = true),
-    FeatureBundle(dependency = Blended.jmx, start = true),
-    FeatureBundle(dependency = commonsCollections),
-    FeatureBundle(dependency = commonsDiscovery),
-    FeatureBundle(dependency = commonsLang),
-    FeatureBundle(dependency = commonsPool2),
-    FeatureBundle(dependency = commonsNet),
-    FeatureBundle(dependency = commonsExec),
-    FeatureBundle(dependency = commonsIo),
-    FeatureBundle(dependency = commonsCodec),
-    FeatureBundle(dependency = commonsHttpclient),
-    FeatureBundle(dependency = commonsBeanUtils),
-    FeatureBundle(dependency = commonsConfiguration2)
-  ))
+  lazy val blendedCommons = Feature(
+    "blended-commons",
+    bundles = Seq(
+      FeatureBundle(dependency = ariesUtil),
+      FeatureBundle(dependency = ariesJmxApi),
+      FeatureBundle(dependency = ariesJmxCore, start = true),
+      FeatureBundle(dependency = Blended.jmx, start = true),
+      FeatureBundle(dependency = commonsCollections),
+      FeatureBundle(dependency = commonsDiscovery),
+      FeatureBundle(dependency = commonsLang),
+      FeatureBundle(dependency = commonsPool2),
+      FeatureBundle(dependency = commonsNet),
+      FeatureBundle(dependency = commonsExec),
+      FeatureBundle(dependency = commonsIo),
+      FeatureBundle(dependency = commonsCodec),
+      FeatureBundle(dependency = commonsHttpclient),
+      FeatureBundle(dependency = commonsBeanUtils),
+      FeatureBundle(dependency = commonsConfiguration2)
+    )
+  )
 
   lazy val blendedHawtio = Feature(
     "blended-hawtio",
@@ -381,6 +385,7 @@ object Feature {
     blendedBaseEquinox,
     blendedBaseFelix,
     blendedCamel,
+    blendedCommons,
     blendedHawtio,
     blendedJetty,
     blendedMgmtClient,
@@ -392,56 +397,5 @@ object Feature {
     blendedStreams,
     blendedSsl
   )
-
-  //  def apply(name: String) = Dependency(
-  //    Blended.launcherFeatures,
-  //    `type` = "conf",
-  //    classifier = name
-  //  )
-  //
-  //  // Create the String content of a feature file from a sequence of FeatureBundles
-  //
-  //  def featureDependencies(features: Seq[FeatureDef]): Seq[Dependency] =
-  //    distinctDependencies(features.flatMap(_.bundles.map(_.dependency)))
-  //
-  //  def distinctDependencies(deps: Seq[Dependency]): Seq[Dependency] =
-  //    deps.foldLeft(List[Dependency]()) { (ds, n) =>
-  //      if (ds.exists(d =>
-  //        d.gav.groupId == n.gav.groupId &&
-  //          d.gav.artifactId == n.gav.artifactId &&
-  //          d.gav.version == n.gav.version &&
-  //          d.classifier == n.classifier &&
-  //          d.scope == n.scope)) ds
-  //      else n :: ds
-  //    }.reverse
-  //
-  //  // This is the content of the feature file
-  //  def featureFile(feature: FeatureDef): String = {
-  //
-  //    val prefix = "name=\"" + feature.name + "\"\nversion=\"${project.version}\"\n"
-  //
-  //    val bundles = feature.bundles.map(_.toString).mkString(
-  //      "bundles = [\n", ",\n", "\n]\n"
-  //    )
-  //
-  //    val featureRefs =
-  //      if (feature.features.isEmpty) ""
-  //      else feature.features.map(f => s"""{ name="${f}", version="$${project.version}" }""").mkString(
-  //        "features = [\n", ",\n", "\n]\n"
-  //      )
-  //
-  //    "\"\"\"" + prefix + featureRefs + bundles + "\"\"\""
-  //  }
-  //
-  //  def generateFeatures(features: Seq[FeatureDef]) = {
-  //
-  //    val writeFiles = features.map { feature =>
-  //      """
-  //ScriptHelper.writeFile(new File(project.getBasedir(), "target/classes/""" + feature.name + """.conf"), """ + featureFile(feature) + """)
-  //                                                                                                                                    """
-  //    }.mkString("import java.io.File\n", "\n", "")
-  //
-  //    scriptHelper + writeFiles
-  //  }
 
 }

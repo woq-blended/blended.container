@@ -24,10 +24,15 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 addSbtPlugin("de.wayofquality" % "sbt-testlogconfig" % "0.1.0-SNAPSHOT")
 
 // Filter resources (like Maven)
-addSbtPlugin("de.wayofquality" % "sbt-filterresources" % "0.1.0-SNAPSHOT")
+addSbtPlugin("de.wayofquality" % "sbt-filterresources" % "0.1.1-SNAPSHOT")
 
 // Contains project dependency information from blended project as sbt plugin
 //libraryDependencies ++= Seq(
 addSbtPlugin(
   "de.wayofquality.blended" % "blended.dependencies" % "3.1-SNAPSHOT"
+)
+
+// We use this to materialize profiles to containers
+libraryDependencies ++= Seq(
+  "de.wayofquality.blended" %% "blended.updater.tools" % "3.1-SNAPSHOT"
 )

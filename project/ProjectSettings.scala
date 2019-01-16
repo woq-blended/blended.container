@@ -36,7 +36,9 @@ class ProjectSettings(
   val projectDir: Option[String] = None
 ) {
 
-  def libDeps: Seq[ModuleID] = features.flatMap(_.libDeps).map(_.withExclusions(Vector(InclExclRule()))) ++ deps
+  def libDeps: Seq[ModuleID] = deps ++ features.flatMap { f =>
+    f.libDeps // ++ Seq(Blended.blendedOrganization %% f.name % Blended.blendedVersion)
+  }.map(_.withExclusions(Vector(InclExclRule())))
 
   /**
    * Override this method to specify additional plugins for this project.
@@ -86,13 +88,13 @@ class ProjectSettings(
       Keys.moduleName := Keys.name.value,
       Keys.description := description,
       Keys.libraryDependencies ++= libDeps,
-      Test / javaOptions += ("-DprojectTestOutput=" + (Test / classDirectory).value), 
+      Test / javaOptions += ("-DprojectTestOutput=" + (Test / classDirectory).value),
       Test / fork := true,
       Test / parallelExecution := false,
       Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "binaryResources",
       Test / unmanagedResourceDirectories += baseDirectory.value / "src" / "test" / "binaryResources",
 
-      Test / testlogDirectory := (Global/testlogDirectory).value,
+      Test / testlogDirectory := (Global / testlogDirectory).value,
       Test / testlogLogToConsole := false,
       Test / testlogLogToFile := true,
 
@@ -103,22 +105,22 @@ class ProjectSettings(
 
         val log = streams.value.log
 
-        val options = (Test/javaOptions).value.toVector
+        val options = (Test / javaOptions).value.toVector
 
-        val annotatedTestNames : Seq[String] = (Test/compile).value.asInstanceOf[Analysis]
+        val annotatedTestNames: Seq[String] = (Test / compile).value.asInstanceOf[Analysis]
           .apis.internal.values.filter(hasForkAnnotation).map(_.name()).toSeq
 
-        val (forkedTests, otherTests) = (Test / definedTests).value.partition{ t =>
+        val (forkedTests, otherTests) = (Test / definedTests).value.partition { t =>
           annotatedTestNames.contains(t.name)
         }
 
-        val combined : Tests.Group = new Group(
+        val combined: Tests.Group = new Group(
           name = "Combined",
           tests = otherTests,
           runPolicy = SubProcess(config = ForkOptions.apply().withRunJVMOptions(options))
         )
 
-        val forked : Seq[Tests.Group] = forkedTests.map { t =>
+        val forked: Seq[Tests.Group] = forkedTests.map { t =>
           new Group(
             name = t.name,
             tests = Seq(t),
@@ -131,18 +133,18 @@ class ProjectSettings(
         }
 
         forked ++ Seq(combined)
-      },
+      }
 
     ) ++ osgiSettings ++ (
-          if (publish) PublishConfig.doPublish else PublishConfig.noPublish
-        )
+        if (publish) PublishConfig.doPublish else PublishConfig.noPublish
+      )
   }
 
-  def settings: Seq[sbt.Setting[_]] =  defaultSettings
+  def settings: Seq[sbt.Setting[_]] = defaultSettings
 
   def plugins: Seq[AutoPlugin] = extraPlugins ++
     Seq(TestLogConfig) ++
-    (if (publish) Seq(Sonatype) else Seq()) ++ 
+    (if (publish) Seq(Sonatype) else Seq()) ++
     (if (osgi) Seq(SbtOsgi) else Seq())
 
   // creates the project and apply settings and plugins

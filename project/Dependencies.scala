@@ -80,9 +80,11 @@ object Dependencies extends blended.sbt.Dependencies {
 
 object Blended extends blended.sbt.Blended {
 
-  override def blendedVersion: String = "3.1-SNAPSHOT"
+  val blendedOrganization = "de.wayofquality.blended"
 
-  val mgmtUi = "de.wayofquality.blended" %% "blended.mgmt.ui.server" % "0.2-SNAPSHOT"
+  override def blendedVersion: String = BuildHelper.readAsVersion(new File("version.txt"))
+
+  val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.2-SNAPSHOT"
 
   //  def blended(name: String) = Def.setting(groupId %% name % version.value)
   //
