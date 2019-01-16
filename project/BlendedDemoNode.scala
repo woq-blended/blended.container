@@ -70,16 +70,20 @@ object BlendedDemoNode extends ProjectFactory {
         Compile / filterResourcesFailOnMissingMatch := false,
 
         unpackLauncherZip := {
+          val log = streams.value.log
 
-          val launcher = Blended.launcher // .artifacts(Artifact(name = Blended.launcher.name, `type` = "zip", extension = "zip"))
+          val launcher = Blended.launcher.artifacts(Artifact(name = Blended.launcher.name, `type` = "zip", extension = "zip"))
           println("launcher: " + launcher + ", explicit artifacts: " + launcher.explicitArtifacts)
 
-          val files = BuildHelper.resolveModuleFile(
-            launcher,
-            //            scalaModuleInfo.value,
-            target.value
-          ).distinct
+          val depRes = (Compile / dependencyResolution).value
+          val files = depRes.retrieve(
+            launcher.intransitive(), // .withExclusions(Vector(InclExclRule())),
+            scalaModuleInfo.value,
+            target.value,
+            log
+          ).toOption.get.distinct
           println("resolved: " + files)
+
           val destDir = target.value / "launcher"
           files.foreach { f =>
             IO.unzip(f, destDir)
