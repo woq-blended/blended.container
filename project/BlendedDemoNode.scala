@@ -1,13 +1,13 @@
 import java.io.File
+import java.net.URLClassLoader
 
 import scala.util.control.NonFatal
 
-import blended.updater.tools.configbuilder.RuntimeConfigBuilder
 import de.wayofquality.sbt.filterresources.FilterResources
 import de.wayofquality.sbt.filterresources.FilterResources.autoImport._
 import sbt._
 import sbt.Keys._
-import sbt.librarymanagement.{InclExclRule, UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
+import sbt.librarymanagement.{UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
 
 object BlendedDemoNode extends ProjectFactory {
@@ -53,6 +53,10 @@ object BlendedDemoNode extends ProjectFactory {
     val materializeDebug = settingKey[Boolean]("Enable debug mode")
 
     val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
+
+    val materializeToolsDeps = settingKey[Seq[ModuleID]]("Dependencies needed as tools classpath for the RuntimeConfigBuilder / Materializer")
+
+    val materializeToolsCp = taskKey[Seq[File]]("Tools Classpath for the RuntimeConfigBuilder / Materializer")
 
     override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
       FilterResources
@@ -110,6 +114,35 @@ object BlendedDemoNode extends ProjectFactory {
           Seq(moduleId.artifacts(artifact) -> file)
         },
 
+        materializeToolsDeps := Seq(
+          Blended.updaterTools
+        ),
+
+        materializeToolsCp := {
+          val log = streams.value.log
+          val depRes = (Compile / dependencyResolution).value
+
+          materializeToolsDeps.value.flatMap { dep =>
+
+            val resolved: Either[UnresolvedWarning, UpdateReport] =
+              depRes.update(
+                depRes.wrapDependencyInModule(dep, scalaModuleInfo.value),
+                UpdateConfiguration(),
+                UnresolvedWarningConfiguration(),
+                log
+              )
+
+            val files = resolved match {
+              case Right(report) =>
+                val files: Seq[(ConfigRef, ModuleID, Artifact, File)] = report.toSeq
+                files.map(_._4)
+              case Left(w) => throw w.resolveException
+            }
+
+            files
+          }
+        },
+
         materializeProfile := {
           val log = streams.value.log
 
@@ -145,12 +178,12 @@ object BlendedDemoNode extends ProjectFactory {
             val unresolvedWarningConfiguration = UnresolvedWarningConfiguration()
 
             val resolved: Either[UnresolvedWarning, UpdateReport] = // BuildHelper.resolveModuleFile(
-              //              depRes.retrieve(
-              //                dep,
-              //                scalaModuleInfo.value,
-              //                target.value / "dependencies",
-              //                log
-              //              )
+            //              depRes.retrieve(
+            //                dep,
+            //                scalaModuleInfo.value,
+            //                target.value / "dependencies",
+            //                log
+            //              )
               depRes.update(
                 depRes.wrapDependencyInModule(dep.intransitive(), scalaModuleInfo.value),
                 updateConfiguration,
@@ -244,19 +277,28 @@ object BlendedDemoNode extends ProjectFactory {
 
           log.info("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
 
-          try {
+//          try {
 
-            RuntimeConfigBuilder.run(
-              args = profileArgs.toArray,
-              debugLog = Some(msg => log.debug(msg)),
-              infoLog = msg => log.info(msg),
-              errorLog = msg => log.error(msg)
-            )
-          } catch {
-            case NonFatal(e) =>
-              println("Ex location: " + e.getClass().getProtectionDomain().getCodeSource().getLocation())
-              throw e
-          }
+            // We use a separate Classloader with NULL as parent
+            // to avoid classes with incompatible older versions of typesafe config in sbt
+            val cl = new URLClassLoader(materializeToolsCp.value.map(_.toURL).toArray, null)
+
+            val builder = cl.loadClass("blended.updater.tools.configbuilder.RuntimeConfigBuilder")
+            val runMethod = builder.getMethod("run", Seq(classOf[Array[String]]):_*)
+
+            runMethod.invoke(null, profileArgs.toArray)
+
+//            RuntimeConfigBuilder.run(
+//              args = profileArgs.toArray,
+//              debugLog = Some(msg => log.debug(msg)),
+//              infoLog = msg => log.info(msg),
+//              errorLog = msg => log.error(msg)
+//            )
+//          } catch {
+//            case NonFatal(e) =>
+//              println("Ex location: " + e.getClass().getProtectionDomain().getCodeSource().getLocation())
+//              throw e
+//          }
 
         }
 

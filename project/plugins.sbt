@@ -33,7 +33,7 @@ addSbtPlugin(
 )
 
 // We use this to materialize profiles to containers
-libraryDependencies ++= Seq(
-  "de.wayofquality.blended" %% "blended.updater.tools" % "3.1-SNAPSHOT",
-  "com.typesafe" % "config" % "1.3.3"
-)
+//libraryDependencies ++= Seq(
+//  "de.wayofquality.blended" %% "blended.updater.tools" % "3.1-SNAPSHOT",
+//  "com.typesafe" % "config" % "1.3.3"
+//)
