@@ -51,6 +51,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
+        log = log,
         connectionFactory = intCf,
         jmsDestination = Some(JmsQueue("SampleIn"))
       )
@@ -82,6 +83,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
+        log = log,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
@@ -116,6 +118,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
+        log = log,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
@@ -150,6 +153,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
+        log = log,
         connectionFactory = intCf,
         jmsDestination = Some(JmsQueue("internal.data.in"))
       )
