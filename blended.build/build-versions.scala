@@ -1,14 +1,14 @@
 object BlendedVersions {
 
   val blendedGroupId = "de.wayofquality.blended"
-  val blendedVersion = "3.0-M2"
+  val blendedVersion = "3.0-M3-SNAPSHOT"
 
   val javaVersion = "1.8"
 
   val sbtVersion = "1.1.2"
 
-  val scalaVersion = "2.12.7"
-  val scalaVersionJS = "2.12.7"
+  val scalaVersion = "2.12.8"
+  val scalaVersionJS = "2.12.8"
   val scalaVersionJSBinary = "2.12"
 
   val scalaJsVersion = "0.6.25"

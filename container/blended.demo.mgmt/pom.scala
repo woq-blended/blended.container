@@ -20,13 +20,10 @@ BlendedContainer(
     Feature("blended-hawtio"),
     Feature("blended-spring"),
     Feature("blended-activemq"),
-    Feature("blended-camel"),
-    Feature("blended-samples"),
     Feature("blended-mgmt-client"),
     Feature("blended-mgmt-server"),
     Feature("blended-akka-http"),
     Feature("blended-persistence"),
-    Feature("blended-akka-http-modules"),
     Feature("blended-ssl")
   )
 )
