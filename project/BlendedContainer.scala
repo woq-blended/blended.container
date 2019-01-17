@@ -58,6 +58,10 @@ class BlendedContainer(
   override def settings: Seq[sbt.Setting[_]] = super.settings ++ {
 
     Seq(
+      Compile / packageBin / publishArtifact := false,
+      Compile / packageDoc / publishArtifact := false,
+      Compile / packageSrc / publishArtifact := false,
+
       Compile / filterSources := Seq(baseDirectory.value / "src" / "main" / "resources"),
       Compile / filterTargetDir := target.value / "filteredResources",
       Compile / filterProperties := Map(
@@ -136,7 +140,7 @@ class BlendedContainer(
         }
       },
 
-      materializeExplodeResources := false,
+      materializeExplodeResources := true,
 
       materializeProfile := {
         val log = streams.value.log
@@ -316,7 +320,7 @@ class BlendedContainer(
         val mapping =
           Seq(profileDir / "profile.conf" -> "profile.conf") ++
             PathFinder(profileDir / "bundles").allPaths.pair(MappingsHelper.relativeTo(profileDir)) ++
-            PathFinder(profileDir / "resources").allPaths.pair(MappingsHelper.relativeTo(profileDir))
+            PathFinder(profileDir / "resources").allPaths.---(PathFinder(profileDir / "resources").glob(".*")).pair(MappingsHelper.relativeTo(profileDir))
 
         validateMapping(mapping, streams.value.log)
 
