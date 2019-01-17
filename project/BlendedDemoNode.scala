@@ -65,6 +65,8 @@ object BlendedDemoNode extends ProjectFactory {
     val packageFullNoJreZip = taskKey[File]("Create a product package without a JRE")
     val packageFullNoJreTarGz = taskKey[File]("Create a product package without a JRE")
 
+    val packageDeploymentPack = taskKey[File]("Create deployment pack")
+
     override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
       FilterResources,
       UniversalPlugin,
@@ -332,15 +334,34 @@ object BlendedDemoNode extends ProjectFactory {
           Archives.makeTarball(Archives.gzip, ".tar.gz")(target.value, outputName, packageFullNoJreMapping.value, None)
         },
 
-        Compile / packageBin := packageFullNoJreTarGz.value
+        //        Compile / packageBin := packageFullNoJreTarGz.value,
 
-      ) ++ addArtifact(
-          Artifact(name = projectName, `type` = "zip", extension = "zip", classifier = "full-nojre"),
-          packageFullNoJreZip
-        ) ++ addArtifact(
+        packageDeploymentPack := {
+          val outputName = s"${projectName}-${version.value}-deploymentpack"
+          val profileDir = materializeTargetDir.value
+          val mapping =
+            Seq(profileDir / "profile.conf" -> "profile.conf") ++
+              PathFinder(profileDir / "bundles").allPaths.pair(MappingsHelper.relativeTo(profileDir)) ++
+              PathFinder(profileDir / "resources").allPaths.pair(MappingsHelper.relativeTo(profileDir))
+
+          Archives.makeZip(target.value, outputName, mapping, None, Nil)
+        }
+
+      ) ++
+        Seq(
+          addArtifact(
+            Artifact(name = projectName, `type` = "zip", extension = "zip", classifier = "full-nojre"),
+            packageFullNoJreZip
+          ),
+          addArtifact(
             Artifact(name = projectName, `type` = "tar.gz", extension = "tar.gz", classifier = "full-nojre"),
             packageFullNoJreTarGz
+          ),
+          addArtifact(
+            Artifact(name = projectName, `type` = "zip", extension = "zip", classifier = "deploymentpack"),
+            packageDeploymentPack
           )
+        ).flatten
     }
 
   }
