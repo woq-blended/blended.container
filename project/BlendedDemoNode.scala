@@ -8,7 +8,7 @@ import sbt._
 import sbt.Keys._
 import sbt.librarymanagement.{UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
-import com.typesafe.sbt.packager.universal.{UniversalDeployPlugin, UniversalPlugin}
+import com.typesafe.sbt.packager.universal.{Archives, UniversalDeployPlugin, UniversalPlugin, ZipHelper}
 
 object BlendedDemoNode extends ProjectFactory {
 
@@ -61,6 +61,10 @@ object BlendedDemoNode extends ProjectFactory {
 
     val materializeOverlays = taskKey[Seq[(ModuleID, File)]]("Additional overlays that should be applied to the materialized profile")
 
+    val packageFullNoJreMapping = taskKey[Seq[(File, String)]]("Mapping for product package without a JRE")
+    val packageFullNoJreZip = taskKey[File]("Create a product package without a JRE")
+    val packageFullNoJreTarGz = taskKey[File]("Create a product package without a JRE")
+
     override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
       FilterResources,
       UniversalPlugin,
@@ -74,7 +78,7 @@ object BlendedDemoNode extends ProjectFactory {
       // [x] declare deps from features
       // [x] Materialize profile
       // [x] Build launch.conf
-      // [ ] Build assembly (full-nojre)
+      // [x] Build assembly (full-nojre)
       // [ ] Build deploymentpack
 
       Seq(
@@ -193,12 +197,12 @@ object BlendedDemoNode extends ProjectFactory {
             val unresolvedWarningConfiguration = UnresolvedWarningConfiguration()
 
             val resolved: Either[UnresolvedWarning, UpdateReport] = // BuildHelper.resolveModuleFile(
-            //              depRes.retrieve(
-            //                dep,
-            //                scalaModuleInfo.value,
-            //                target.value / "dependencies",
-            //                log
-            //              )
+              //              depRes.retrieve(
+              //                dep,
+              //                scalaModuleInfo.value,
+              //                target.value / "dependencies",
+              //                log
+              //              )
               depRes.update(
                 depRes.wrapDependencyInModule(dep.intransitive(), scalaModuleInfo.value),
                 updateConfiguration,
@@ -293,9 +297,9 @@ object BlendedDemoNode extends ProjectFactory {
 
         },
 
-        Universal / topLevelDirectory := None,
+        packageFullNoJreMapping := {
+          val log = streams.value.log
 
-        Universal / packageBin / mappings := {
           // trigger
           (Compile / filterResources).value
           materializeProfile.value
@@ -304,26 +308,51 @@ object BlendedDemoNode extends ProjectFactory {
           val containerResources = (Compile / filterTargetDir).value / "container"
           val profileDir = materializeTargetDir.value
 
-          // mapping
-          PathFinder(launcherDir).allPaths.pair(MappingsHelper.relativeTo(launcherDir)) ++
+          val mapping = PathFinder(launcherDir).allPaths.pair(MappingsHelper.relativeTo(launcherDir)).
+            // We provide that ourselves
+            filter(_._2 != "etc/logback.xml") ++
             PathFinder(containerResources).allPaths.pair(MappingsHelper.relativeTo(containerResources)) ++
             PathFinder(profileDir).allPaths.pair(
               f => IO.relativize(profileDir, f).map(p => s"profiles/${projectName}/${version.value}/${p}")
             ) ++
-            Seq(profileDir -> s"profiles/${projectName}/${version.value}") ++
-            materializeLaunchConf.value.toList.map(f => f -> f.getName())
+              Seq(profileDir -> s"profiles/${projectName}/${version.value}") ++
+              materializeLaunchConf.value.toList.map(f => f -> f.getName())
 
+          // security measure
+          var entries = Set[String]()
+          mapping.foreach {
+            case (k, v) =>
+              if (k.isFile()) {
+                if (entries.contains(v)) {
+                  log.warn(s"The resulting mapping [${packageFullNoJreMapping.key}] will contain colliding entry [${v}] from: [${mapping.filter(_._2 == v).map(_._1)}]")
+                } else {
+                  entries += v
+                }
+              }
+          }
+
+          mapping
         },
 
-        artifacts ++= (Universal / packageBin / artifacts).value,
+        packageFullNoJreZip := {
+          val outputName = s"${projectName}-${version.value}-full-nojre"
+          Archives.makeZip(target.value, outputName, packageFullNoJreMapping.value, None, Nil)
+        },
 
-        packagedArtifacts := {
-          // trigger
-          (Universal / packageBin).value
-          packagedArtifacts.value ++ (Universal / packageBin / packagedArtifacts).value
-        }
+        packageFullNoJreTarGz := {
+          val outputName = s"${projectName}-${version.value}-full-nojre"
+          Archives.makeTarball(Archives.gzip, ".tar.gz")(target.value, outputName, packageFullNoJreMapping.value, None)
+        },
 
-      )
+        Compile / packageBin := packageFullNoJreTarGz.value
+
+      ) ++ addArtifact(
+          Artifact(name = projectName, `type` = "zip", extension = "zip", classifier = "full-nojre"),
+          packageFullNoJreZip
+        ) ++ addArtifact(
+            Artifact(name = projectName, `type` = "tar.gz", extension = "tar.gz", classifier = "full-nojre"),
+            packageFullNoJreTarGz
+          )
     }
 
   }
