@@ -18,6 +18,7 @@ lazy val blendedLauncherFeatures = BlendedLauncherFeatures.project
 lazy val blendedDemoNodeResources = BlendedDemoNodeResources.project
 lazy val blendedDemoMgmtResources = BlendedDemoMgmtResources.project
 lazy val blendedDemoNode = BlendedDemoNode.project
+lazy val blendedDemoMgmt = BlendedDemoMgmt.project
 
 lazy val root = {
   project
@@ -28,7 +29,8 @@ lazy val root = {
       blendedLauncherFeatures,
       blendedDemoNodeResources,
       blendedDemoMgmtResources,
-      blendedDemoNode
+      blendedDemoNode,
+      blendedDemoMgmt
     )
 
 }
