@@ -326,12 +326,21 @@ object BlendedDemoNode extends ProjectFactory {
 
         packageFullNoJreZip := {
           val outputName = s"${projectName}-${version.value}-full-nojre"
-          Archives.makeZip(target.value, outputName, packageFullNoJreMapping.value, None, Nil)
+          Archives.makeZip(
+            target = target.value,
+            name = outputName,
+            mappings = packageFullNoJreMapping.value,
+            top = Some(s"${projectName}-${version.value}"),
+            options = Nil)
         },
 
         packageFullNoJreTarGz := {
           val outputName = s"${projectName}-${version.value}-full-nojre"
-          Archives.makeTarball(Archives.gzip, ".tar.gz")(target.value, outputName, packageFullNoJreMapping.value, None)
+          Archives.makeTarball(Archives.gzip, ".tar.gz")(
+            target = target.value,
+            name = outputName,
+            mappings = packageFullNoJreMapping.value,
+            top = Some(s"${projectName}-${version.value}"))
         },
 
         //        Compile / packageBin := packageFullNoJreTarGz.value,
@@ -344,7 +353,12 @@ object BlendedDemoNode extends ProjectFactory {
               PathFinder(profileDir / "bundles").allPaths.pair(MappingsHelper.relativeTo(profileDir)) ++
               PathFinder(profileDir / "resources").allPaths.pair(MappingsHelper.relativeTo(profileDir))
 
-          Archives.makeZip(target.value, outputName, mapping, None, Nil)
+          Archives.makeZip(
+            target = target.value,
+            name = outputName,
+            mappings = mapping,
+            top = None,
+            options = Nil)
         }
 
       ) ++
