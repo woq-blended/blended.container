@@ -183,9 +183,6 @@ object BlendedDemoNode extends ProjectFactory {
           }
           log.debug(s"feature args: ${featureArgs}")
 
-          // experimental: trigger dep resolution
-          val depCp = (Compile / dependencyClasspath).value
-          log.debug(s"Dependency classpath: [${depCp}]")
           val depRes = (Compile / dependencyResolution).value
 
           // We need to declare all bundles as libraryDependencies!
@@ -196,19 +193,12 @@ object BlendedDemoNode extends ProjectFactory {
             val updateConfiguration = UpdateConfiguration()
             val unresolvedWarningConfiguration = UnresolvedWarningConfiguration()
 
-            val resolved: Either[UnresolvedWarning, UpdateReport] = // BuildHelper.resolveModuleFile(
-              //              depRes.retrieve(
-              //                dep,
-              //                scalaModuleInfo.value,
-              //                target.value / "dependencies",
-              //                log
-              //              )
-              depRes.update(
-                depRes.wrapDependencyInModule(dep.intransitive(), scalaModuleInfo.value),
-                updateConfiguration,
-                unresolvedWarningConfiguration,
-                log
-              )
+            val resolved: Either[UnresolvedWarning, UpdateReport] = depRes.update(
+              depRes.wrapDependencyInModule(dep.intransitive(), scalaModuleInfo.value),
+              updateConfiguration,
+              unresolvedWarningConfiguration,
+              log
+            )
             val files = resolved match {
               case Right(report) =>
                 val files: Seq[(ConfigRef, ModuleID, Artifact, File)] = report.toSeq
@@ -272,11 +262,9 @@ object BlendedDemoNode extends ProjectFactory {
             launchConfArgs
           ).flatten
 
-          // ++ repoArgs ++ explodeResourcesArgs ++ overlayArgs ++ launchConfArgs
+          //  ++ overlayArgs
 
           log.debug("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
-
-          //          try {
 
           // We use a separate Classloader with NULL as parent
           // to avoid classes with incompatible older versions of typesafe config in sbt
