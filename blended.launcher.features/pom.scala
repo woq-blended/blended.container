@@ -85,8 +85,7 @@ val features = Seq(
       FeatureBundle(dependency = camelCore),
       FeatureBundle(dependency = camelSpring),
       FeatureBundle(dependency = camelJms),
-      FeatureBundle(dependency = Blended.camelUtils),
-      FeatureBundle(dependency = Blended.jmsSampler, start = true)
+      FeatureBundle(dependency = Blended.camelUtils)
     )
   ),
   FeatureDef("blended-commons", bundles = Seq(
