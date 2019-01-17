@@ -1,14 +1,14 @@
 import java.io.File
 import java.net.URLClassLoader
 
-import scala.util.control.NonFatal
-
+import com.typesafe.sbt.packager.MappingsHelper
 import de.wayofquality.sbt.filterresources.FilterResources
 import de.wayofquality.sbt.filterresources.FilterResources.autoImport._
 import sbt._
 import sbt.Keys._
 import sbt.librarymanagement.{UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
+import com.typesafe.sbt.packager.universal.{UniversalDeployPlugin, UniversalPlugin}
 
 object BlendedDemoNode extends ProjectFactory {
 
@@ -46,27 +46,36 @@ object BlendedDemoNode extends ProjectFactory {
       super.libDeps
     }
 
-    val unpackLauncherZip = taskKey[Unit]("Unpack the launcher ZIP")
-    val materializeProfile = taskKey[Unit]("Materialize the profile")
+    val unpackLauncherZip = taskKey[File]("Unpack the launcher ZIP")
+
+    val materializeDebug = settingKey[Boolean]("Enable debug mode")
     val materializeSourceProfile = settingKey[File]("Source profile")
     val materializeTargetDir = settingKey[File]("Target directory")
-    val materializeDebug = settingKey[Boolean]("Enable debug mode")
-
-    val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
-
     val materializeToolsDeps = settingKey[Seq[ModuleID]]("Dependencies needed as tools classpath for the RuntimeConfigBuilder / Materializer")
+    val materializeExplodeResources = settingKey[Boolean]("Should resources already be exploded")
+    val materializeLaunchConf = settingKey[Option[File]]("The name of the optional created launch.conf file")
 
+    val materializeProfile = taskKey[Unit]("Materialize the profile")
+    val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
     val materializeToolsCp = taskKey[Seq[File]]("Tools Classpath for the RuntimeConfigBuilder / Materializer")
 
+    val materializeOverlays = taskKey[Seq[(ModuleID, File)]]("Additional overlays that should be applied to the materialized profile")
+
     override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
-      FilterResources
+      FilterResources,
+      UniversalPlugin,
+      UniversalDeployPlugin
     )
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ {
 
-      // Unpack launcher zip
-      // declare resources zip as dep
-      // declare deps from features
+      // [x] Unpack launcher zip
+      // [x] declare resources zip as dep
+      // [x] declare deps from features
+      // [x] Materialize profile
+      // [x] Build launch.conf
+      // [ ] Build assembly (full-nojre)
+      // [ ] Build deploymentpack
 
       Seq(
         Compile / filterSources := Seq(baseDirectory.value / "src" / "main" / "resources"),
@@ -97,11 +106,15 @@ object BlendedDemoNode extends ProjectFactory {
           files.foreach { f =>
             IO.unzip(f, destDir)
           }
+
+          destDir
         },
 
-        materializeDebug := true,
+        materializeDebug := false,
 
         materializeTargetDir := target.value / "profile",
+
+        materializeLaunchConf := Some(target.value / "container" / "launch.conf"),
 
         materializeSourceProfile := (Compile / filterTargetDir).value / "profile" / "profile.conf",
 
@@ -142,6 +155,8 @@ object BlendedDemoNode extends ProjectFactory {
             files
           }
         },
+
+        materializeExplodeResources := false,
 
         materializeProfile := {
           val log = streams.value.log
@@ -217,25 +232,8 @@ object BlendedDemoNode extends ProjectFactory {
           }
           log.debug(s"extra artifact args: ${extraArtifactArgs}")
 
-          //          val repoArgs =
-          ////            if (resolveFromDependencies) {
-          //            (Compile / libraryDependencies).value
-          //          project.getArtifacts.asScala.toArray.flatMap { a =>
-          //            Array(
-          //                "--maven-artifact",
-          //                s"${a.getGroupId}:${a.getArtifactId}:${Option(a.getClassifier).filter(_ != "jar").getOrElse("")}:${a.getVersion}:${Option(a.getType).getOrElse("")}",
-          //                a.getFile.getAbsolutePath
-          //          )
-          //        }
-          //                } else {
-          ////            Array("--maven-url", localRepoUrl) ++ remoteRepoUrls.toArray.flatMap(u => Array("--maven-url", u))
-          //        }
-          //          getLog.debug("repo args: " + repoArgs.mkString("Array(", ", ", ")"))
-          //
-          //          val explodeResourcesArgs = if (explodeResources) Array("--explode-resources") else Array[String]()
-          //
-          //          val debugArgs = if (debug) Array("--debug") else Array[String]()
-          //
+          val explodeResourcesArgs = if (materializeExplodeResources.value) Seq("--explode-resources") else Nil
+
           //          val overlayArgs =
           //          // prepend base dir if set
           //            Option(overlays).getOrElse(ju.Collections.emptyList()).asScala.map { o =>
@@ -248,16 +246,11 @@ object BlendedDemoNode extends ProjectFactory {
           //              // create args
           //              flatMap(o => Seq("--add-overlay-file", o.getAbsolutePath())).toArray
           //
-          //          val launchConfArgs = Option(createLaunchConfig).toList.flatMap(cf => Seq("--create-launch-config", cf.getPath())).toArray
-          //
-          //          val profileArgs = Array(
-          //            "-f", srcProfile.getAbsolutePath,
-          //            "-o", targetProfile.getAbsolutePath,
-          //            "--download-missing",
-          //            "--update-checksums",
-          //            "--write-overlays-config"
-          //          ) ++ debugArgs ++ featureArgs ++ repoArgs ++ explodeResourcesArgs ++ overlayArgs ++ launchConfArgs
-          //
+
+          val launchConfArgs = materializeLaunchConf.value.toList.flatMap { cf =>
+            Option(cf.getParentFile()).foreach(_.mkdirs())
+            Seq("--create-launch-config", cf.getAbsolutePath())
+          }
 
           val debugArgs = if (materializeDebug.value) Seq("--debug") else Nil
 
@@ -270,36 +263,64 @@ object BlendedDemoNode extends ProjectFactory {
             debugArgs,
             featureArgs,
             artifactArgs,
-            extraArtifactArgs
+            extraArtifactArgs,
+            explodeResourcesArgs,
+            launchConfArgs
           ).flatten
 
           // ++ repoArgs ++ explodeResourcesArgs ++ overlayArgs ++ launchConfArgs
 
-          log.info("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
+          log.debug("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
 
-//          try {
+          //          try {
 
-            // We use a separate Classloader with NULL as parent
-            // to avoid classes with incompatible older versions of typesafe config in sbt
-            val cl = new URLClassLoader(materializeToolsCp.value.map(_.toURL).toArray, null)
+          // We use a separate Classloader with NULL as parent
+          // to avoid classes with incompatible older versions of typesafe config in sbt
+          val cl = new URLClassLoader(materializeToolsCp.value.map(_.toURI().toURL()).toArray, null)
 
-            val builder = cl.loadClass("blended.updater.tools.configbuilder.RuntimeConfigBuilder")
-            val runMethod = builder.getMethod("run", Seq(classOf[Array[String]]):_*)
+          val builder = cl.loadClass("blended.updater.tools.configbuilder.RuntimeConfigBuilder")
+          val runMethod = builder.getMethod("run", Seq(classOf[Array[String]]): _*)
 
-            runMethod.invoke(null, profileArgs.toArray)
+          runMethod.invoke(null, profileArgs.toArray)
 
-//            RuntimeConfigBuilder.run(
-//              args = profileArgs.toArray,
-//              debugLog = Some(msg => log.debug(msg)),
-//              infoLog = msg => log.info(msg),
-//              errorLog = msg => log.error(msg)
-//            )
-//          } catch {
-//            case NonFatal(e) =>
-//              println("Ex location: " + e.getClass().getProtectionDomain().getCodeSource().getLocation())
-//              throw e
-//          }
+          // We can't call the tool directly, as some sbt deps (typesafe-config) collide
+          //            RuntimeConfigBuilder.run(
+          //              args = profileArgs.toArray,
+          //              debugLog = Some(msg => log.debug(msg)),
+          //              infoLog = msg => log.info(msg),
+          //              errorLog = msg => log.error(msg)
+          //            )
 
+        },
+
+        Universal / topLevelDirectory := None,
+
+        Universal / packageBin / mappings := {
+          // trigger
+          (Compile / filterResources).value
+          materializeProfile.value
+
+          val launcherDir = unpackLauncherZip.value
+          val containerResources = (Compile / filterTargetDir).value / "container"
+          val profileDir = materializeTargetDir.value
+
+          // mapping
+          PathFinder(launcherDir).allPaths.pair(MappingsHelper.relativeTo(launcherDir)) ++
+            PathFinder(containerResources).allPaths.pair(MappingsHelper.relativeTo(containerResources)) ++
+            PathFinder(profileDir).allPaths.pair(
+              f => IO.relativize(profileDir, f).map(p => s"profiles/${projectName}/${version.value}/${p}")
+            ) ++
+            Seq(profileDir -> s"profiles/${projectName}/${version.value}") ++
+            materializeLaunchConf.value.toList.map(f => f -> f.getName())
+
+        },
+
+        artifacts ++= (Universal / packageBin / artifacts).value,
+
+        packagedArtifacts := {
+          // trigger
+          (Universal / packageBin).value
+          packagedArtifacts.value ++ (Universal / packageBin / packagedArtifacts).value
         }
 
       )
