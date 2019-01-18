@@ -315,6 +315,9 @@ class BlendedContainer(
       //        Compile / packageBin := packageFullNoJreTarGz.value,
 
       packageDeploymentPack := {
+        // trigger
+        materializeProfile.value
+
         val outputName = s"${projectName}-${version.value}-deploymentpack"
         val profileDir = materializeTargetDir.value
         val mapping =

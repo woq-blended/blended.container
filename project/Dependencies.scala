@@ -71,10 +71,6 @@ object Dependencies extends blended.sbt.Dependencies {
   val servicemixStaxApi = "org.apache.servicemix.specs" % "org.apache.servicemix.specs.stax-api-1.0" % "2.4.0"
   val slf4jJcl = "org.slf4j" % "jcl-over-slf4j" % slf4jVersion
   val slf4jJul = "org.slf4j" % "jul-to-slf4j" % slf4jVersion
-  val springAop = spring("aop")
-  val springContext = spring("context")
-  val springContextSupport = spring("context-support")
-  val springJms = spring("jms")
 
 }
 
