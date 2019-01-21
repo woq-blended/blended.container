@@ -1,6 +1,7 @@
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
 import sbt.Keys._
 import sbt._
+import BlendedContainer._
 
 object BlendedDemoNode extends ProjectFactory {
 

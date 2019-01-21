@@ -28,26 +28,7 @@ class BlendedContainer(
   projectDir = projectDir
 ) {
 
-  val unpackLauncherZip = taskKey[File]("Unpack the launcher ZIP")
-
-  val materializeDebug = settingKey[Boolean]("Enable debug mode")
-  val materializeSourceProfile = settingKey[File]("Source profile")
-  val materializeTargetDir = settingKey[File]("Target directory")
-  val materializeToolsDeps = settingKey[Seq[ModuleID]]("Dependencies needed as tools classpath for the RuntimeConfigBuilder / Materializer")
-  val materializeExplodeResources = settingKey[Boolean]("Should resources already be exploded")
-  val materializeLaunchConf = settingKey[Option[File]]("The name of the optional created launch.conf file")
-
-  val materializeProfile = taskKey[Unit]("Materialize the profile")
-  val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
-  val materializeToolsCp = taskKey[Seq[File]]("Tools Classpath for the RuntimeConfigBuilder / Materializer")
-
-  val materializeOverlays = taskKey[Seq[(ModuleID, File)]]("Additional overlays that should be applied to the materialized profile")
-
-  val packageFullNoJreMapping = taskKey[Seq[(File, String)]]("Mapping for product package without a JRE")
-  val packageFullNoJreZip = taskKey[File]("Create a product package without a JRE")
-  val packageFullNoJreTarGz = taskKey[File]("Create a product package without a JRE")
-
-  val packageDeploymentPack = taskKey[File]("Create deployment pack")
+  import BlendedContainer._
 
   override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
     FilterResources,
@@ -373,5 +354,29 @@ class BlendedContainer(
         }
     }
   }
+
+}
+
+object BlendedContainer {
+  val unpackLauncherZip = taskKey[File]("Unpack the launcher ZIP")
+
+  val materializeDebug = settingKey[Boolean]("Enable debug mode")
+  val materializeSourceProfile = settingKey[File]("Source profile")
+  val materializeTargetDir = settingKey[File]("Target directory")
+  val materializeToolsDeps = settingKey[Seq[ModuleID]]("Dependencies needed as tools classpath for the RuntimeConfigBuilder / Materializer")
+  val materializeExplodeResources = settingKey[Boolean]("Should resources already be exploded")
+  val materializeLaunchConf = settingKey[Option[File]]("The name of the optional created launch.conf file")
+
+  val materializeProfile = taskKey[Unit]("Materialize the profile")
+  val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
+  val materializeToolsCp = taskKey[Seq[File]]("Tools Classpath for the RuntimeConfigBuilder / Materializer")
+
+  val materializeOverlays = taskKey[Seq[(ModuleID, File)]]("Additional overlays that should be applied to the materialized profile")
+
+  val packageFullNoJreMapping = taskKey[Seq[(File, String)]]("Mapping for product package without a JRE")
+  val packageFullNoJreZip = taskKey[File]("Create a product package without a JRE")
+  val packageFullNoJreTarGz = taskKey[File]("Create a product package without a JRE")
+
+  val packageDeploymentPack = taskKey[File]("Create deployment pack")
 
 }
