@@ -18,8 +18,8 @@ class BlendedDockerContainer(
                               imageTag: String,
                               publish: Boolean = true,
                               projectDir: Option[String] = None,
-                              ports: List[Int] = List(),
-                              folder: String,
+                              val ports: List[Int] = List(),
+                              val folder: String,
                               overlays: List[String] = List()
                             ) extends ProjectSettings(
   projectName = projectName,
@@ -33,11 +33,7 @@ class BlendedDockerContainer(
   projectDir = projectDir
 ) {
 
-  val dockerDir = settingKey[File]("The base directory for the docker image content")
-  val containerImageTgz = taskKey[(String, File)]("The container image and it's folder name")
-  val generateDockerfile = taskKey[File]("Generate to dockerfile")
-  val unpackContainer = taskKey[File]("Unpack the container archive")
-  val createDockerImage = taskKey[Unit]("Create the docker image")
+  import BlendedDockerContainer._
 
   override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
     FilterResources,
@@ -77,7 +73,7 @@ class BlendedDockerContainer(
       unpackContainer := {
         val log = streams.value.log
 
-        val file = containerImageTgz.value._2
+        val file = containerImage.value._2
         val destDir = dockerDir.value / "image"
         BuildHelper.unpackTarGz(file, destDir)
         destDir
@@ -95,9 +91,9 @@ class BlendedDockerContainer(
         val dockerconf = Seq(
           "FROM atooni/blended-base:latest",
           s"MAINTAINER Blended Team version: ${Blended.blendedVersion}",
-          s"ADD ${containerImageTgz.value._2.getName()} /opt",
-          s"RUN ln -s /opt/${containerImageTgz.value._1} /opt/${folder}",
-          s"RUN chown -R blended.blended /opt/${containerImageTgz.value._1}",
+          s"ADD ${containerImage.value._2.getName()} /opt",
+          s"RUN ln -s /opt/${containerImage.value._1} /opt/${folder}",
+          s"RUN chown -R blended.blended /opt/${containerImage.value._1}",
           s"RUN chown -R blended.blended /opt/${folder}",
           "USER blended",
           "ENV JAVA_HOME /opt/java",
@@ -114,7 +110,7 @@ class BlendedDockerContainer(
       createDockerImage := {
         val log = streams.value.log
 
-        IO.copyFile(containerImageTgz.value._2, dockerDir.value / containerImageTgz.value._2.getName())
+        IO.copyFile(containerImage.value._2, dockerDir.value / containerImage.value._2.getName())
 
         // trigger dockerfile
         generateDockerfile.value
@@ -150,4 +146,13 @@ class BlendedDockerContainer(
     }
   }
 
+}
+
+object BlendedDockerContainer {
+
+  val dockerDir = settingKey[File]("The base directory for the docker image content")
+  val containerImage = taskKey[(String, File)]("The container image and it's folder name")
+  val generateDockerfile = taskKey[File]("Generate to dockerfile")
+  val unpackContainer = taskKey[File]("Unpack the container archive")
+  val createDockerImage = taskKey[Unit]("Create the docker image")
 }

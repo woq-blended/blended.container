@@ -15,7 +15,7 @@ object BlendedDockerDemoMgmt extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      containerImageTgz := s"blended.demo.mgmt-${Blended.blendedVersion}" -> (BlendedDemoMgmt.project / BlendedContainer.packageFullNoJreTarGz).value
+      BlendedDockerContainer.containerImage := s"blended.demo.mgmt-${Blended.blendedVersion}" -> (BlendedDemoMgmt.project / BlendedContainer.packageFullNoJreTarGz).value
     )
 
   }

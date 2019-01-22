@@ -1,8 +1,3 @@
-import java.io.File
-
-import com.typesafe.sbt.packager.universal.{UniversalDeployPlugin, UniversalPlugin}
-import de.wayofquality.sbt.filterresources.FilterResources
-import sbt.Keys._
 import sbt._
 
 
@@ -20,7 +15,7 @@ object BlendedDockerDemoNode extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      containerImageTgz := s"blended.demo.node-${Blended.blendedVersion}" -> (BlendedDemoNode.project / BlendedContainer.packageFullNoJreTarGz).value
+      BlendedDockerContainer.containerImage := s"blended.demo.node-${Blended.blendedVersion}" -> (BlendedDemoNode.project / BlendedContainer.packageFullNoJreTarGz).value
     )
 
   }
