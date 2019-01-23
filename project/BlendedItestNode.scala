@@ -13,14 +13,21 @@ object BlendedItestNode extends ProjectFactory {
     Blended.streams % "test",
     Blended.streamsTestsupport % "test",
     Blended.jmsUtils % "test",
-    Blended.testSupport % "test"
-  ).map(_.intransitive()) ++ Seq(
+    Blended.testSupport % "test",
+    Blended.util % "test",
+    Blended.akka % "test"
+  ) //.map(_.intransitive())
+      ++ Seq(
       Dependencies.scalatest % "test",
       Dependencies.akkaActor % "test",
+      Dependencies.akkaStream % "test",
       Dependencies.slf4j % "test",
       Dependencies.akkaSlf4j % "test",
       Dependencies.logbackClassic % "test",
-      Dependencies.akkaTestkit % "test"
+      Dependencies.akkaTestkit % "test",
+      Dependencies.geronimoJms11Spec % "test",
+      Dependencies.dockerJava % "test",
+      Dependencies.geronimoJ2eeMgmtSpec % "test"
     ),
     osgi = false,
     projectDir = Some("itest/blended.itest.node")
@@ -33,7 +40,9 @@ object BlendedItestNode extends ProjectFactory {
         (BlendedDockerDemoApacheds.project / BlendedDockerContainer.createDockerImage).value
 
         (Test / dependencyClasspath).value
-      }
+      },
+      javaOptions += s"-Ddocker.host=${System.getProperty("docker.host", "localhost")}",
+      javaOptions += s"-Ddocker.port=${System.getProperty("docker.port", "4243")}"
     )
 
   }
