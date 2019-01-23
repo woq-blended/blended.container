@@ -1,11 +1,14 @@
 import java.io.File
 
+import scala.util.control.NonFatal
+
 import blended.updater.tools.configbuilder.RuntimeConfigBuilder
 import de.wayofquality.sbt.filterresources.FilterResources
 import de.wayofquality.sbt.filterresources.FilterResources.autoImport._
 import sbt._
 import sbt.Keys._
-import sbt.librarymanagement.{InclExclRule, UnresolvedWarning}
+import sbt.librarymanagement.{InclExclRule, UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
+import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
 
 object BlendedDemoNode extends ProjectFactory {
 
@@ -49,6 +52,8 @@ object BlendedDemoNode extends ProjectFactory {
     val materializeTargetDir = settingKey[File]("Target directory")
     val materializeDebug = settingKey[Boolean]("Enable debug mode")
 
+    val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
+
     override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
       FilterResources
     )
@@ -79,7 +84,7 @@ object BlendedDemoNode extends ProjectFactory {
           val files = depRes.retrieve(
             launcher.intransitive(), // .withExclusions(Vector(InclExclRule())),
             scalaModuleInfo.value,
-            target.value,
+            target.value / "dependencies",
             log
           ).toOption.get.distinct
           println("resolved: " + files)
@@ -90,11 +95,20 @@ object BlendedDemoNode extends ProjectFactory {
           }
         },
 
-        materializeDebug := false,
+        materializeDebug := true,
 
         materializeTargetDir := target.value / "profile",
 
         materializeSourceProfile := (Compile / filterTargetDir).value / "profile" / "profile.conf",
+
+        materializeExtraDeps := {
+          val file = (BlendedDemoNodeResources.project / Universal / packageBin).value
+          //          val moduleId = Blended.blendedOrganization %% (BlendedDemoNodeResources.project / name).value % Blended.blendedVersion
+          val artifact = (BlendedDemoNodeResources.project / artifacts).value.filter(a => a.`type` == "zip" && a.extension == "zip").head
+          val moduleId: ModuleID = (Blended.blendedOrganization %% (BlendedDemoNodeResources.project / name).value % Blended.blendedVersion)
+
+          Seq(moduleId.artifacts(artifact) -> file)
+        },
 
         materializeProfile := {
           val log = streams.value.log
@@ -115,35 +129,46 @@ object BlendedDemoNode extends ProjectFactory {
           val featureArgs = featureFiles.flatMap { f =>
             Seq("--feature-repo", f.getAbsolutePath())
           }
-          log.info(s"feature args: ${featureArgs}")
-
+          log.debug(s"feature args: ${featureArgs}")
 
           // experimental: trigger dep resolution
           val depCp = (Compile / dependencyClasspath).value
-          log.info(s"Dependency classpath: [${depCp}]")
+          log.debug(s"Dependency classpath: [${depCp}]")
           val depRes = (Compile / dependencyResolution).value
 
           // We need to declare all bundles as libraryDependencies!
           val libDeps: Seq[ModuleID] = (Compile / libraryDependencies).value
           val artifactArgs = libDeps.flatMap { dep: ModuleID =>
-            val optType = dep.explicitArtifacts.headOption.map { a => a.`type` }
-            val optClassifier = dep.explicitArtifacts.headOption.flatMap(a => a.classifier).filterNot(_ == "jar")
+            val gav = moduleIdToGav(dep)
 
-            val gav = s"${dep.organization}:${dep.name}:${optClassifier.getOrElse("")}:${dep.revision}:${optType.getOrElse("")}"
-            val resolved: Either[UnresolvedWarning, Vector[File]] = // BuildHelper.resolveModuleFile(
-              depRes.retrieve(
-                dep, // .withExclusions(Vector(InclExclRule())),
-                scalaModuleInfo.value,
-                target.value,
+            val updateConfiguration = UpdateConfiguration()
+            val unresolvedWarningConfiguration = UnresolvedWarningConfiguration()
+
+            val resolved: Either[UnresolvedWarning, UpdateReport] = // BuildHelper.resolveModuleFile(
+              //              depRes.retrieve(
+              //                dep,
+              //                scalaModuleInfo.value,
+              //                target.value / "dependencies",
+              //                log
+              //              )
+              depRes.update(
+                depRes.wrapDependencyInModule(dep.intransitive(), scalaModuleInfo.value),
+                updateConfiguration,
+                unresolvedWarningConfiguration,
                 log
               )
             val files = resolved match {
-              case Right(files) => files.distinct
+              case Right(report) =>
+                val files: Seq[(ConfigRef, ModuleID, Artifact, File)] = report.toSeq
+                files.map(_._4)
               case Left(w) => throw w.resolveException
             }
             files.headOption match {
               case Some(file) =>
-                log.info(s"Associated file with dependency: ${dep} => ${gav} --> ${file.getAbsolutePath()}")
+                log.debug(s"Associated file with dependency: ${dep} => ${gav} --> ${file.getAbsolutePath()}")
+                if (!file.exists()) {
+                  log.error(s"Resolved file does not exist: ${file}")
+                }
                 Seq("--maven-artifact", gav, file.getAbsolutePath())
               case None =>
                 log.warn(s"No file associated with dependency: ${dep} => ${gav}")
@@ -151,7 +176,13 @@ object BlendedDemoNode extends ProjectFactory {
             }
 
           }
-          log.info(s"artifact args: ${artifactArgs}")
+          log.debug(s"artifact args: ${artifactArgs}")
+
+          val extraArtifactArgs = materializeExtraDeps.value.flatMap {
+            case (moduleId, file) =>
+              Seq("--maven-artifact", moduleIdToGav(moduleId), file.getAbsolutePath())
+          }
+          log.debug(s"extra artifact args: ${extraArtifactArgs}")
 
           //          val repoArgs =
           ////            if (resolveFromDependencies) {
@@ -202,29 +233,42 @@ object BlendedDemoNode extends ProjectFactory {
               "-o", targetProfile.getAbsolutePath(),
               "--download-missing",
               "--update-checksums",
-              "--write-overlays-config"
-            ),
+              "--write-overlays-config"),
             debugArgs,
             featureArgs,
-            artifactArgs
+            artifactArgs,
+            extraArtifactArgs
           ).flatten
 
           // ++ repoArgs ++ explodeResourcesArgs ++ overlayArgs ++ launchConfArgs
 
-          log.info("About to run RuntimeConfigBuilder.run with args: " + profileArgs)
+          log.info("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
 
-          RuntimeConfigBuilder.run(
-            args = profileArgs.toArray,
-            debugLog = Some(msg => log.debug(msg)),
-            infoLog = msg => log.info(msg),
-            errorLog = msg => log.error(msg)
-          )
+          try {
+
+            RuntimeConfigBuilder.run(
+              args = profileArgs.toArray,
+              debugLog = Some(msg => log.debug(msg)),
+              infoLog = msg => log.info(msg),
+              errorLog = msg => log.error(msg)
+            )
+          } catch {
+            case NonFatal(e) =>
+              println("Ex location: " + e.getClass().getProtectionDomain().getCodeSource().getLocation())
+              throw e
+          }
 
         }
 
       )
     }
 
+  }
+
+  def moduleIdToGav(dep: ModuleID): String = {
+    val optExt = dep.explicitArtifacts.headOption.map { a => a.extension }
+    val optClassifier = dep.explicitArtifacts.headOption.flatMap(a => a.classifier).filter(_ != "jar")
+    s"${dep.organization}:${dep.name}:${optClassifier.getOrElse("")}:${dep.revision}:${optExt.getOrElse("jar")}"
   }
 
   override val project = helper.baseProject.dependsOn(

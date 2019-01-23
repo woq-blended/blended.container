@@ -37,8 +37,8 @@ class ProjectSettings(
 ) {
 
   def libDeps: Seq[ModuleID] = deps ++ features.flatMap { f =>
-    f.libDeps // ++ Seq(Blended.blendedOrganization %% f.name % Blended.blendedVersion)
-  }.map(_.withExclusions(Vector(InclExclRule())))
+    f.libDeps
+  }.map(_.intransitive())
 
   /**
    * Override this method to specify additional plugins for this project.
