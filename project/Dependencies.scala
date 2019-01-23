@@ -80,7 +80,7 @@ object Dependencies extends blended.sbt.Dependencies {
 
 object Blended extends blended.sbt.Blended {
 
-  override def blendedVersion: String = "3.0-M2-SNAPSHOT"
+  override def blendedVersion: String = "3.1-SNAPSHOT"
 
   val mgmtUi = "de.wayofquality.blended" %% "blended.mgmt.ui.server" % "0.2-SNAPSHOT"
 

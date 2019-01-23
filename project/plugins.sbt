@@ -29,5 +29,5 @@ addSbtPlugin("de.wayofquality" % "sbt-filterresources" % "0.1.0-SNAPSHOT")
 // Contains project dependency information from blended project as sbt plugin
 //libraryDependencies ++= Seq(
 addSbtPlugin(
-  "de.wayofquality.blended" % "blended.dependencies" % "3.0-M2-SNAPSHOT"
+  "de.wayofquality.blended" % "blended.dependencies" % "3.1-SNAPSHOT"
 )
