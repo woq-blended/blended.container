@@ -32,6 +32,9 @@ pom.xml
 target/
 .bloop/
 
+# SBT files
+/.sbtopts
+
 # Eclipse settings and caches
 .project
 .classpath
