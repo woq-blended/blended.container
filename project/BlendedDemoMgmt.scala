@@ -19,13 +19,10 @@ object BlendedDemoMgmt extends ProjectFactory {
       Feature.blendedHawtio,
       Feature.blendedSpring,
       Feature.blendedActivemq,
-      Feature.blendedCamel,
-      Feature.blendedSamples,
       Feature.blendedMgmtClient,
       Feature.blendedMgmtServer,
       Feature.blendedAkkaHttp,
       Feature.blendedPersistence,
-      Feature.blendedAkkaHttpModules,
       Feature.blendedStreams,
       Feature.blendedSsl
     )

@@ -111,6 +111,8 @@ object Feature {
     FeatureBundle(dependency = Blended.akka, start = true),
     FeatureBundle(dependency = Blended.utilLogging),
     FeatureBundle(dependency = Blended.util, start = true),
+    FeatureBundle(dependency = springCore),
+    FeatureBundle(dependency = springExpression),
     FeatureBundle(dependency = Blended.containerContextApi),
     FeatureBundle(dependency = Blended.containerContextImpl, start = true),
     FeatureBundle(dependency = felixConfigAdmin, start = true),
@@ -129,9 +131,6 @@ object Feature {
     FeatureBundle(dependency = akkaSlf4j),
     FeatureBundle(dependency = akkaProtobuf),
     FeatureBundle(dependency = akkaStream),
-    //FeatureBundle(dependency = akkaActorTyped),
-    //FeatureBundle(dependency = akkaPersistence),
-    //FeatureBundle(dependency = akkaPersistenceTyped),
     FeatureBundle(dependency = domino),
     FeatureBundle(dependency = Blended.domino),
     FeatureBundle(dependency = Blended.mgmtBase, start = true),
@@ -151,7 +150,7 @@ object Feature {
       FeatureBundle(dependency = servicemixStaxApi),
       FeatureBundle(dependency = activeMqOsgi),
       FeatureBundle(dependency = Blended.activemqBrokerstarter, start = true),
-      FeatureBundle(dependency = Blended.jmsUtils, start = true),
+      FeatureBundle(dependency = Blended.jmsUtils),
       FeatureBundle(dependency = springJms)
     )
   )
@@ -166,8 +165,7 @@ object Feature {
       FeatureBundle(dependency = camelCore),
       FeatureBundle(dependency = camelSpring),
       FeatureBundle(dependency = camelJms),
-      FeatureBundle(dependency = Blended.camelUtils),
-      FeatureBundle(dependency = Blended.jmsSampler, start = true)
+      FeatureBundle(dependency = Blended.camelUtils)
     )
   )
 
@@ -336,14 +334,11 @@ object Feature {
 
   lazy val blendedSpring = Feature("blended-spring", bundles = Seq(
     FeatureBundle(dependency = aopAlliance),
-    FeatureBundle(dependency = springCore),
-    FeatureBundle(dependency = springExpression),
     FeatureBundle(dependency = springBeans),
     FeatureBundle(dependency = springAop),
     FeatureBundle(dependency = springContext),
     FeatureBundle(dependency = springContextSupport),
     FeatureBundle(dependency = springJdbc),
-    FeatureBundle(dependency = springJms),
     FeatureBundle(dependency = springTx)
   ))
 

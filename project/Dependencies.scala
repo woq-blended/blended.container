@@ -80,7 +80,7 @@ object Blended extends blended.sbt.Blended {
 
   override def blendedVersion: String = BuildHelper.readAsVersion(new File("version.txt"))
 
-  val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.2-SNAPSHOT"
+  val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.4-SNAPSHOT"
 
   //  def blended(name: String) = Def.setting(groupId %% name % version.value)
   //

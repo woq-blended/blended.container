@@ -1,6 +1,7 @@
 import sbt._
 
 inThisBuild(BuildHelper.readVersion(file("version.txt")))
+inThisBuild(sourcesInBase := false)
 
 lazy val global = Def.settings(
   Global / scalariformAutoformat := false,
