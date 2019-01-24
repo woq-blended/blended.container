@@ -24,6 +24,7 @@ lazy val blendedDockerDemoNode = BlendedDockerDemoNode.project
 lazy val blendedDockerDemoMgmt = BlendedDockerDemoMgmt.project
 lazy val blendedDockerDemoApacheds = BlendedDockerDemoApacheds.project
 lazy val blendedItestNode = BlendedItestNode.project
+lazy val blendedItestMgmt = BlendedItestMgmt.project
 
 lazy val root = {
   project
@@ -38,7 +39,9 @@ lazy val root = {
       blendedDemoMgmt,
       blendedDockerDemoNode,
       blendedDockerDemoMgmt,
-      blendedDockerDemoApacheds
+      blendedDockerDemoApacheds,
+      blendedItestNode,
+      blendedItestMgmt
     )
 
 }

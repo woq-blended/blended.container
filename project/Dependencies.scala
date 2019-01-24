@@ -42,7 +42,7 @@ object Dependencies extends blended.sbt.Dependencies {
   val geronimoJaspic = "org.apache.geronimo.specs" % "geronimo-jaspic_1.0_spec" % "1.1"
   val geronimoJ2eeMgmtSpec = "org.apache.geronimo.specs" % "geronimo-j2ee-management_1.1_spec" % "1.0.1"
 
-  val hawtioWeb = "io.hawt" % "hawtio-web" % "1.5.8" withExplicitArtifacts(Vector(Artifact("hawtio-web", `type` = "war", extension = "war")))
+  val hawtioWeb = "io.hawt" % "hawtio-web" % "1.5.8" withExplicitArtifacts (Vector(Artifact("hawtio-web", `type` = "war", extension = "war")))
 
   protected def jetty(n: String) = "org.eclipse.jetty" % s"jetty-${n}" % jettyVersion
 
@@ -66,6 +66,8 @@ object Dependencies extends blended.sbt.Dependencies {
   val jline = "org.jline" % "jline" % "3.9.0"
   val jlineBuiltins = "org.jline" % "jline-builtins" % "3.9.0"
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "3.0.1"
+
+  val lihaoyiPprint = "com.lihaoyi" %% "pprint" % "0.5.3"
 
   val reactiveStreams = "org.reactivestreams" % "reactive-streams" % "1.0.0.final"
 

@@ -89,6 +89,10 @@ class ProjectSettings(
       Keys.description := description,
       Keys.libraryDependencies ++= libDeps,
       Test / javaOptions += ("-DprojectTestOutput=" + (Test / classDirectory).value),
+
+      javaOptions += s"-Ddocker.host=${System.getProperty("docker.host", "localhost")}",
+      javaOptions += s"-Ddocker.port=${System.getProperty("docker.port", "4243")}",
+
       Test / fork := true,
       Test / parallelExecution := false,
       Compile / unmanagedResourceDirectories += baseDirectory.value / "src" / "main" / "binaryResources",

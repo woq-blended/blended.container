@@ -70,6 +70,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
   }
 
   "Upload a deployment pack to mgmt node" in logException {
+    log.debug(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
     val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
     assert(packFile.exists() === true)
 

@@ -1,27 +1,23 @@
 import java.io.File
-import java.net.URLClassLoader
 
 import scala.sys.process.Process
 
-import com.typesafe.sbt.packager.MappingsHelper
-import com.typesafe.sbt.packager.universal.{Archives, UniversalDeployPlugin, UniversalPlugin}
+import com.typesafe.sbt.packager.universal.{UniversalDeployPlugin, UniversalPlugin}
 import de.wayofquality.sbt.filterresources.FilterResources
-import de.wayofquality.sbt.filterresources.FilterResources.autoImport._
 import sbt.Keys._
 import sbt._
-import sbt.librarymanagement.{UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 
 class BlendedDockerContainer(
-                              projectName: String,
-                              description: String = null,
-                              containerDep: Option[ModuleID] = None,
-                              imageTag: String,
-                              publish: Boolean = true,
-                              projectDir: Option[String] = None,
-                              val ports: List[Int] = List(),
-                              val folder: String,
-                              overlays: List[String] = List()
-                            ) extends ProjectSettings(
+  projectName: String,
+  description: String = null,
+  containerDep: Option[ModuleID] = None,
+  imageTag: String,
+  publish: Boolean = true,
+  projectDir: Option[String] = None,
+  val ports: List[Int] = List(),
+  val folder: String,
+  overlays: List[String] = List()
+) extends ProjectSettings(
   projectName = projectName,
   description = Option(description).getOrElse(s"Docker container for container ${containerDep.getOrElse("")}"),
   features = Seq(),
@@ -82,8 +78,6 @@ class BlendedDockerContainer(
       generateDockerfile := {
         val log = streams.value.log
 
-        import java.io.File
-
         // make Dockerfile
 
         val dockerfile = dockerDir.value / "Dockerfile"
@@ -115,10 +109,12 @@ class BlendedDockerContainer(
         // trigger dockerfile
         generateDockerfile.value
 
+        log.info(s"Creating docker image ${imageTag}")
         Process(
           command = List("docker", "build", "-t", imageTag, "."),
           cwd = Some(dockerDir.value)
         ) ! log
+        log.info(s"Created docker image ${imageTag}")
 
       }
     )
