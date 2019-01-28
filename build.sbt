@@ -12,7 +12,9 @@ lazy val global = Def.settings(
   Global / useGpg := false,
   Global / pgpPublicRing := baseDirectory.value / "project" / ".gnupg" / "pubring.gpg",
   Global / pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg",
-  Global / pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray)
+  Global / pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray),
+  Global / resolvers += "SpringBundles" at "http://repository.springsource.com/maven/bundles/release",
+  Global / resolvers += "SpringExternal" at "http://repository.springsource.com/maven/bundles/external"
 )
 
 lazy val blendedLauncherFeatures = BlendedLauncherFeatures.project
