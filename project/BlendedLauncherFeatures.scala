@@ -33,7 +33,7 @@ object BlendedLauncherFeatures extends ProjectFactory {
       }
 
     // Attach feature files as artifacts
-    ) ++ (features.flatMap { feature: Feature =>
+    ) ++ features.flatMap { feature: Feature =>
 
         val a = Artifact(
           name = projectName,
@@ -54,9 +54,7 @@ object BlendedLauncherFeatures extends ProjectFactory {
             packagedArtifacts.value updated (a, file)
           }
         )
-
-      })
-
+      }
   }
 
   override val project = helper.baseProject

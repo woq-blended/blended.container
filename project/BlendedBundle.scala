@@ -28,7 +28,7 @@ object BlendedBundle {
   * A set of jars to be embedded into the bundle as JARs. Those will also be added to the `Bundle-Classpath`.
   * Example:
   * {{{
-  *                       OsgiKeys.embeddedJars := dependencyClasspath.in(Compile).value.files
+  *   OsgiKeys.embeddedJars := dependencyClasspath.in(Compile).value.files
   * }}}
   * The value is a rather complex TaskKey to support references to other tasks and settings via `.value`.
   * @param exportContents
@@ -37,17 +37,17 @@ object BlendedBundle {
   * A map with additional manifest entries.
   */
 case class BlendedBundle(
-                          bundleSymbolicName: String = null,
-                          bundleVersion: String = null,
-                          bundleActivator: String = null,
-                          importPackage: Seq[String] = Seq.empty,
-                          privatePackage: Seq[String] = Seq.empty,
-                          exportPackage: Seq[String] = Seq.empty,
-                          embeddedJars: Setting[Task[Seq[sbt.File]]] = null,
-                          exportContents: Seq[String] = Seq.empty,
-                          additionalHeaders: Map[String, String] = Map.empty,
-                          defaultImports: Boolean = true
-                        ) {
+  bundleSymbolicName: String = null,
+  bundleVersion: String = null,
+  bundleActivator: String = null,
+  importPackage: Seq[String] = Seq.empty,
+  privatePackage: Seq[String] = Seq.empty,
+  exportPackage: Seq[String] = Seq.empty,
+  embeddedJars: Setting[Task[Seq[sbt.File]]] = null,
+  exportContents: Seq[String] = Seq.empty,
+  additionalHeaders: Map[String, String] = Map.empty,
+  defaultImports: Boolean = true
+) {
 
   private[this] lazy val extraEntries: Seq[Setting[_]] = Seq(
     OsgiKeys.additionalHeaders ++= Map(

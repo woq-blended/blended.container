@@ -28,16 +28,16 @@ object BlendedDemoMgmt extends ProjectFactory {
     )
   ) {
 
-    override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      materializeDebug := false,
-      materializeExtraDeps := {
-        val file = (BlendedDemoMgmtResources.project / Universal / packageBin).value
-        val artifact = (BlendedDemoMgmtResources.project / artifacts).value.filter(a => a.`type` == "zip" && a.extension == "zip").head
-        val moduleId: ModuleID = (Blended.blendedOrganization %% (BlendedDemoMgmtResources.project / name).value % Blended.blendedVersion)
-        Seq(moduleId.artifacts(artifact) -> file)
-      }
-    )
-
+    override def settings: Seq[sbt.Setting[_]] = super.settings ++
+      Seq(
+        materializeDebug := false,
+        materializeExtraDeps := {
+          val file = (BlendedDemoMgmtResources.project / Universal / packageBin).value
+          val artifact = (BlendedDemoMgmtResources.project / artifacts).value.filter(a => a.`type` == "zip" && a.extension == "zip").head
+          val moduleId: ModuleID = (Blended.blendedOrganization %% (BlendedDemoMgmtResources.project / name).value % Blended.blendedVersion)
+          Seq(moduleId.artifacts(artifact) -> file)
+        }
+      )
   }
 
   override val project = helper.baseProject
