@@ -354,6 +354,7 @@ class BlendedContainer(
         }
     }
   }
+
 }
 
 object BlendedContainer {
@@ -377,4 +378,5 @@ object BlendedContainer {
   val packageFullNoJreTarGz = taskKey[File]("Create a product package without a JRE")
 
   val packageDeploymentPack = taskKey[File]("Create deployment pack")
+
 }

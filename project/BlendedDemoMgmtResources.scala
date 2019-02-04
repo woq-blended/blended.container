@@ -25,7 +25,7 @@ object BlendedDemoMgmtResources extends ProjectFactory {
 
 
       super.settings ++ Seq(
-        
+
         Universal / topLevelDirectory := None,
 
         // Use default mapping (from JAR) for ZIP

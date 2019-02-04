@@ -65,15 +65,13 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
       assert(remoteContState.size >= 3)
       remoteContState
     }
-    // TODO: profile names should contain scala qualifier ?
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.mgmt")).size == 1)
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node")).size == 2)
+    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.mgmt_2.12")).size == 1)
+    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12")).size == 2)
   }
 
   "Upload a deployment pack to mgmt node" in logException {
     log.debug(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
-    // TODO: resolve deployment artifact name correctly
-    val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node-3.1-SNAPSHOT-deploymentpack.zip")
+    val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
     assert(packFile.exists() === true)
 
     val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
@@ -89,7 +87,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
     assert(rcs.size >= 1)
-    assert(rcs.find(_.name == "blended.demo.node").isDefined)
+    assert(rcs.find(_.name == "blended.demo.node_2.12").isDefined)
   }
 
   "Upload two overlays to mgmt node" in logException {
