@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
  * This Spec contains mostly test setup and teardown logic.
  * The real test cases are nested in [[nestedSuites]].
  */
-class BlendedDemoIntegrationSpec
+class BlendedDemoMgmtIntegrationSpec
   extends RefSpec
   with BeforeAndAfterAll
   with BlendedIntegrationTestSupport {
@@ -26,14 +26,14 @@ class BlendedDemoIntegrationSpec
   private implicit val testkit : TestKit = new TestKit(system)
   private implicit val eCtxt : ExecutionContext = testkit.system.dispatcher
 
-  private[this] val log = Logger[BlendedDemoIntegrationSpec]
+  private[this] val log = Logger[BlendedDemoMgmtIntegrationSpec]
 
   /**
    * Timeout in which we wait for container ready (before nested tests).
    * Also used when stopping containers.
    */
   private[this] implicit val timeout : Timeout = Timeout(180.seconds)
-  private[this] val ctProxy = system.actorOf(TestContainerProxy.props(timeout.duration))
+  private[this] val ctProxy = system.actorOf(TestMgmtContainerProxy.props(timeout.duration))
 
   private[this] val cuts : Map[String, ContainerUnderTest] = {
     log.info(s"Using testkit [$testkit]")
@@ -41,7 +41,7 @@ class BlendedDemoIntegrationSpec
     Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
   }
 
-  override def nestedSuites : IndexedSeq[TestSuite] = IndexedSeq(new BlendedDemoSpec())
+  override def nestedSuites : IndexedSeq[TestSuite] = IndexedSeq(new BlendedDemoMgmtSpec())
 
   override def afterAll() {
     log.info("Running afterAll...")

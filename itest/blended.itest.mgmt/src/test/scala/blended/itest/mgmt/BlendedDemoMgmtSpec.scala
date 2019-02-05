@@ -23,7 +23,7 @@ import org.scalatest.{DoNotDiscover, Matchers}
 import prickle.Unpickle
 
 @DoNotDiscover
-class BlendedDemoSpec()(implicit testKit: TestKit)
+class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
   extends LoggingFreeSpec
   with Matchers
   with TestFile {
@@ -33,7 +33,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
   implicit val eCtxt = testKit.system.dispatcher
   implicit val scheduler = testKit.system.scheduler
 
-  private[this] val log = Logger[BlendedDemoSpec]
+  private[this] val log = Logger[BlendedDemoMgmtSpec]
 
   private val scalaBinVersion = "2.12"
 
@@ -42,7 +42,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
   implicit val backend = HttpURLConnectionBackend()
 
   def mgmtRequest(path: String) = {
-    val uri = s"${TestContainerProxy.mgmtHttp}${path}"
+    val uri = s"${TestMgmtContainerProxy.mgmtHttp}${path}"
     log.debug(s"Using uri: ${uri}")
     val request = sttp.sttp.get(uri"${uri}")
     val response = request.send()
@@ -76,7 +76,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     val packFile = new File(BlendedTestSupport.projectTestOutput, s"blended.demo.node_${scalaBinVersion}-deploymentpack.zip")
     assert(packFile.exists() === true)
 
-    val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
+    val uploadUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
     log.info(s"Uploading to: ${uploadUrl}")
     val uploadResponse = sttp.sttp.
       post(uri"${uploadUrl}").
@@ -116,7 +116,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
         |""".stripMargin
     val overlayConfig2 = OverlayConfigCompanion.read(ConfigFactory.parseString(o2)).get
 
-    val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/overlayConfig"
+    val uploadUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/overlayConfig"
     val uploadResponse1 = sttp.sttp.
       body(Pickle.intoString(overlayConfig1)).
       header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
@@ -187,7 +187,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
       containerIds = List(id1)
     )
 
-    val rolloutUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/rollout/profile"
+    val rolloutUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/rollout/profile"
     log.info(s"Using rollout uri [${rolloutUrl}] with body [${pp(rollout)}]")
     val response = sttp.sttp
       .post(uri"${rolloutUrl}")
@@ -253,7 +253,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
       overlays = Set(OverlayRef(name = rCtx.overlayName, version = rCtx.overlayVersion))
     )
 
-    val activateUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/container/${rCtx.containerId}/update"
+    val activateUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/container/${rCtx.containerId}/update"
     log.info(s"Using activate uri [${activateUrl}] with body [${pp(activateProfile)}]")
     val response = sttp.sttp
       .post(uri"${activateUrl}")
