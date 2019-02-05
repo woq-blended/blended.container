@@ -114,7 +114,7 @@ class BlendedDockerContainer(
         Process(
           command = List("docker", "build", "-t", imageTag, "."),
           cwd = Some(dockerDir.value)
-        ) !;
+        ) ! log
         log.info(s"Created docker image ${imageTag}")
 
       }

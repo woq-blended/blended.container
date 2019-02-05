@@ -309,6 +309,8 @@ class BlendedContainer(
 
         validateMapping(mapping, streams.value.log)
 
+        IO.delete(target.value / s"${outputName}.zip")
+
         Archives.makeZip(
           target = target.value,
           name = outputName,

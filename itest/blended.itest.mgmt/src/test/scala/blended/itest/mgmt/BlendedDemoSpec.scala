@@ -35,6 +35,8 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
 
   private[this] val log = Logger[BlendedDemoSpec]
 
+  private val scalaBinVersion = "2.12"
+
   private[this] val dockerHost = system.settings.config.getString("docker.host")
 
   implicit val backend = HttpURLConnectionBackend()
@@ -55,7 +57,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     assert(response.body.isRight)
   }
 
-  "Mgmt container sees node containers" in logException {
+  "Mgmt container sees 2 node containers" in logException {
     val rcs = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
       val body = response.body.right.get
@@ -65,17 +67,17 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
       assert(remoteContState.size >= 3)
       remoteContState
     }
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.mgmt_2.12")).size == 1)
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12")).size == 2)
+    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.mgmt_${scalaBinVersion}")).size == 1)
+    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}")).size == 2)
   }
 
   "Upload a deployment pack to mgmt node" in logException {
-    log.debug(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
-    val packFile = new File(BlendedTestSupport.projectTestOutput, "blended.demo.node_2.12-deploymentpack.zip")
+    log.info(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
+    val packFile = new File(BlendedTestSupport.projectTestOutput, s"blended.demo.node_${scalaBinVersion}-deploymentpack.zip")
     assert(packFile.exists() === true)
 
     val uploadUrl = s"${TestContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
-    log.debug(s"Uploading to: ${uploadUrl}")
+    log.info(s"Uploading to: ${uploadUrl}")
     val uploadResponse = sttp.sttp.
       post(uri"${uploadUrl}").
       auth.basic("itest", "secret").
@@ -87,7 +89,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
     assert(rcs.size >= 1)
-    assert(rcs.find(_.name == "blended.demo.node_2.12").isDefined)
+    assert(rcs.find(_.name == s"blended.demo.node_${scalaBinVersion}").isDefined)
   }
 
   "Upload two overlays to mgmt node" in logException {
@@ -155,7 +157,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     }
 
     // we need 2 node containers
-    val nodeRcs = containers.filter(_.containerInfo.profiles.map(_.name).contains("blended.demo.node_2.12"))
+    val nodeRcs = containers.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}"))
     val containerIds = nodeRcs.map(_.containerInfo.containerId)
     assert(containerIds.size === 2)
     log.info("All node containers: " + dumpProfiles(nodeRcs.map(_.containerInfo)))
@@ -169,7 +171,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
     assert(rcs.size >= 1)
 
     // the new profile to apply
-    val profile = rcs.find(_.name == "blended.demo.node_2.12").get
+    val profile = rcs.find(_.name == s"blended.demo.node_${scalaBinVersion}").get
 
     val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
     val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
@@ -212,7 +214,7 @@ class BlendedDemoSpec()(implicit testKit: TestKit)
       log.debug(s"profiles of node under test: [${pp(profiles)}]")
 
       val updatedProfile = profiles.find(p =>
-        p.name == "blended.demo.node_2.12" &&
+        p.name == s"blended.demo.node_${scalaBinVersion}" &&
           p.overlays.exists(o => o.name == overlayName))
       assert(updatedProfile.isDefined)
     }
