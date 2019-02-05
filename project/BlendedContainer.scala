@@ -6,7 +6,7 @@ import de.wayofquality.sbt.filterresources.FilterResources
 import de.wayofquality.sbt.filterresources.FilterResources.autoImport._
 import sbt._
 import sbt.Keys._
-import sbt.librarymanagement.{UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
+import sbt.librarymanagement.{Constant, UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 import com.typesafe.sbt.packager.universal.{Archives, UniversalDeployPlugin, UniversalPlugin, ZipHelper}
 
 class BlendedContainer(
@@ -271,12 +271,12 @@ class BlendedContainer(
       packageFullNoJreZip := {
         validateMapping(packageFullNoJreMapping.value, streams.value.log)
 
-        val outputName = s"${projectName}-${version.value}-full-nojre"
+        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-full-nojre"
         Archives.makeZip(
           target = target.value,
           name = outputName,
           mappings = packageFullNoJreMapping.value,
-          top = Some(s"${projectName}-${version.value}"),
+          top = Some(s"${projectName}_${scalaBinaryVersion.value}-${version.value}"),
           options = Nil
         )
       },
@@ -284,12 +284,12 @@ class BlendedContainer(
       packageFullNoJreTarGz := {
         validateMapping(packageFullNoJreMapping.value, streams.value.log)
 
-        val outputName = s"${projectName}-${version.value}-full-nojre"
+        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-full-nojre"
         Archives.makeTarball(Archives.gzip, ".tar.gz")(
           target = target.value,
           name = outputName,
           mappings = packageFullNoJreMapping.value,
-          top = Some(s"${projectName}-${version.value}")
+          top = Some(s"${projectName}_${scalaBinaryVersion.value}-${version.value}")
         )
       },
 
@@ -299,7 +299,7 @@ class BlendedContainer(
         // trigger
         materializeProfile.value
 
-        val outputName = s"${projectName}-${version.value}-deploymentpack"
+        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-deploymentpack"
         val profileDir = materializeTargetDir.value
         val mapping =
           Seq(profileDir / "profile.conf" -> "profile.conf") ++
@@ -337,7 +337,8 @@ class BlendedContainer(
   def moduleIdToGav(dep: ModuleID): String = {
     val optExt = dep.explicitArtifacts.headOption.map { a => a.extension }
     val optClassifier = dep.explicitArtifacts.headOption.flatMap(a => a.classifier).filter(_ != "jar")
-    s"${dep.organization}:${dep.name}:${optClassifier.getOrElse("")}:${dep.revision}:${optExt.getOrElse("jar")}"
+
+    s"${dep.organization}:${dep.name}${BuildHelper.artifactNameSuffix(dep)}:${optClassifier.getOrElse("")}:${dep.revision}:${optExt.getOrElse("jar")}"
   }
 
   def validateMapping(mapping: Seq[(File, String)], log: Logger): Unit = {

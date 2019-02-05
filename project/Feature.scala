@@ -1,4 +1,5 @@
 import sbt._
+import sbt.librarymanagement.Constant
 
 case class Feature(name: String, features: Seq[Feature] = Seq(), bundles: Seq[FeatureBundle]) {
 
@@ -41,6 +42,9 @@ case class FeatureBundle(
     builder.append(dependency.organization)
     builder.append(":")
     builder.append(dependency.name)
+
+    builder.append(BuildHelper.artifactNameSuffix(dependency))
+
     builder.append(":")
 
     // if true, we render the long form with 5 parts (4 colons) instead of 3 parts (2 colons)

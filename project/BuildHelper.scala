@@ -9,7 +9,7 @@ import sbt.Keys._
 import sbt.io.{IO, Using}
 import sbt.librarymanagement._
 import sbt.librarymanagement.ivy._
-import sbt.{Def, File}
+import sbt.{Binary, Def, File}
 
 object BuildHelper {
 
@@ -60,9 +60,9 @@ object BuildHelper {
       val tar = new TarArchiveInputStream(gi)
 
       var entry = tar.getNextTarEntry()
-      while(entry != null) {
+      while (entry != null) {
         val file = new File(targetDir + "/" + entry.getName())
-        if(entry.isDirectory()) {
+        if (entry.isDirectory()) {
           file.mkdirs()
         } else {
           val size = entry.getSize().intValue()
@@ -81,6 +81,18 @@ object BuildHelper {
     } finally {
       fi.close()
     }
+  }
+
+  /**
+    *
+    * @param moduleID
+    * @param scalaBinVersion We hard-code the default, to avoid to make this def a sbt setting.
+    * @return
+    */
+  def artifactNameSuffix(moduleID: ModuleID, scalaBinVersion: String = "2.12"): String = moduleID.crossVersion match {
+    case b: Binary => s"_${b.prefix}${scalaBinVersion}${b.suffix}"
+    case c: Constant => s"_${c.value}"
+    case _ => ""
   }
 
 }

@@ -1,5 +1,5 @@
 import sbt._
-
+import sbt.Keys._
 
 object BlendedDockerDemoMgmt extends ProjectFactory {
 
@@ -15,7 +15,7 @@ object BlendedDockerDemoMgmt extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      BlendedDockerContainer.containerImage := s"blended.demo.mgmt-${Blended.blendedVersion}" -> (BlendedDemoMgmt.project / BlendedContainer.packageFullNoJreTarGz).value
+      BlendedDockerContainer.containerImage := s"blended.demo.mgmt_${scalaBinaryVersion.value}-${Blended.blendedVersion}" -> (BlendedDemoMgmt.project / BlendedContainer.packageFullNoJreTarGz).value
     )
 
   }
