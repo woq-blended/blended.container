@@ -66,14 +66,14 @@ class BlendedDockerContainer(
 
       dockerDir := target.value / "docker",
 
-      unpackContainer := {
-        val log = streams.value.log
-
-        val file = containerImage.value._2
-        val destDir = dockerDir.value / "image"
-        BuildHelper.unpackTarGz(file, destDir)
-        destDir
-      },
+      //      unpackContainer := {
+      //        val log = streams.value.log
+      //
+      //        val file = containerImage.value._2
+      //        val destDir = dockerDir.value / "image"
+      //        BuildHelper.unpackTarGz(file, destDir)
+      //        destDir
+      //      },
 
       generateDockerfile := {
         val log = streams.value.log
@@ -104,16 +104,17 @@ class BlendedDockerContainer(
       createDockerImage := {
         val log = streams.value.log
 
-        IO.copyFile(containerImage.value._2, dockerDir.value / containerImage.value._2.getName())
-
-        // trigger dockerfile
+        // trigger dockerfile generator
         generateDockerfile.value
+
+        // copy container pack into docker dir
+        IO.copyFile(containerImage.value._2, dockerDir.value / containerImage.value._2.getName())
 
         log.info(s"Creating docker image ${imageTag}")
         Process(
           command = List("docker", "build", "-t", imageTag, "."),
           cwd = Some(dockerDir.value)
-        ) ! log
+        ) !;
         log.info(s"Created docker image ${imageTag}")
 
       }
@@ -149,6 +150,6 @@ object BlendedDockerContainer {
   val dockerDir = settingKey[File]("The base directory for the docker image content")
   val containerImage = taskKey[(String, File)]("The container image and it's folder name")
   val generateDockerfile = taskKey[File]("Generate to dockerfile")
-  val unpackContainer = taskKey[File]("Unpack the container archive")
+  //  val unpackContainer = taskKey[File]("Unpack the container archive")
   val createDockerImage = taskKey[Unit]("Create the docker image")
 }

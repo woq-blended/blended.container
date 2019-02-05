@@ -39,6 +39,8 @@ class BlendedContainer(
   override def settings: Seq[sbt.Setting[_]] = super.settings ++ {
 
     Seq(
+      profileName := s"${projectName}_${scalaBinaryVersion.value}",
+
       Compile / packageBin / publishArtifact := false,
       Compile / packageDoc / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false,
@@ -47,7 +49,7 @@ class BlendedContainer(
       Compile / filterTargetDir := target.value / "filteredResources",
       Compile / filterProperties := Map(
         "profile.version" -> version.value,
-        "profile.name" -> projectName,
+        "profile.name" -> profileName.value,
         "blended.version" -> Blended.blendedVersion
       ),
       Compile / filterResourcesFailOnMissingMatch := false,
@@ -150,7 +152,6 @@ class BlendedContainer(
         val libDeps: Seq[ModuleID] = (Compile / libraryDependencies).value
         val artifactArgs = libDeps.flatMap { dep: ModuleID =>
           val gav = moduleIdToGav(dep)
-
           val updateConfiguration = UpdateConfiguration()
           val unresolvedWarningConfiguration = UnresolvedWarningConfiguration()
 
@@ -262,21 +263,21 @@ class BlendedContainer(
           filter(_._2 != "etc/logback.xml") ++
           PathFinder(containerResources).allPaths.pair(MappingsHelper.relativeTo(containerResources)) ++
           PathFinder(profileDir).allPaths.pair(
-            f => IO.relativize(profileDir, f).map(p => s"profiles/${projectName}/${version.value}/${p}")
+            f => IO.relativize(profileDir, f).map(p => s"profiles/${profileName.value}/${version.value}/${p}")
           ) ++
-            Seq(profileDir -> s"profiles/${projectName}/${version.value}") ++
+            Seq(profileDir -> s"profiles/${profileName.value}/${version.value}") ++
             materializeLaunchConf.value.toList.map(f => f -> f.getName())
       },
 
       packageFullNoJreZip := {
         validateMapping(packageFullNoJreMapping.value, streams.value.log)
 
-        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-full-nojre"
+        val outputName = s"${profileName.value}-${version.value}-full-nojre"
         Archives.makeZip(
           target = target.value,
           name = outputName,
           mappings = packageFullNoJreMapping.value,
-          top = Some(s"${projectName}_${scalaBinaryVersion.value}-${version.value}"),
+          top = Some(s"${profileName.value}-${version.value}"),
           options = Nil
         )
       },
@@ -284,12 +285,12 @@ class BlendedContainer(
       packageFullNoJreTarGz := {
         validateMapping(packageFullNoJreMapping.value, streams.value.log)
 
-        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-full-nojre"
+        val outputName = s"${profileName.value}-${version.value}-full-nojre"
         Archives.makeTarball(Archives.gzip, ".tar.gz")(
           target = target.value,
           name = outputName,
           mappings = packageFullNoJreMapping.value,
-          top = Some(s"${projectName}_${scalaBinaryVersion.value}-${version.value}")
+          top = Some(s"${profileName.value}-${version.value}")
         )
       },
 
@@ -299,7 +300,7 @@ class BlendedContainer(
         // trigger
         materializeProfile.value
 
-        val outputName = s"${projectName}_${scalaBinaryVersion.value}-${version.value}-deploymentpack"
+        val outputName = s"${profileName.value}-${version.value}-deploymentpack"
         val profileDir = materializeTargetDir.value
         val mapping =
           Seq(profileDir / "profile.conf" -> "profile.conf") ++
@@ -359,6 +360,9 @@ class BlendedContainer(
 }
 
 object BlendedContainer {
+
+  val profileName = settingKey[String]("The profile name")
+
   val unpackLauncherZip = taskKey[File]("Unpack the launcher ZIP")
 
   val materializeDebug = settingKey[Boolean]("Enable debug mode")
