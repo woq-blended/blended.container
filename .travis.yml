@@ -8,6 +8,8 @@ cache:
   - "$HOME/.m2"
   - "$HOME/.ivy2"
 
+CACHE_NAME=repos
+
 before_cache:
   - rm -Rf $HOME/.ivy2/.sbt.cache.lock
   - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
