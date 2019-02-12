@@ -8,8 +8,6 @@ cache:
   - "$HOME/.m2"
   - "$HOME/.ivy2"
 
-CACHE_NAME=repos
-
 before_cache:
   - rm -Rf $HOME/.ivy2/.sbt.cache.lock
   - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
@@ -20,16 +18,23 @@ env:
 matrix:
   include:
     - stage: Prerequisites (level -2)
-      env: BUILD_COMMAND="sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
+      # env: BUILD_COMMAND="sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
+      script: sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources
 
     - stage: Prerequisites (level -1)
-      env: BUILD_COMMAND="sh -e scripts/build-prereq.sh blended"
+      # env: BUILD_COMMAND="sh -e scripts/build-prereq.sh blended"
+      script: sh -e scripts/build-prereq.sh blended
 
     - stage: Build
-      env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt publishLocal"
+      # env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt publishLocal"
+      script:
+        - "$BUILD_DOCKER_BASE"
+        - sbt publishLocal
 
     - stage: Test
-      env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt test"
+      # env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt test"
+      script:
+        - "$BUILD_DOCKER_BASE"
+        - sbt test
 
-script:
-  - "$BUILD_COMMAND"
+script: echo "No script specified"
