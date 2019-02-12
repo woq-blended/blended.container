@@ -13,13 +13,13 @@ before_cache:
 
 matrix:
   include:
-    - stage: Prerequisites (level -3)
+    - stage: Prerequisites (level -3): blended sbt plugins
       script:
         - sh -e scripts/build-prereq.sh sbt-testlogconfig
         - sh -e scripts/build-prereq.sh sbt-jbake
         - sh -e scripts/build-prereq.sh sbt-filterresources
 
-    - stage: Prerequisites (level -2)
+    - stage: Prerequisites (level -2): blended core
       script: sh -e scripts/build-prereq.sh blended
 
     - stage: Prerequisites (level -1)
