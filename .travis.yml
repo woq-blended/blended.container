@@ -8,6 +8,7 @@ cache:
   - "$HOME/.ivy2"
 
 before_cache:
+  - rm -Rf $HOME/.ivy2/.sbt.cache.lock
   - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
 
 env:
@@ -16,10 +17,10 @@ env:
 matrix:
   include:
     - stage: Prerequisites (level -2)
-      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
+      env: BUILD_COMMAND="sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
 
     - stage: Prerequisites (level -1)
-      env: BUILD_COMMAND="sh scripts/build-prereq.sh blended"
+      env: BUILD_COMMAND="sh -e scripts/build-prereq.sh blended"
 
     - stage: Build
       env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt publishLocal"
