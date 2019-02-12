@@ -1,0 +1,19 @@
+language: scala
+
+services:
+  - docker
+
+before_script:
+  - (cd docker/blended.docker.base/files && wget https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz)
+  - (cd docker/blended.docker.base && docker build -t atooni/blended-base .)
+
+matrix:
+  include:
+    - stage: Build
+      env: BUILD_COMMAND="sbt publishLocal"
+
+    - stage: Test
+      env: BUILD_COMMAND="sbt test"
+
+script:
+  - "$BUILD_COMMAND"
