@@ -21,19 +21,19 @@ script: echo "No script specified" && false
 
 matrix:
   include:
-    - stage: Prerequisites (level -3)  blended sbt plugins
+    - stage: Prerequisites (level -4) blended sbt plugins
       script:
         - sh -e scripts/build-prereq.sh sbt-testlogconfig
         - sh -e scripts/build-prereq.sh sbt-jbake
         - sh -e scripts/build-prereq.sh sbt-filterresources
 
-    - stage: Prerequisites (level -2)  blended core
+    - stage: Prerequisites (level -3) blended core
       script: sh -e scripts/build-prereq.sh blended
 
-    - stage: Prerequisites (level -1)
+    - stage: Prerequisites (level -2) blended.itestsupport
       script: sh -e scripts/build-prereq.sh blended.itestsupport
 
-    - stage: Prerequisites (level -1)
+    - stage: Prerequisites (level -1) blended.mgmt.ui
       script: sh -e scripts/build-prereq.sh blended.mgmt.ui
 
     - stage: Build
