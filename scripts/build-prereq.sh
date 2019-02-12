@@ -10,7 +10,7 @@ publishLocal() {
     "$REPO" "$REPODIR"
   cd "$REPODIR"
   echo "Building and (local) publishing ${REPO}..."
-  sbt publishLocal publishM2
+  sbt publishLocal
   cd "${TRAVIS_BUILD_DIR}"
 }
 
