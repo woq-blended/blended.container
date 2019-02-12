@@ -5,36 +5,30 @@ services:
 
 cache:
   directories:
-  - "$HOME/.m2"
-  - "$HOME/.ivy2"
+    - "$HOME/.ivy2"
 
 before_cache:
   - rm -Rf $HOME/.ivy2/.sbt.cache.lock
   - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
 
-env:
-  BUILD_DOCKER_BASE="wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz && docker build -t atooni/blended-base docker/blended.docker.base"
-
 matrix:
   include:
     - stage: Prerequisites (level -2)
-      # env: BUILD_COMMAND="sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
       script: sh -e scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources
 
     - stage: Prerequisites (level -1)
-      # env: BUILD_COMMAND="sh -e scripts/build-prereq.sh blended"
       script: sh -e scripts/build-prereq.sh blended
 
     - stage: Build
-      # env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt publishLocal"
       script:
-        - "$BUILD_DOCKER_BASE"
+        - wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz
+        - docker build -t atooni/blended-base docker/blended.docker.base
         - sbt publishLocal
 
     - stage: Test
-      # env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt test"
       script:
-        - "$BUILD_DOCKER_BASE"
+        - wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz
+        - docker build -t atooni/blended-base docker/blended.docker.base
         - sbt test
 
-script: echo "No script specified"
+script: echo "No script specified" && false
