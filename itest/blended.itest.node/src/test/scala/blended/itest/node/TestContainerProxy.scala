@@ -14,23 +14,23 @@ class TestContainerProxy(timeout: FiniteDuration)
   extends DockerbasedTestconnectorSetup
   with TestConnectorSetup {
 
-  private[this] val dockerHost : String = context.system.settings.config.getString("docker.host")
+  private[this] val testHost : String = context.system.settings.config.getString("test.host")
 
   override def configure(cuts: Map[String, ContainerUnderTest]): Unit = {
 
     implicit val system : ActorSystem = context.system
 
     // The url for the internal connection factory
-    val internal : String = cuts("node_0").url("internal", dockerHost, "tcp")
+    val internal : String = cuts("node_0").url("internal", testHost, "tcp")
 
     // The url for the external connection factory
-    val external : String = cuts("node_0").url("external", dockerHost, "tcp")
+    val external : String = cuts("node_0").url("external", testHost, "tcp")
 
     // the url to jolokia for REST JMX queries
-    val jmxRest : String = s"${cuts("node_0").url("http", dockerHost, "http")}/hawtio/jolokia"
+    val jmxRest : String = s"${cuts("node_0").url("http", testHost, "http")}/hawtio/jolokia"
 
     // the url to the ldap server
-    val ldapUrl : String = cuts("apacheds_0").url("ldap", dockerHost, "ldap")
+    val ldapUrl : String = cuts("apacheds_0").url("ldap", testHost, "ldap")
 
     val internalCf : IdAwareConnectionFactory = SimpleIdAwareConnectionFactory(
       vendor = "activemq",
