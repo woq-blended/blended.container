@@ -41,7 +41,7 @@ class BlendedContainer(
     Seq(
       profileName := s"${projectName}_${scalaBinaryVersion.value}",
 
-      Compile / packageBin / publishArtifact := false,
+      // Compile / packageBin / publishArtifact := false,
       Compile / packageDoc / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false,
 
