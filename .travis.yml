@@ -3,17 +3,35 @@ language: scala
 services:
   - docker
 
-before_script:
-  - (cd docker/blended.docker.base/files && wget https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz)
-  - (cd docker/blended.docker.base && docker build -t atooni/blended-base .)
+cache:
+  directories:
+  - "$HOME/.ivy2"
+
+before_cache:
+  - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
+
+env:
+  BUILD_DOCKER_BASE="wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz && docker build -t atooni/blended-base docker/blended.docker.base"
 
 matrix:
   include:
+    - stage: Prerequisites (level -2)
+      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-testlogconfig"
+
+    - stage: Prerequisites (level -2)
+      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-jbake"
+
+    - stage: Prerequisites (level -2)
+      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-filterresources"
+
+    - stage: Prerequisites (level -1)
+      env: BUILD_COMMAND="sh scripts/build-prereq.sh blended"
+
     - stage: Build
-      env: BUILD_COMMAND="sbt publishLocal"
+      env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt publishLocal"
 
     - stage: Test
-      env: BUILD_COMMAND="sbt test"
+      env: BUILD_COMMAND="$BUILD_DOCKER_BASE && sbt test"
 
 script:
   - "$BUILD_COMMAND"
