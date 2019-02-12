@@ -14,4 +14,6 @@ publishLocal() {
   cd "${TRAVIS_BUILD_DIR}"
 }
 
-publishLocal "$@"
+for repo in "$@"; do
+  publishLocal "$repo"
+done

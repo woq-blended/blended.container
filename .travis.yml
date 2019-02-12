@@ -16,13 +16,7 @@ env:
 matrix:
   include:
     - stage: Prerequisites (level -2)
-      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-testlogconfig"
-
-    - stage: Prerequisites (level -2)
-      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-jbake"
-
-    - stage: Prerequisites (level -2)
-      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-filterresources"
+      env: BUILD_COMMAND="sh scripts/build-prereq.sh sbt-testlogconfig sbt-jbake sbt-filterresources"
 
     - stage: Prerequisites (level -1)
       env: BUILD_COMMAND="sh scripts/build-prereq.sh blended"
