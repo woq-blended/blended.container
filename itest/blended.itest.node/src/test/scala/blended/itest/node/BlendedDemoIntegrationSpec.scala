@@ -1,17 +1,17 @@
 package blended.itest.node
 
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
-import scala.util.{Failure, Success}
-
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.itestsupport.BlendedIntegrationTestSupport
+import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
 import org.scalatest.refspec.RefSpec
 import org.scalatest.{BeforeAndAfterAll, Suite}
+
+import scala.collection.immutable.IndexedSeq
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
+import scala.util.{Failure, Success}
 
 class BlendedDemoIntegrationSpec
   extends RefSpec
@@ -26,6 +26,12 @@ class BlendedDemoIntegrationSpec
 
   private[this] implicit val timeout : Timeout = Timeout(300.seconds)
   private[this] val ctProxy = system.actorOf(TestContainerProxy.props(timeout.duration))
+
+  private[this] val cuts : Map[String, ContainerUnderTest] = {
+    log.info(s"Using testkit [$testkit]")
+    startContainers(ctProxy)(timeout, testkit)
+    Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
+  }
 
   override def nestedSuites : IndexedSeq[Suite] = IndexedSeq(
     new BlendedDemoSpec()
