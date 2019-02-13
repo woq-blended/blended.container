@@ -37,8 +37,6 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
   private val scalaBinVersion = "2.12"
 
-  private[this] val dockerHost = system.settings.config.getString("docker.host")
-
   implicit val backend = HttpURLConnectionBackend()
 
   def mgmtRequest(path: String) = {
