@@ -1,5 +1,6 @@
 import sbt.Keys._
 import sbt._
+import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
 
 object BlendedItestNode extends ProjectFactory {
 
@@ -34,6 +35,9 @@ object BlendedItestNode extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
+
+      Test / testlogDefaultLevel := "debug",
+
       Test / resourceGenerators += Def.task {
         // trigger docker containers
         (BlendedDockerDemoNode.project / BlendedDockerContainer.createDockerImage).value
