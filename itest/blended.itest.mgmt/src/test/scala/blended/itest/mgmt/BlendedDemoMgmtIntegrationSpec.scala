@@ -35,6 +35,7 @@ class BlendedDemoMgmtIntegrationSpec
   private[this] implicit val timeout : Timeout = Timeout(180.seconds)
   private[this] val ctProxy = system.actorOf(TestMgmtContainerProxy.props(timeout.duration))
 
+  /** Even when unused, this one triggers the container start. */
   private[this] val cuts : Map[String, ContainerUnderTest] = {
     log.info(s"Using testkit [$testkit]")
     startContainers(ctProxy)(timeout, testkit)
