@@ -22,6 +22,7 @@ object BlendedItestMgmt extends ProjectFactory {
       Dependencies.scalatest % "test",
       Dependencies.akkaActor % "test",
       Dependencies.akkaStream % "test",
+      Dependencies.akkaStreamTestkit % "test",
       Dependencies.slf4j % "test",
       Dependencies.akkaSlf4j % "test",
       Dependencies.logbackClassic % "test",
