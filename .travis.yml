@@ -5,8 +5,9 @@ services:
 
 cache:
   directories:
-    - "$HOME/.ivy2"
     - ".prereq-refs"
+    - "$HOME/.ivy2"
+    - "$HOME/.sbt"
 
 before_cache:
   - rm -Rf $HOME/.ivy2/.sbt.cache.lock
