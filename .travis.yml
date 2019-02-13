@@ -38,6 +38,7 @@ matrix:
     - stage: Build
       name: Build and publish local
       script:
+        - docker info
         - wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz
         - docker build -t atooni/blended-base docker/blended.docker.base
         - sbt publishLocal
@@ -45,6 +46,7 @@ matrix:
     - stage: Test
       name: Test Node container
       script:
+        - docker info
         - wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz
         - docker build -t atooni/blended-base docker/blended.docker.base
         - echo -e "-Pdocker.host=${DOCKER_HOST}\n-Pdocker.port=${DOCKER_PORT}\n" > .sbtopts
@@ -53,6 +55,7 @@ matrix:
     - stage: Test
       name: Test Mgmt container
       script:
+        - docker info
         - wget -P docker/blended.docker.base/files/ https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz
         - docker build -t atooni/blended-base docker/blended.docker.base
         - echo -e "-Pdocker.host=${DOCKER_HOST}\n-Pdocker.port=${DOCKER_PORT}\n" > .sbtopts
