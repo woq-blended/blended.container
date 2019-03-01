@@ -1,0 +1,7 @@
+-J-Xmx8192m
+-J-XX:MaxMetaspaceSize=4096m
+-Dlog4j2.disable.jmx=true
+-Dlog4j.shutdownHookEnabled=false
+-Ddocker.host=localhost
+-Ddocker.port=2375
+
