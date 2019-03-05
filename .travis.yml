@@ -58,7 +58,7 @@ jobs:
         - docker info
         - docker build -t atooni/blended-base docker/blended.docker.base
         - echo -e "-Ddocker.host=${DOCKER_HOST}\n-Ddocker.port=${DOCKER_PORT}\n" > .sbtopts
-        - sbt blendedItestNode/test || (cat target/testlog/blended.itest.node-test.log | grep -v org.apache.http; false)
+        - sbt blendedItestNode/test || (echo "Test failed. Node log:"; cat target/testlog/blended.itest.node-test.log | grep -v org.apache.http; false)
 
     - stage: Test
       name: Test Mgmt container
@@ -66,5 +66,5 @@ jobs:
         - docker info
         - docker build -t atooni/blended-base docker/blended.docker.base
         - echo -e "-Ddocker.host=${DOCKER_HOST}\n-Ddocker.port=${DOCKER_PORT}\n" > .sbtopts
-        - sbt blendedItestMgmt/test || (cat target/testlog/blended.itest.mgmt-test.log | grep -v org.apache.http; false)
+        - sbt blendedItestMgmt/test || (echo "Test failed. Mgmt log:"; cat target/testlog/blended.itest.mgmt-test.log | grep -v org.apache.http; false)
 
