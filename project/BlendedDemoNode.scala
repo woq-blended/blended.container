@@ -1,9 +1,8 @@
+import blended.sbt.container.BlendedContainerPlugin.autoImport._
+import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
 import sbt.Keys._
 import sbt._
-import BlendedContainer._
-
-import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
 
 object BlendedDemoNode extends ProjectFactory {
 
@@ -17,6 +16,7 @@ object BlendedDemoNode extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
+      blendedVersion := Blended.blendedVersion,
       materializeDebug := true,
       materializeExtraDeps += {
         val file = (BlendedDemoNodeResources.project / Universal / packageBin).value

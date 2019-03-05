@@ -1,6 +1,7 @@
 import sbt._
 import sbt.Keys._
 import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
+import blended.sbt.container.BlendedContainerPlugin.autoImport._
 
 object BlendedItestMgmt extends ProjectFactory {
 
@@ -49,7 +50,7 @@ object BlendedItestMgmt extends ProjectFactory {
         (BlendedDockerDemoMgmt.project / BlendedDockerContainer.createDockerImage).value
 
         // copy deploymentpack used in a test case
-        val packFile = (BlendedDemoNode.project / BlendedContainer.packageDeploymentPack).value
+        val packFile = (BlendedDemoNode.project / packageDeploymentPack).value
 
         // As we want to rename it, we must copy it, BUT
         // it is essential, that we don't copy under the final resources directory,

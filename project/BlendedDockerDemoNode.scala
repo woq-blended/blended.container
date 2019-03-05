@@ -1,5 +1,6 @@
 import sbt._
 import sbt.Keys._
+import blended.sbt.container.BlendedContainerPlugin.autoImport._
 
 object BlendedDockerDemoNode extends ProjectFactory {
 
@@ -15,7 +16,9 @@ object BlendedDockerDemoNode extends ProjectFactory {
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      BlendedDockerContainer.containerImage := s"blended.demo.node_${scalaBinaryVersion.value}-${Blended.blendedVersion}" -> (BlendedDemoNode.project / BlendedContainer.packageFullNoJreTarGz).value
+      BlendedDockerContainer.containerImage :=
+        s"blended.demo.node_${scalaBinaryVersion.value}-${Blended.blendedVersion}" ->
+        (BlendedDemoNode.project / packageFullNoJreTarGz).value
     )
 
   }
