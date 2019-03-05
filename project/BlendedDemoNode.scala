@@ -14,24 +14,6 @@ object BlendedDemoNode extends ProjectFactory {
     projectName = "blended.demo.node",
     description = "A sample container with some routes and Mgmt client functions",
     projectDir = Some("container/blended.demo.node")
-//    features = Seq(
-//      BlendedFeatures.blendedBaseFelix,
-//      BlendedFeatures.blendedBaseEquinox,
-//      BlendedFeatures.blendedBase,
-//      BlendedFeatures.blendedCommons,
-//      BlendedFeatures.blendedSsl,
-//      BlendedFeatures.blendedJetty,
-//      BlendedFeatures.blendedHawtio,
-//      BlendedFeatures.blendedSpring,
-//      BlendedFeatures.blendedActivemq,
-//      BlendedFeatures.blendedCamel,
-//      BlendedFeatures.blendedSecurity,
-//      BlendedFeatures.blendedMgmtClient,
-//      BlendedFeatures.blendedAkkaHttp,
-//      BlendedFeatures.blendedPersistence,
-//      BlendedFeatures.blendedStreams,
-//      BlendedFeatures.blendedSamples
-//    )
   ) {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
