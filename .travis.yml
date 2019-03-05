@@ -1,5 +1,9 @@
 language: scala
 
+jvm:
+  - openjdk8
+  - oraclejdk8
+
 services:
   - docker
 
@@ -20,7 +24,7 @@ env:
 # We define the script in the build matrix
 script: echo "No script specified" && false
 
-matrix:
+jobs:
   include:
     - stage: Prerequisites (level -4)
       name: blended sbt plugins
