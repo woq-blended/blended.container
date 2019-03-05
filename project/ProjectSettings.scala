@@ -9,52 +9,69 @@ import sbt.librarymanagement.InclExclRule
 import xerial.sbt.Sonatype
 import xsbti.api.{AnalyzedClass, Projection}
 
+import blended.sbt.feature._
+
 trait ProjectFactory {
-  val project: Project
+  def project: Project
 }
 
-/**
- * Blended project settings.
- *
- * @param projectName The Project name, also used as Bundle-Name and prefix for package names.
- * @param description The project description, also used as Bundle-Description.
- * @param deps        The project classpath dependencies (exclusive of other blended projects).
- * @param osgi        If `true` this project is packaged as OSGi Bundle.
- * @param publish     If `true`, this projects package will be publish.
- * @param adaptBundle adapt the bundle configuration (used by sbt-osgi)
- * @param projectDir  Optional project directory (use this if not equal to project name)
- */
-class ProjectSettings(
-  val projectName: String,
-  val description: String,
-  val features: Seq[Feature] = Seq.empty,
-  deps: Seq[ModuleID] = Seq.empty,
-  osgi: Boolean = true,
-  osgiDefaultImports: Boolean = true,
-  publish: Boolean = true,
-  adaptBundle: BlendedBundle => BlendedBundle = identity,
-  val projectDir: Option[String] = None
-) {
-
-  def libDeps: Seq[ModuleID] = deps ++ features.flatMap { f =>
-    f.libDeps
-  }.map(_.intransitive())
+trait ProjectCreator {
 
   /**
-   * Override this method to specify additional plugins for this project.
-   */
-  def extraPlugins: Seq[AutoPlugin] = Seq.empty
-
-  /**
-   * Override this method to customize the creation of this project.
-   */
-  def projectFactory: () => Project = { () =>
-    val name = projectName.split("[.]").foldLeft("") {
+    * Override this method to customize the creation of this project.
+    */
+  def createProject(): Project = {
+    val name = projectName.split("[._]").foldLeft("") {
       case ("", next) => next
       case (name, next) => name + next.capitalize
     }
     Project(name, file(projectDir.getOrElse(projectName)))
   }
+
+  def projectName: String
+
+  def projectDir: Option[String] = None
+
+  def settings: Seq[sbt.Setting[_]] = CommonSettings() ++ Seq(
+    Keys.name := projectName,
+    Keys.moduleName := Keys.name.value
+  )
+
+  def plugins: Seq[AutoPlugin] = Seq()
+
+  // creates the project and apply settings and plugins
+  def baseProject: Project = createProject()
+    .settings(settings)
+    .enablePlugins(plugins: _*)
+
+}
+
+/**
+  * Blended project settings.
+  *
+  * @param projectName The Project name, also used as Bundle-Name and prefix for package names.
+  * @param description The project description, also used as Bundle-Description.
+  * @param deps        The project classpath dependencies (exclusive of other blended projects).
+  * @param osgi        If `true` this project is packaged as OSGi Bundle.
+  * @param publish     If `true`, this projects package will be publish.
+  * @param adaptBundle adapt the bundle configuration (used by sbt-osgi)
+  * @param projectDir  Optional project directory (use this if not equal to project name)
+  */
+class ProjectSettings(
+                       override val projectName: String,
+                       val description: String,
+                       val features: Seq[Feature] = Seq.empty,
+                       deps: Seq[ModuleID] = Seq.empty,
+                       osgi: Boolean = true,
+                       osgiDefaultImports: Boolean = true,
+                       publish: Boolean = true,
+                       adaptBundle: BlendedBundle => BlendedBundle = identity,
+                       override val projectDir: Option[String] = None
+                     ) extends ProjectCreator {
+
+  def libDeps: Seq[ModuleID] = deps ++ features.flatMap { f =>
+    f.libDeps
+  }.map(_.intransitive())
 
   def defaultBundle: BlendedBundle = BlendedBundle(
     bundleSymbolicName = projectName,
@@ -79,7 +96,7 @@ class ProjectSettings(
     }
   }
 
-  def defaultSettings: Seq[Setting[_]] = CommonSettings() ++ {
+  def defaultSettings: Seq[Setting[_]] = super.settings ++ {
 
     val osgiSettings: Seq[Setting[_]] = sbtBundle.toSeq.flatMap(_.osgiSettings)
 
@@ -140,21 +157,16 @@ class ProjectSettings(
       }
 
     ) ++ osgiSettings ++ (
-        if (publish) PublishConfig.doPublish else PublishConfig.noPublish
+      if (publish) PublishConfig.doPublish else PublishConfig.noPublish
       )
   }
 
-  def settings: Seq[sbt.Setting[_]] = defaultSettings
+  override def settings: Seq[sbt.Setting[_]] = defaultSettings
 
-  def plugins: Seq[AutoPlugin] = extraPlugins ++
+  override def plugins: Seq[AutoPlugin] = super.plugins ++
     Seq(TestLogConfig) ++
     (if (publish) Seq(Sonatype) else Seq()) ++
     (if (osgi) Seq(SbtOsgi) else Seq())
 
-  // creates the project and apply settings and plugins
-  def baseProject: Project = projectFactory
-    .apply()
-    .settings(settings)
-    .enablePlugins(plugins: _*)
 
 }

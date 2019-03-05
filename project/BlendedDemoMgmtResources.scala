@@ -11,7 +11,7 @@ object BlendedDemoMgmtResources extends ProjectFactory {
     projectDir = Some("container/blended.demo.mgmt/blended.demo.mgmt.resources"),
   ) {
 
-    override def extraPlugins: Seq[AutoPlugin] = Seq(
+    override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
       UniversalPlugin,
       UniversalDeployPlugin
     )

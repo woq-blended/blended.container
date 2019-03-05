@@ -31,7 +31,7 @@ class BlendedDockerContainer(
 
   import BlendedDockerContainer._
 
-  override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
+  override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
     FilterResources,
     UniversalPlugin,
     UniversalDeployPlugin

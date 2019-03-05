@@ -9,17 +9,19 @@ import sbt.Keys._
 import sbt.librarymanagement.{Constant, UnresolvedWarning, UnresolvedWarningConfiguration, UpdateConfiguration}
 import com.typesafe.sbt.packager.universal.{Archives, UniversalDeployPlugin, UniversalPlugin, ZipHelper}
 
+import blended.sbt.feature._
+
 class BlendedContainer(
   projectName: String,
   description: String,
-  features: Seq[Feature] = Seq.empty,
+  //  features: Seq[Feature] = Seq.empty,
   deps: Seq[ModuleID] = Seq.empty,
   publish: Boolean = true,
   projectDir: Option[String] = None
 ) extends ProjectSettings(
   projectName = projectName,
   description = description,
-  features = features,
+  //  features = features,
   deps = deps,
   osgi = false,
   osgiDefaultImports = false,
@@ -30,7 +32,7 @@ class BlendedContainer(
 
   import BlendedContainer._
 
-  override def extraPlugins: Seq[AutoPlugin] = super.extraPlugins ++ Seq(
+  override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
     FilterResources,
     UniversalPlugin,
     UniversalDeployPlugin
@@ -85,6 +87,10 @@ class BlendedContainer(
 
       materializeSourceProfile := (Compile / filterTargetDir).value / "profile" / "profile.conf",
 
+      materializeExtraDeps := Seq(),
+
+      materializeExtraFeatures := Seq(),
+
       // set in derived class
       //      materializeExtraDeps := {
       //        val file = (BlendedDemoNodeResources.project / Universal / packageBin).value
@@ -137,19 +143,33 @@ class BlendedContainer(
 
         val srcProfile = materializeSourceProfile.value
 
-        // Trigger feature file generation and add them to cmdline
-        val featuresWithFile = (BlendedLauncherFeatures.project / BlendedLauncherFeatures.generateFeatureConfigs).value
-        val featureFiles = featuresWithFile.map(_._2)
-        log.debug(s"Feature files: ${featureFiles}")
-        val featureArgs = featureFiles.flatMap { f =>
-          Seq("--feature-repo", f.getAbsolutePath())
-        }
-        log.debug(s"feature args: ${featureArgs}")
+        //        // We nee to declare all feature files as module deps
+        //        log.debug(s"dependencyClasspathAsJars: ${(Compile / dependencyClasspathAsJars).value}")
+        //        log.debug(s"dependencyClasspath: ${(Compile / dependencyClasspath).value}")
+        //        val featureFiles = (Compile / dependencyClasspathAsJars).value
+        //          .map(_.data)
+        //          .filter(_.name.endsWith(".conf"))
+        //        log.debug(s"Feature files: ${featureFiles}")
+        //
+        //        //         Trigger feature file generation and add them to cmdline
+        //        //        val featuresWithFile = (BlendedLauncherFeatures.project / BlendedLauncherFeatures.generateFeatureConfigs).value
+        //        //        val featureFiles = featuresWithFile.map(_._2)
+        //        val featureArgs = featureFiles.flatMap { f =>
+        //          Seq("--feature-repo", f.getAbsolutePath())
+        //        }
+        //        log.debug(s"feature args: ${featureArgs}")
 
         val depRes = (Compile / dependencyResolution).value
 
         // We need to declare all bundles as libraryDependencies!
-        val libDeps: Seq[ModuleID] = (Compile / libraryDependencies).value
+        // but we also support all referenced bundles from features
+        val libDeps: Seq[ModuleID] =
+          (Compile / libraryDependencies).value ++
+            materializeExtraFeatures.value.flatMap {
+              case (feature, file) =>
+                feature.libDeps
+            }
+
         val artifactArgs = libDeps.flatMap { dep: ModuleID =>
           val gav = moduleIdToGav(dep)
           val updateConfiguration = UpdateConfiguration()
@@ -184,9 +204,17 @@ class BlendedContainer(
 
         val extraArtifactArgs = materializeExtraDeps.value.flatMap {
           case (moduleId, file) =>
+            log.debug(s"Extra dep: artifact ${file}")
             Seq("--maven-artifact", moduleIdToGav(moduleId), file.getAbsolutePath())
         }
         log.debug(s"extra artifact args: ${extraArtifactArgs}")
+
+        val extraFeatureArgs = materializeExtraFeatures.value.flatMap {
+          case (feature, file) =>
+            log.debug(s"Extra dep: feature repo ${file}")
+            Seq("--feature-repo", file.getAbsolutePath())
+        }
+        log.debug(s"extra feature args: ${extraFeatureArgs}")
 
         val explodeResourcesArgs = if (materializeExplodeResources.value) Seq("--explode-resources") else Nil
 
@@ -217,9 +245,10 @@ class BlendedContainer(
             "--update-checksums",
             "--write-overlays-config"),
           debugArgs,
-          featureArgs,
+          //          featureArgs,
           artifactArgs,
           extraArtifactArgs,
+          extraFeatureArgs,
           explodeResourcesArgs,
           launchConfArgs
         ).flatten
@@ -229,7 +258,7 @@ class BlendedContainer(
         log.debug("About to run RuntimeConfigBuilder.run with args: " + profileArgs.mkString("\n    "))
 
         // We use a separate Classloader with NULL as parent
-        // to avoid classes with incompatible older versions of typesafe config in sbt
+        // to avoid incompatible classes (e.g. with incompatible older versions of typesafe config in sbt)
         val cl = new URLClassLoader(materializeToolsCp.value.map(_.toURI().toURL()).toArray, null)
 
         val builder = cl.loadClass("blended.updater.tools.configbuilder.RuntimeConfigBuilder")
@@ -376,6 +405,7 @@ object BlendedContainer {
 
   val materializeProfile = taskKey[Unit]("Materialize the profile")
   val materializeExtraDeps = taskKey[Seq[(ModuleID, File)]]("Extra dependencies, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
+  val materializeExtraFeatures = taskKey[Seq[(Feature, File)]]("Extra dependencies representing feature conf files, which can't be expressed as libraryDependencies, e.g. other sub-projects for resources")
   val materializeToolsCp = taskKey[Seq[File]]("Tools Classpath for the RuntimeConfigBuilder / Materializer")
 
   val materializeOverlays = taskKey[Seq[(ModuleID, File)]]("Additional overlays that should be applied to the materialized profile")
