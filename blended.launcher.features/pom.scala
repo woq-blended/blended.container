@@ -205,6 +205,7 @@ val features = Seq(
       "blended-base"
     ),
     bundles = Seq(
+      FeatureBundle(dependency = javaxServlet31),
       FeatureBundle(dependency = Blended.securityScep, start = true),
       FeatureBundle(dependency = Blended.securitySsl, start = true)
     )
