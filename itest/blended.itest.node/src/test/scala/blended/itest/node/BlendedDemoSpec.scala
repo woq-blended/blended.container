@@ -6,8 +6,10 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
+import blended.itestsupport.ssl.ContainerSslContextInfo
 import blended.itestsupport.{BlendedIntegrationTestSupport, TestConnector}
 import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination, JmsQueue}
+import blended.security.ssl.SslContextInfo
 import blended.streams.jms.{JmsEnvelopeHeader, JmsProducerSettings, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
 import blended.streams.testsupport._
@@ -251,6 +253,28 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       }
 
       Await.result(test.future, timeOut)
+    }
+
+    "Only support TLSv1.2" in {
+      val info : SslContextInfo = ContainerSslContextInfo.sslContextInfo(
+        client = TestContainerProxy.jolokia,
+        domain = "blended",
+        name = "server"
+      ).get
+
+      info.getEnabledProtocols() should be (Array("TLSv1.2"))
+    }
+
+    "Only support selected CypherSuites" in {
+
+      val info = ContainerSslContextInfo.sslContextInfo(
+        client = TestContainerProxy.jolokia,
+        domain = "blended",
+        name = "server"
+      ).get
+
+      info.getInvalidCypherSuites() should be (empty)
+      info.getEnabledCypherSuites() should not be (empty)
     }
   }
 }
