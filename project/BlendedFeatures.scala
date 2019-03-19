@@ -42,6 +42,7 @@ object BlendedFeatures {
     FeatureBundle(dependency = springExpression),
     FeatureBundle(dependency = Blended.containerContextApi),
     FeatureBundle(dependency = Blended.containerContextImpl, start = true),
+    FeatureBundle(dependency = Blended.securityCrypto),
     FeatureBundle(dependency = felixConfigAdmin, start = true),
     FeatureBundle(dependency = felixEventAdmin, start = true),
     FeatureBundle(dependency = felixFileinstall, start = true),
@@ -227,6 +228,7 @@ object BlendedFeatures {
       blendedBase
     ),
     bundles = Seq(
+      FeatureBundle(dependency = javaxServlet31),
       FeatureBundle(dependency = Blended.securityScep, start = true),
       FeatureBundle(dependency = Blended.securitySsl, start = true)
     )

@@ -6,6 +6,7 @@ import blended.itestsupport.jms.{JMSAvailableCondition, JMSConnectedCondition}
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
 import blended.itestsupport.{ContainerUnderTest, DockerbasedTestconnectorSetup, TestConnector, TestConnectorSetup}
 import blended.jms.utils.{IdAwareConnectionFactory, SimpleIdAwareConnectionFactory}
+import blended.jolokia.{JolokiaAddress, JolokiaClient}
 import org.apache.activemq.ActiveMQConnectionFactory
 
 import scala.concurrent.duration._
@@ -28,6 +29,13 @@ class TestContainerProxy(timeout: FiniteDuration)
 
     // the url to jolokia for REST JMX queries
     val jmxRest : String = s"${cuts("node_0").url("http", testHost, "http")}/hawtio/jolokia"
+    val jolokia : JolokiaClient = new JolokiaClient(
+      JolokiaAddress(
+        jolokiaUrl = jmxRest,
+        user = Some("root"),
+        password = Some("mysecret")
+      )
+    )
 
     // the url to the ldap server
     val ldapUrl : String = cuts("apacheds_0").url("ldap", testHost, "ldap")
@@ -47,6 +55,7 @@ class TestContainerProxy(timeout: FiniteDuration)
     )
 
     TestConnector.put("jmxRest", jmxRest)
+    TestConnector.put("jolokia", jolokia)
     TestConnector.put("ldap", ldapUrl)
     TestConnector.put("internalCf", internalCf)
     TestConnector.put("externalCf", externalCf)
@@ -63,14 +72,17 @@ class TestContainerProxy(timeout: FiniteDuration)
     SequentialComposedCondition(
       JMSAvailableCondition(internalCf, Some(timeout)),
       JMSAvailableCondition(externalCf, Some(timeout)),
-      JolokiaAvailableCondition(jmxRest, Some(timeout), Some("root"), Some("mysecret")),
-      CamelContextExistsCondition(jmxRest, Some("root"), Some("mysecret"),  "BlendedSampleContext", Some(timeout)),
-      JMSConnectedCondition(jmxRest, Some("root"), Some("mysecret"), "activemq", "activemq", Some(timeout))
+      JolokiaAvailableCondition(jolokia, Some(timeout)),
+      CamelContextExistsCondition(jolokia,  "BlendedSampleContext", Some(timeout)),
+      JMSConnectedCondition(jolokia, "activemq", "activemq", Some(timeout))
     )
   }
 }
 
 object TestContainerProxy {
+
+  def jolokia : JolokiaClient =
+    TestConnector.property[JolokiaClient]("jolokia").get
 
   def internalCf : IdAwareConnectionFactory =
     TestConnector.property[IdAwareConnectionFactory]("internalCf").get
