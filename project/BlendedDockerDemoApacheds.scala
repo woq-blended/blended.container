@@ -22,7 +22,7 @@ object BlendedDockerDemoApacheds extends ProjectFactory {
         val file = target.value / "apacheds-2.0.0-M24-x86_64.rpm"
         // todo only download when missing
         Using.urlInputStream(
-          new URL("http://www-eu.apache.org/dist//directory/apacheds/dist/2.0.0-M24/" + file.getName())
+          new URL("https://archive.apache.org/dist/directory/apacheds/dist/2.0.0-M24/" + file.getName())
         ) { in => IO.transfer(in, file) }
 
         s"apacheds-2.0.0-M24-x86_64" -> file
