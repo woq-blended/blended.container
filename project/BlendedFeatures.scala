@@ -300,25 +300,4 @@ object BlendedFeatures {
     )
   )
 
-  def allFeatures = Seq(
-    blendedActivemq,
-    blendedAkkaHttp,
-    blendedAkkaHttpModules,
-    blendedBase,
-    blendedBaseEquinox,
-    blendedBaseFelix,
-    blendedCamel,
-    blendedCommons,
-    blendedHawtio,
-    blendedJetty,
-    blendedMgmtClient,
-    blendedMgmtServer,
-    blendedPersistence,
-    blendedSamples,
-    blendedSecurity,
-    blendedSpring,
-    blendedStreams,
-    blendedSsl
-  )
-
 }

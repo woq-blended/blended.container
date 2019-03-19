@@ -37,3 +37,7 @@ addSbtPlugin(
 //  "de.wayofquality.blended" %% "blended.updater.tools" % "3.1-SNAPSHOT",
 //  "com.typesafe" % "config" % "1.3.3"
 //)
+
+addSbtPlugin("de.wayofquality.blended" % "sbt-blendedfeature" % "0.1-SNAPSHOT")
+
+addSbtPlugin("de.wayofquality.blended" % "sbt-blendedcontainer" % "0.1-SNAPSHOT")

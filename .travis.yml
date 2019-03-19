@@ -1,9 +1,5 @@
 language: scala
 
-jvm:
-  - openjdk8
-  - oraclejdk8
-
 services:
   - docker
 
@@ -32,6 +28,8 @@ jobs:
         - sh -e scripts/build-prereq.sh sbt-testlogconfig
         - sh -e scripts/build-prereq.sh sbt-jbake
         - sh -e scripts/build-prereq.sh sbt-filterresources
+        - sh -e scripts/build-prereq.sh sbt-blendedfeature
+        - sh -e scripts/build-prereq.sh sbt-blendedcontainer
 
     - stage: Prerequisites (level -3)
       name: blended core
