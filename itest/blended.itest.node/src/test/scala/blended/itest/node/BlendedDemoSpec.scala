@@ -265,7 +265,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
     "Only support selected CypherSuites" in {
 
-      val info = ContainerSslContextInfo.sslContextInfo(
+      val info : SslContextInfo = ContainerSslContextInfo.sslContextInfo(
         client = TestContainerProxy.jolokia,
         domain = "blended",
         name = "server"

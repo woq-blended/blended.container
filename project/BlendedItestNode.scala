@@ -16,7 +16,8 @@ object BlendedItestNode extends ProjectFactory {
     Blended.jmsUtils % "test",
     Blended.testSupport % "test",
     Blended.util % "test",
-    Blended.akka % "test"
+    Blended.akka % "test",
+    Blended.securitySsl % "test"
   ) //.map(_.intransitive())
       ++ Seq(
       Dependencies.scalatest % "test",
