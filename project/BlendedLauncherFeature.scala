@@ -10,10 +10,12 @@ object BlendedLauncherFeature extends ProjectFactory {
     override val aggregate: Seq[ProjectReference] = Seq(
       BlendedLauncherFeatureActivemq.project,
       BlendedLauncherFeatureAkkaHttp.project,
+      BlendedLauncherFeatureAkkaHttpModules.project,
       BlendedLauncherFeatureBase.project,
       BlendedLauncherFeatureBaseEquinox.project,
       BlendedLauncherFeatureBaseFelix.project,
       BlendedLauncherFeatureCamel.project,
+      BlendedLauncherFeatureCommons.project,
       BlendedLauncherFeatureHawtio.project,
       BlendedLauncherFeatureJetty.project,
       BlendedLauncherFeatureMgmtClient.project,
@@ -50,7 +52,7 @@ object BlendedLauncherFeatureAkkaHttp extends ProjectFactory {
   }
 }
 
-object BlendedLauncherFeatureAkkaHttpModule extends ProjectFactory {
+object BlendedLauncherFeatureAkkaHttpModules extends ProjectFactory {
   object config extends FeatureProjectConfig {
     override val feature = BlendedFeatures.blendedAkkaHttpModules
   }

@@ -20,6 +20,7 @@ lazy val global = Def.settings(
 
 lazy val blendedLauncherFeatureActivemq = BlendedLauncherFeatureActivemq.project
 lazy val blendedLauncherFeatureAkkaHttp = BlendedLauncherFeatureAkkaHttp.project
+lazy val blendedLauncherFeatureAkkaHttpModules = BlendedLauncherFeatureAkkaHttpModules.project
 lazy val blendedLauncherFeatureBase = BlendedLauncherFeatureBase.project
 lazy val blendedLauncherFeatureBaseEquinox = BlendedLauncherFeatureBaseEquinox.project
 lazy val blendedLauncherFeatureBaseFelix = BlendedLauncherFeatureBaseFelix.project
