@@ -8,18 +8,18 @@ import blended.util.logging.Logger
 
 import scala.concurrent.duration._
 
-class TestContainerProxy(timeout: FiniteDuration)
+class TestMgmtContainerProxy(timeout: FiniteDuration)
   extends DockerbasedTestconnectorSetup
   with TestConnectorSetup {
 
-  private[this] val log : Logger = Logger[TestContainerProxy.type]
-  private[this] val dockerHost = context.system.settings.config.getString("docker.host")
+  private[this] val log : Logger = Logger[TestMgmtContainerProxy.type]
+  private[this] val testHost = context.system.settings.config.getString("test.host")
 
   override def configure(cuts: Map[String, ContainerUnderTest]): Unit = {
 
-    val mgmtHttp : String = cuts("mgmt_0").url("http-akka", dockerHost, "http")
-    val node_1_Http : String = cuts("node1_0").url("http-akka", dockerHost, "http")
-    val node_2_Http : String = cuts("node2_0").url("http-akka", dockerHost, "http")
+    val mgmtHttp : String = cuts("mgmt_0").url("http-akka", testHost, "http")
+    val node_1_Http : String = cuts("node1_0").url("http-akka", testHost, "http")
+    val node_2_Http : String = cuts("node2_0").url("http-akka", testHost, "http")
 
     TestConnector.put("mgmtHttp", mgmtHttp)
     TestConnector.put("node1Http", node_1_Http)
@@ -31,7 +31,7 @@ class TestContainerProxy(timeout: FiniteDuration)
   override def containerReady(): Condition = {
 
     implicit val system = context.system
-    import TestContainerProxy._
+    import TestMgmtContainerProxy._
 
     ParallelComposedCondition(
       HttpAvailableCondition(mgmtHttp + "/mgmt/version", Some(timeout)),
@@ -41,11 +41,11 @@ class TestContainerProxy(timeout: FiniteDuration)
   }
 }
 
-object TestContainerProxy {
+object TestMgmtContainerProxy {
 
   def mgmtHttp : String = TestConnector.property[String]("mgmtHttp").get
   def node1Http : String = TestConnector.property[String]("node1Http").get
   def node2Http : String = TestConnector.property[String]("node2Http").get
 
-  def props(timeout: FiniteDuration): Props = Props(new TestContainerProxy(timeout))
+  def props(timeout: FiniteDuration): Props = Props(new TestMgmtContainerProxy(timeout))
 }

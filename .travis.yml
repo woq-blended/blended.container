@@ -1,0 +1,71 @@
+language: scala
+
+services:
+  - docker
+
+cache:
+  directories:
+    - ".prereq-refs"
+    - "$HOME/.ivy2"
+    - "$HOME/.sbt"
+
+before_cache:
+  - rm -Rf $HOME/.ivy2/.sbt.cache.lock
+  - rm -Rf $HOME/.ivy2/.sbt.ivy.lock
+
+env:
+  global:
+    - DOCKER_HOST="unix:///var/run/docker.sock"
+
+# We define the script in the build matrix
+script: echo "No script specified" && false
+
+jobs:
+  include:
+    - stage: Prerequisites (level -4)
+      name: blended sbt plugins
+      script:
+        - sh -e scripts/build-prereq.sh sbt-testlogconfig
+        - sh -e scripts/build-prereq.sh sbt-jbake
+        - sh -e scripts/build-prereq.sh sbt-filterresources
+        - sh -e scripts/build-prereq.sh sbt-blendedfeature
+        - sh -e scripts/build-prereq.sh sbt-blendedcontainer
+
+    - stage: Prerequisites (level -3)
+      name: blended core
+      script: sh -e scripts/build-prereq.sh blended
+
+    - stage: Prerequisites (level -2)
+      name:  blended.itestsupport
+      script: sh -e scripts/build-prereq.sh blended.itestsupport
+
+    - stage: Prerequisites (level -1)
+      name: blended.mgmt.ui
+      script: sh -e scripts/build-prereq.sh blended.mgmt.ui
+
+    - stage: Test
+      name: Build and publish local
+      script:
+        - docker info
+        - wget "https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz" -O "docker/blended.docker.base/files/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz"
+        - docker build -t atooni/blended-base docker/blended.docker.base
+        - sbt update publishLocal
+
+    - stage: Test
+      name: Test Node container
+      script:
+        - docker info
+        - wget "https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz" -O "docker/blended.docker.base/files/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz"
+        - docker build -t atooni/blended-base docker/blended.docker.base
+        - echo -e "-Ddocker.host=${DOCKER_HOST}\n-Ddocker.port=${DOCKER_PORT}\n" > .sbtopts
+        - sbt update blendedItestNode/test || (echo "Test failed. Node log:"; cat target/testlog/blended.itest.node-test.log | grep -v org.apache.http; false)
+
+    - stage: Test
+      name: Test Mgmt container
+      script:
+        - docker info
+        - wget "https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz" -O "docker/blended.docker.base/files/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz"
+        - docker build -t atooni/blended-base docker/blended.docker.base
+        - echo -e "-Ddocker.host=${DOCKER_HOST}\n-Ddocker.port=${DOCKER_PORT}\n" > .sbtopts
+        - sbt update blendedItestMgmt/test || (echo "Test failed. Mgmt log:"; cat target/testlog/blended.itest.mgmt-test.log | grep -v org.apache.http; false)
+

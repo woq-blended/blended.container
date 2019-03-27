@@ -37,8 +37,6 @@ class BlendedDemoSpec(implicit testKit: TestKit)
   implicit val timeOut : FiniteDuration = 10.seconds
   implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
-  private val dockerHost : String = system.settings.config.getString("docker.host")
-
   private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
   private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
 
@@ -267,7 +265,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
     "Only support selected CypherSuites" in {
 
-      val info = ContainerSslContextInfo.sslContextInfo(
+      val info : SslContextInfo = ContainerSslContextInfo.sslContextInfo(
         client = TestContainerProxy.jolokia,
         domain = "blended",
         name = "server"

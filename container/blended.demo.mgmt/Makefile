@@ -13,3 +13,12 @@ build:
 .PHONY: show-log # Open the container logfile
 show-log:
 	$${PAGER} -i target/blended.demo.*-*-SNAPSHOT/log/blended.log
+
+.PHONY: unpack-sbt # Unpack the container which was build with sbt
+unpack-sbt:
+	tar xzf target/blended.demo.*-*-SNAPSHOT-full-nojre.tar.gz -C target/
+
+.PHONY: clean-container # Remove an older instance of the unpacked container
+clean-container:
+	-rm -r target/blended.demo.*-*-SNAPSHOT/
+
