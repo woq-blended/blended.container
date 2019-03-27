@@ -27,8 +27,6 @@ object Dependencies extends blended.sbt.Dependencies {
   val commonsNet = "commons-net" % "commons-net" % "3.3"
   val commonsPool2 = "org.apache.commons" % "commons-pool2" % "2.6.0"
 
-  val dockerJava = "com.github.docker-java" % "docker-java" % "3.0.13"
-
   // provides Equinox console commands to gogo shell
   val eclipseEquinoxConsole = "org.eclipse.platform" % "org.eclipse.equinox.console" % "1.1.300"
   val eclipseOsgi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.12.50"
