@@ -7,29 +7,26 @@ import de.wayofquality.sbt.filterresources.FilterResources
 import sbt.Keys._
 import sbt._
 
-class BlendedDockerContainer(
-  projectName: String,
-  description: String = null,
-  containerDep: Option[ModuleID] = None,
-  imageTag: String,
-  publish: Boolean = true,
-  projectDir: Option[String] = None,
-  val ports: List[Int] = List(),
-  val folder: String,
-  overlays: List[String] = List()
-) extends ProjectSettings(
-  projectName = projectName,
-  description = Option(description).getOrElse(s"Docker container for container ${containerDep.getOrElse("")}"),
-  features = Seq(),
-  deps = containerDep.toList,
-  osgi = false,
-  osgiDefaultImports = false,
-  publish = publish,
-  adaptBundle = identity,
-  projectDir = projectDir
-) {
+trait BlendedDockerContainer extends ProjectSettings {
 
   import BlendedDockerContainer._
+
+  def containerDep: Option[ModuleID] = None
+
+  def imageTag: String
+
+  def ports: List[Int] = List()
+
+  def folder: String
+
+  override def description = s"Docker container for container ${containerDep.getOrElse("")}"
+
+  override def deps: Seq[sbt.ModuleID] = containerDep.toList
+
+  override def osgi = false
+
+  override def osgiDefaultImports = false
+
 
   override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
     FilterResources,

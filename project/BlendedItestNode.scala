@@ -1,25 +1,24 @@
 import sbt.Keys._
 import sbt._
 import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
+import phoenix.ProjectFactory
 
 object BlendedItestNode extends ProjectFactory {
 
-  private[this] val helper = new ProjectSettings(
-    projectName = "blended.itest.node",
-    description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards",
-    deps = Seq(
-    Blended.utilLogging,
-    Dependencies.activeMqClient % "test",
-    Blended.itestSupport % "test",
-    Blended.streams % "test",
-    Blended.streamsTestsupport % "test",
-    Blended.jmsUtils % "test",
-    Blended.testSupport % "test",
-    Blended.util % "test",
-    Blended.akka % "test",
-    Blended.securitySsl % "test"
-  ) //.map(_.intransitive())
-      ++ Seq(
+  object config extends ProjectSettings {
+    override val projectName = "blended.itest.node"
+    override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
+    override val deps = Seq(
+      Blended.utilLogging,
+      Dependencies.activeMqClient % "test",
+      Blended.itestSupport % "test",
+      Blended.streams % "test",
+      Blended.streamsTestsupport % "test",
+      Blended.jmsUtils % "test",
+      Blended.testSupport % "test",
+      Blended.util % "test",
+      Blended.akka % "test",
+      Blended.securitySsl % "test",
       Dependencies.scalatest % "test",
       Dependencies.akkaActor % "test",
       Dependencies.akkaStream % "test",
@@ -30,10 +29,10 @@ object BlendedItestNode extends ProjectFactory {
       Dependencies.geronimoJms11Spec % "test",
       Dependencies.dockerJava % "test",
       Dependencies.geronimoJ2eeMgmtSpec % "test"
-    ),
-    osgi = false,
-    projectDir = Some("itest/blended.itest.node")
-  ) {
+    )
+
+    override val osgi = false
+    override val projectDir = Some("itest/blended.itest.node")
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
 
@@ -48,7 +47,5 @@ object BlendedItestNode extends ProjectFactory {
     )
 
   }
-
-  override val project = helper.baseProject
 
 }

@@ -1,6 +1,7 @@
 import blended.sbt.container.BlendedContainerPlugin.autoImport._
 import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
+import phoenix.ProjectFactory
 import sbt.Keys._
 import sbt._
 
@@ -9,11 +10,11 @@ object BlendedDemoNode extends ProjectFactory {
   val featureRepos = settingKey[Seq[Project]]("Projects holding feature defs")
   val featureRepoCoords = taskKey[Seq[Project]]("")
 
-  private[this] val helper = new BlendedContainer(
-    projectName = "blended.demo.node",
-    description = "A sample container with some routes and Mgmt client functions",
-    projectDir = Some("container/blended.demo.node")
-  ) {
+  object config extends BlendedContainer {
+
+    override val projectName = "blended.demo.node"
+    override val description = "A sample container with some routes and Mgmt client functions"
+    override val projectDir = Some("container/blended.demo.node")
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
       blendedVersion := Blended.blendedVersion,
@@ -47,7 +48,4 @@ object BlendedDemoNode extends ProjectFactory {
     )
 
   }
-
-  override val project = helper.baseProject
-
 }

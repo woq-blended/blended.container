@@ -41,3 +41,5 @@ addSbtPlugin(
 addSbtPlugin("de.wayofquality.blended" % "sbt-blendedfeature" % "0.1-SNAPSHOT")
 
 addSbtPlugin("de.wayofquality.blended" % "sbt-blendedcontainer" % "0.1-SNAPSHOT")
+
+addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1-SNAPSHOT")

@@ -1,12 +1,35 @@
 import sbt._
 import sbt.Keys._
-
 import blended.sbt.feature._
 import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
+import phoenix.ProjectFactory
 
-class FeatureProjectCreator(
-  feature: Feature
-) extends ProjectCreator {
+object BlendedLauncherFeature extends ProjectFactory {
+  object config extends CommonSettings {
+    override val projectName = "blended.launcher.feature"
+    override val aggregate: Seq[ProjectReference] = Seq(
+      BlendedLauncherFeatureActivemq.project,
+      BlendedLauncherFeatureAkkaHttp.project,
+      BlendedLauncherFeatureBase.project,
+      BlendedLauncherFeatureBaseEquinox.project,
+      BlendedLauncherFeatureBaseFelix.project,
+      BlendedLauncherFeatureCamel.project,
+      BlendedLauncherFeatureHawtio.project,
+      BlendedLauncherFeatureJetty.project,
+      BlendedLauncherFeatureMgmtClient.project,
+      BlendedLauncherFeatureMgmtServer.project,
+      BlendedLauncherFeaturePersistence.project,
+      BlendedLauncherFeatureSamples.project,
+      BlendedLauncherFeatureSecurity.project,
+      BlendedLauncherFeatureSpring.project,
+      BlendedLauncherFeatureSsl.project,
+      BlendedLauncherFeatureStreams.project
+    )
+  }
+}
+
+trait FeatureProjectCreator extends CommonSettings {
+  def feature: Feature
   override def projectName: String = feature.name
   override def projectDir: Option[String] = Some(s"blended.launcher.feature/${feature.name}")
   override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(BlendedFeaturePlugin)
@@ -16,153 +39,109 @@ class FeatureProjectCreator(
 }
 
 object BlendedLauncherFeatureActivemq extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedActivemq)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedActivemq
+  }
 }
 
 object BlendedLauncherFeatureAkkaHttp extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedAkkaHttp)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedAkkaHttp
+  }
 }
 
 object BlendedLauncherFeatureAkkaHttpModule extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedAkkaHttpModules)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedAkkaHttpModules
+  }
 }
 
 object BlendedLauncherFeatureBase extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedBase)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedBase
+  }
 }
 
 object BlendedLauncherFeatureBaseEquinox extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedBaseEquinox)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedBaseEquinox
+  }
 }
 
 object BlendedLauncherFeatureBaseFelix extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedBaseFelix)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedBaseFelix
+  }
 }
 
 object BlendedLauncherFeatureCamel extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedCamel)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedCamel
+  }
 }
 
 object BlendedLauncherFeatureCommons extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedCommons)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedCommons
+  }
 }
 
 object BlendedLauncherFeatureHawtio extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedHawtio)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedHawtio
+  }
 }
 
 object BlendedLauncherFeatureJetty extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedJetty)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedJetty
+  }
 }
 
 object BlendedLauncherFeatureMgmtClient extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedMgmtClient)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedMgmtClient
+  }
 }
 
 object BlendedLauncherFeatureMgmtServer extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedMgmtServer)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedMgmtServer
+  }
 }
 
 object BlendedLauncherFeaturePersistence extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedPersistence)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedPersistence
+  }
 }
 
 object BlendedLauncherFeatureSamples extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedSamples)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedSamples
+  }
 }
 
 object BlendedLauncherFeatureSecurity extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedSecurity)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedSecurity
+  }
 }
 
 object BlendedLauncherFeatureSpring extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedSpring)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedSpring
+  }
 }
 
 object BlendedLauncherFeatureStreams extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedStreams)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedStreams
+  }
 }
 
 object BlendedLauncherFeatureSsl extends ProjectFactory {
-  private[this] val helper = new FeatureProjectCreator(feature = BlendedFeatures.blendedSsl)
-  override val project = helper.baseProject
+  object config extends FeatureProjectCreator {
+    override val feature = BlendedFeatures.blendedSsl
+  }
 }
-
-//object BlendedLauncherFeatures extends ProjectFactory {
-//
-//  val generateFeatureConfigs = taskKey[Seq[(Feature, File)]]("Generate Feature config files")
-//
-//  private[this] val helper = new ProjectSettings(
-//    projectName = "blended.launcher.features",
-//    description = "The prepackaged features for blended.",
-//    features = BlendedFeatures.allFeatures,
-//    osgi = false
-//  ) {
-//
-//
-//    override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-//
-//      // Write feature config files
-//      generateFeatureConfigs := {
-//        val featureDir: File = new File(target.value, "features")
-//        val generated = features.map { feature: Feature =>
-//          val file = new File(featureDir, s"${feature.name}.conf")
-//          IO.write(file, feature.formatConfig(version.value))
-//          feature -> file
-//        }
-//        generated
-//      },
-//
-//      // Trigger file generation to compile step
-//      Compile / compile := {
-//        generateFeatureConfigs.value
-//        (Compile / compile).value
-//      }
-//
-//      // Attach feature files as artifacts
-//    ) ++ (features.flatMap { feature: Feature =>
-//
-//      val a = Artifact(
-//        name = projectName,
-//        `type` = "conf",
-//        extension = "conf",
-//        classifier = feature.name
-//      )
-//
-//      Seq(
-//        artifacts += a,
-//        packagedArtifacts := {
-//          // trigger generator
-//          generateFeatureConfigs.value
-//
-//          val featureDir: File = new File(target.value, "features")
-//          val file = new File(featureDir, s"${feature.name}.conf")
-//
-//          packagedArtifacts.value updated(a, file)
-//        }
-//      )
-//
-//    })
-//
-//  }
-//
-//  override val project = helper.baseProject
-//
-//}

@@ -1,3 +1,4 @@
+import phoenix.Utils
 import sbt.Keys._
 import sbt._
 
@@ -82,7 +83,7 @@ object Blended extends blended.sbt.Blended {
 
   val blendedOrganization = "de.wayofquality.blended"
 
-  override def blendedVersion: String = BuildHelper.readAsVersion(new File("version.txt"))
+  override def blendedVersion: String = Utils.readAsVersion(new File("version.txt"))
 
   val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.5-SNAPSHOT"
 

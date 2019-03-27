@@ -8,43 +8,8 @@ import sbt.internal.inc.Analysis
 import sbt.librarymanagement.InclExclRule
 import xerial.sbt.Sonatype
 import xsbti.api.{AnalyzedClass, Projection}
-
 import blended.sbt.feature._
-
-trait ProjectFactory {
-  def project: Project
-}
-
-trait ProjectCreator {
-
-  /**
-    * Override this method to customize the creation of this project.
-    */
-  def createProject(): Project = {
-    val name = projectName.split("[._]").foldLeft("") {
-      case ("", next) => next
-      case (name, next) => name + next.capitalize
-    }
-    Project(name, file(projectDir.getOrElse(projectName)))
-  }
-
-  def projectName: String
-
-  def projectDir: Option[String] = None
-
-  def settings: Seq[sbt.Setting[_]] = CommonSettings() ++ Seq(
-    Keys.name := projectName,
-    Keys.moduleName := Keys.name.value
-  )
-
-  def plugins: Seq[AutoPlugin] = Seq()
-
-  // creates the project and apply settings and plugins
-  def baseProject: Project = createProject()
-    .settings(settings)
-    .enablePlugins(plugins: _*)
-
-}
+import phoenix.ProjectConfig
 
 /**
   * Blended project settings.
@@ -57,21 +22,24 @@ trait ProjectCreator {
   * @param adaptBundle adapt the bundle configuration (used by sbt-osgi)
   * @param projectDir  Optional project directory (use this if not equal to project name)
   */
-class ProjectSettings(
-                       override val projectName: String,
-                       val description: String,
-                       val features: Seq[Feature] = Seq.empty,
-                       deps: Seq[ModuleID] = Seq.empty,
-                       osgi: Boolean = true,
-                       osgiDefaultImports: Boolean = true,
-                       publish: Boolean = true,
-                       adaptBundle: BlendedBundle => BlendedBundle = identity,
-                       override val projectDir: Option[String] = None
-                     ) extends ProjectCreator {
+trait ProjectSettings extends CommonSettings {
+
+  def description: String
+
+  def features: Seq[Feature] = Seq()
+
+  def deps: Seq[ModuleID] = Seq()
 
   def libDeps: Seq[ModuleID] = deps ++ features.flatMap { f =>
     f.libDeps
   }.map(_.intransitive())
+
+
+  def osgi: Boolean = true
+
+  def osgiDefaultImports : Boolean = true
+
+  def publish: Boolean = true
 
   def defaultBundle: BlendedBundle = BlendedBundle(
     bundleSymbolicName = projectName,
@@ -80,7 +48,7 @@ class ProjectSettings(
     defaultImports = osgiDefaultImports
   )
 
-  def bundle: BlendedBundle = adaptBundle(defaultBundle)
+  def bundle: BlendedBundle = defaultBundle
 
   def sbtBundle: Option[BlendedBundle] = if (osgi) Some(bundle) else None
 

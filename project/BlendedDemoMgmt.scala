@@ -1,16 +1,16 @@
 import blended.sbt.container.BlendedContainerPlugin.autoImport._
 import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
+import phoenix.ProjectFactory
 import sbt.Keys._
 import sbt._
 
 object BlendedDemoMgmt extends ProjectFactory {
 
-  private[this] val helper = new BlendedContainer(
-    projectName = "blended.demo.mgmt",
-    description = "A sample blended management container",
-    projectDir = Some("container/blended.demo.mgmt")
-  ) {
+  object config extends BlendedContainer {
+    override val projectName = "blended.demo.mgmt"
+    override val description = "A sample blended management container"
+    override val projectDir = Some("container/blended.demo.mgmt")
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
       blendedVersion := Blended.blendedVersion,
@@ -41,9 +41,6 @@ object BlendedDemoMgmt extends ProjectFactory {
         )
       }
     )
-
   }
-
-  override val project = helper.baseProject
 
 }

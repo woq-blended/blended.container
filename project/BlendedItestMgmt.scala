@@ -2,13 +2,14 @@ import sbt._
 import sbt.Keys._
 import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
 import blended.sbt.container.BlendedContainerPlugin.autoImport._
+import phoenix.ProjectFactory
 
 object BlendedItestMgmt extends ProjectFactory {
 
-  private[this] val helper = new ProjectSettings(
-    projectName = "blended.itest.mgmt",
-    description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards",
-    deps = Seq(
+  object config extends ProjectSettings {
+    override val projectName = "blended.itest.mgmt"
+    override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
+    override val deps = Seq(
       Blended.utilLogging,
       Dependencies.activeMqClient % "test",
       Blended.itestSupport % "test",
@@ -17,9 +18,7 @@ object BlendedItestMgmt extends ProjectFactory {
       Blended.jmsUtils % "test",
       Blended.testSupport % "test",
       Blended.util % "test",
-      Blended.akka % "test"
-    ) //.map(_.intransitive())
-      ++ Seq(
+      Blended.akka % "test",
       Dependencies.activeMqClient % "test",
       Dependencies.scalatest % "test",
       Dependencies.akkaActor % "test",
@@ -34,13 +33,11 @@ object BlendedItestMgmt extends ProjectFactory {
       Dependencies.geronimoJ2eeMgmtSpec % "test",
       Dependencies.sttp % "test",
       Dependencies.lihaoyiPprint % "test"
-    ),
-    osgi = false,
-    projectDir = Some("itest/blended.itest.mgmt")
-  ) {
+    )
+    override val osgi = false
+    override val projectDir = Some("itest/blended.itest.mgmt")
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-
 
       Test / testlogDefaultLevel := "debug",
 
@@ -72,7 +69,5 @@ object BlendedItestMgmt extends ProjectFactory {
     )
 
   }
-
-  override val project = helper.baseProject
 
 }

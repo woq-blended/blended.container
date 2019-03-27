@@ -1,28 +1,29 @@
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
 import com.typesafe.sbt.packager.universal.{UniversalDeployPlugin, UniversalPlugin}
+import phoenix.ProjectFactory
 import sbt.Keys._
 import sbt._
 
 object BlendedDemoMgmtResources extends ProjectFactory {
 
-  private[this] val helper = new ProjectSettings(
-    projectName = "blended.demo.mgmt.resources",
-    description = "Resources for blended.demo.mgmt container",
-    projectDir = Some("container/blended.demo.mgmt/blended.demo.mgmt.resources"),
-  ) {
+  object config extends ProjectSettings {
+
+    override val projectName = "blended.demo.mgmt.resources"
+    override val description = "Resources for blended.demo.mgmt container"
+    override val projectDir = Some("container/blended.demo.mgmt/blended.demo.mgmt.resources")
 
     override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
       UniversalPlugin,
       UniversalDeployPlugin
     )
 
-    override def settings: Seq[sbt.Setting[_]] = {
+    override def settings: Seq[sbt.Setting[_]] = super.settings ++ {
 
       val artifact = Artifact(
         name = projectName,
         `type` = "zip",
-        extension = "zip")
-
+        extension = "zip"
+      )
 
       super.settings ++ Seq(
 
@@ -40,13 +41,11 @@ object BlendedDemoMgmtResources extends ProjectFactory {
         // Attach the zip file as main artifact
         artifacts += artifact,
         packagedArtifacts := {
-          packagedArtifacts.value updated(artifact, (Universal /packageBin).value)
+          packagedArtifacts.value updated (artifact, (Universal / packageBin).value)
         }
       )
     }
 
   }
-
-  override val project = helper.baseProject
 
 }

@@ -1,6 +1,7 @@
 import sbt._
 
-inThisBuild(BuildHelper.readVersion(file("version.txt")))
+inThisBuild(version := phoenix.Utils.readAsVersion(file("version.txt")))
+inThisBuild(isSnapshot := version.value.endsWith("SNAPSHOT"))
 inThisBuild(sourcesInBase := false)
 
 lazy val global = Def.settings(
@@ -34,25 +35,8 @@ lazy val blendedLauncherFeatureSecurity = BlendedLauncherFeatureSecurity.project
 lazy val blendedLauncherFeatureSpring = BlendedLauncherFeatureSpring.project
 lazy val blendedLauncherFeatureSsl = BlendedLauncherFeatureSsl.project
 lazy val blendedLauncherFeatureStreams = BlendedLauncherFeatureStreams.project
-
-lazy val blendedLauncherFeature = project.settings(CommonSettings()).aggregate(
-  blendedLauncherFeatureActivemq,
-  blendedLauncherFeatureAkkaHttp,
-  blendedLauncherFeatureBase,
-  blendedLauncherFeatureBaseEquinox,
-  blendedLauncherFeatureBaseFelix,
-  blendedLauncherFeatureCamel,
-  blendedLauncherFeatureHawtio,
-  blendedLauncherFeatureJetty,
-  blendedLauncherFeatureMgmtClient,
-  blendedLauncherFeatureMgmtServer,
-  blendedLauncherFeaturePersistence,
-  blendedLauncherFeatureSamples,
-  blendedLauncherFeatureSecurity,
-  blendedLauncherFeatureSpring,
-  blendedLauncherFeatureSsl,
-  blendedLauncherFeatureStreams
-)
+// aggregator
+lazy val blendedLauncherFeature = BlendedLauncherFeature.project
 
 lazy val blendedDemoNodeResources = BlendedDemoNodeResources.project
 lazy val blendedDemoMgmtResources = BlendedDemoMgmtResources.project

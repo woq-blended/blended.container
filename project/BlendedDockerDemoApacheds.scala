@@ -1,20 +1,20 @@
 import BlendedDockerContainer.{containerImage, dockerDir}
+import phoenix.ProjectFactory
 import sbt._
 import sbt.Keys._
 import sbt.io.Using
 
 object BlendedDockerDemoApacheds extends ProjectFactory {
 
-  val helper = new BlendedDockerContainer(
-    projectName = "blended.docker.demo.apacheds",
-    imageTag = "atooni/blended_apacheds",
-    publish = false,
-    projectDir = Some("docker/blended.docker.demo.apacheds"),
-    ports = List(10389),
-    folder = "apacheds",
-    // TODO: no supported yet!
-    overlays = List()
-  ) {
+  object config extends BlendedDockerContainer {
+    override val projectName = "blended.docker.demo.apacheds"
+    override val imageTag = "atooni/blended_apacheds"
+    override val publish = false
+    override val projectDir = Some("docker/blended.docker.demo.apacheds")
+    override val ports = List(10389)
+    override val folder = "apacheds"
+    // TODO: overlays no supported yet!
+    //    overlays = List()
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
 
@@ -51,10 +51,6 @@ object BlendedDockerDemoApacheds extends ProjectFactory {
 
         dockerfile
       }
-
     )
-
   }
-
-  override val project = helper.baseProject
 }

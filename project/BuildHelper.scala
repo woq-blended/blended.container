@@ -24,35 +24,6 @@ object BuildHelper {
     f.delete()
   }
 
-  def resolveModuleFile(mid: ModuleID, targetPath: File): Vector[File] = {
-
-    resolver.retrieve(mid, None, targetPath, log) match {
-      case Left(w) => throw w.resolveException
-      case Right(files) => files
-    }
-  }
-
-  def resolveModuleFile(mid: ModuleID, scalaModuleInfo: Option[ScalaModuleInfo], targetPath: File): Vector[File] = {
-
-    resolver.retrieve(mid, scalaModuleInfo, targetPath, log) match {
-      case Left(w) => throw w.resolveException
-      case Right(files) => files
-    }
-  }
-
-  def readVersion(versionFile: File): Seq[Def.Setting[_]] = {
-    val buildVersion = Files.readAllLines(versionFile.toPath()).get(0)
-
-    Seq(
-      version := buildVersion,
-      isSnapshot := buildVersion.endsWith("SNAPSHOT")
-    )
-  }
-
-  def readAsVersion(versionFile: File): String = {
-    Files.readAllLines(versionFile.toPath()).get(0).trim()
-  }
-
   def unpackTarGz(archive: File, targetDir: File): Unit = {
     val fi = new FileInputStream(archive)
     try {

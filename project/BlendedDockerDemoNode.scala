@@ -1,19 +1,19 @@
 import sbt._
 import sbt.Keys._
 import blended.sbt.container.BlendedContainerPlugin.autoImport._
+import phoenix.ProjectFactory
 
 object BlendedDockerDemoNode extends ProjectFactory {
 
-  val helper = new BlendedDockerContainer(
-    projectName = "blended.docker.demo.node",
-    imageTag = "atooni/blended_node",
-    publish = false,
-    projectDir = Some("docker/blended.docker.demo.node"),
-    ports = List(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996),
-    folder = "node",
+  object config extends BlendedDockerContainer {
+    override val projectName = "blended.docker.demo.node"
+    override val imageTag = "atooni/blended_node"
+    override val publish = false
+    override val projectDir = Some("docker/blended.docker.demo.node")
+    override val ports = List(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
+    override val folder = "node"
     // TODO: no supported yet!
-    overlays = List()
-  ) {
+    //    overlays = List()
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
       BlendedDockerContainer.containerImage :=
@@ -22,6 +22,4 @@ object BlendedDockerDemoNode extends ProjectFactory {
     )
 
   }
-
-  override val project = helper.baseProject
 }

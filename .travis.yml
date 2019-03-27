@@ -30,6 +30,7 @@ jobs:
         - sh -e scripts/build-prereq.sh sbt-filterresources
         - sh -e scripts/build-prereq.sh sbt-blendedfeature
         - sh -e scripts/build-prereq.sh sbt-blendedcontainer
+        - sh -e scripts/build-prereq.sh sbt-phoenix
 
     - stage: Prerequisites (level -3)
       name: blended core
