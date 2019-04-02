@@ -25,7 +25,7 @@ object BlendedDemoMgmtResources extends ProjectFactory {
         extension = "zip"
       )
 
-      super.settings ++ Seq(
+      Seq(
 
         Universal / topLevelDirectory := None,
 

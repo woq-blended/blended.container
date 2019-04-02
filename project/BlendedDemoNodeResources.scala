@@ -16,7 +16,7 @@ object BlendedDemoNodeResources extends ProjectFactory {
       UniversalDeployPlugin
     )
 
-    override def settings: Seq[sbt.Setting[_]] = {
+    override def settings: Seq[sbt.Setting[_]] = super.settings ++ {
 
       val artifact = Artifact(
         name = projectName,
@@ -24,7 +24,7 @@ object BlendedDemoNodeResources extends ProjectFactory {
         extension = "zip"
       )
 
-      super.settings ++ Seq(
+      Seq(
 
         Universal / topLevelDirectory := None,
 
