@@ -9,7 +9,7 @@ import blended.util.logging.Logger
 import scala.concurrent.duration._
 
 class TestMgmtContainerProxy(timeout: FiniteDuration)
-  extends DockerbasedTestconnectorSetup
+  extends DockerbasedTestconnectorSetupActor
   with TestConnectorSetup {
 
   private[this] val log : Logger = Logger[TestMgmtContainerProxy.type]

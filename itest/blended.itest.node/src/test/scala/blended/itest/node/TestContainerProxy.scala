@@ -4,7 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.{Condition, SequentialComposedCondition}
 import blended.itestsupport.jms.{JMSAvailableCondition, JMSConnectedCondition}
 import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
-import blended.itestsupport.{ContainerUnderTest, DockerbasedTestconnectorSetup, TestConnector, TestConnectorSetup}
+import blended.itestsupport.{ContainerUnderTest, DockerbasedTestconnectorSetupActor, TestConnector, TestConnectorSetup}
 import blended.jms.utils.{IdAwareConnectionFactory, SimpleIdAwareConnectionFactory}
 import blended.jolokia.{JolokiaAddress, JolokiaClient}
 import org.apache.activemq.ActiveMQConnectionFactory
@@ -12,7 +12,7 @@ import org.apache.activemq.ActiveMQConnectionFactory
 import scala.concurrent.duration._
 
 class TestContainerProxy(timeout: FiniteDuration)
-  extends DockerbasedTestconnectorSetup
+  extends DockerbasedTestconnectorSetupActor
   with TestConnectorSetup {
 
   private[this] val testHost : String = context.system.settings.config.getString("test.host")
