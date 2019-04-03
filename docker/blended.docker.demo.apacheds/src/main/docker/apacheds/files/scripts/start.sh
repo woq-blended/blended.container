@@ -6,7 +6,7 @@ set -x
 export DOMAIN_NAME=blended
 export SYSTEM_PWD=blended
 
-START_DELAY=10
+START_DELAY=15
 
 APACHE_DS_VERSION=2.0.0_M24
 
