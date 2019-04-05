@@ -38,8 +38,6 @@ addSbtPlugin(
 //  "com.typesafe" % "config" % "1.3.3"
 //)
 
-addSbtPlugin("de.wayofquality.blended" % "sbt-blendedfeature" % "0.1-SNAPSHOT")
-
-addSbtPlugin("de.wayofquality.blended" % "sbt-blendedcontainer" % "0.1-SNAPSHOT")
-
 addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1-SNAPSHOT")
+
+addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1-SNAPSHOT")
