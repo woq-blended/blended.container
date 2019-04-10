@@ -88,7 +88,7 @@ object Deps {
   val felixConfigAdmin = "org.apache.felix" % "org.apache.felix.configadmin" % "1.8.6"
   val felixConnect = "org.apache.felix" % "org.apache.felix.connect" % "0.1.0"
   val felixEventAdmin = "org.apache.felix" % "org.apache.felix.eventadmin" % "1.3.2"
-  val felixFramework = "org.apache.felix" % "org.apache.felix.framework" % "6.0.1"
+  val felixFramework = "org.apache.felix" % "org.apache.felix.framework" % "5.6.10"
   val felixFileinstall = "org.apache.felix" % "org.apache.felix.fileinstall" % "3.4.2"
   val felixGogoCommand = "org.apache.felix" % "org.apache.felix.gogo.command" % "1.0.2"
   val felixGogoJline = "org.apache.felix" % "org.apache.felix.gogo.jline" % "1.1.0"
