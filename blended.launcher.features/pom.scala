@@ -9,6 +9,7 @@ import scala.collection.immutable.Seq
 val features = Seq(
   FeatureDef("blended-base-felix", bundles = Seq(
     FeatureBundle(dependency = felixFramework, startLevel = 0, start = true),
+    FeatureBundle(dependency = orgOsgiCompendium, start = true),
     FeatureBundle(dependency = jline, startLevel = 1),
     FeatureBundle(dependency = jlineBuiltins, startLevel = 1),
     FeatureBundle(dependency = felixGogoJline, startLevel = 1, start = true),
