@@ -2,7 +2,7 @@ import phoenix.Utils
 import sbt.Keys._
 import sbt._
 
-object Dependencies extends blended.sbt.Dependencies {
+object ProjectDependencies extends blended.sbt.Dependencies {
 
   val activeMqOsgi = "org.apache.activemq" % "activemq-osgi" % activeMqVersion
   val activationApi = "org.apache.servicemix.specs" % "org.apache.servicemix.specs.activation-api-1.1" % "2.2.0"

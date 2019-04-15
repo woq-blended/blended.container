@@ -6,12 +6,14 @@ import phoenix.ProjectFactory
 
 object BlendedItestMgmt extends ProjectFactory {
 
+  import ProjectDependencies._
+  
   object config extends ProjectSettings {
     override val projectName = "blended.itest.mgmt"
     override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
     override val deps = Seq(
       Blended.utilLogging,
-      Dependencies.activeMqClient % "test",
+      activeMqClient % "test",
       Blended.itestSupport % "test",
       Blended.streams % "test",
       Blended.streamsTestsupport % "test",
@@ -19,20 +21,20 @@ object BlendedItestMgmt extends ProjectFactory {
       Blended.testSupport % "test",
       Blended.util % "test",
       Blended.akka % "test",
-      Dependencies.activeMqClient % "test",
-      Dependencies.scalatest % "test",
-      Dependencies.akkaActor % "test",
-      Dependencies.akkaStream % "test",
-      Dependencies.akkaStreamTestkit % "test",
-      Dependencies.slf4j % "test",
-      Dependencies.akkaSlf4j % "test",
-      Dependencies.logbackClassic % "test",
-      Dependencies.akkaTestkit % "test",
-      Dependencies.geronimoJms11Spec % "test",
-      Dependencies.dockerJava % "test",
-      Dependencies.geronimoJ2eeMgmtSpec % "test",
-      Dependencies.sttp % "test",
-      Dependencies.lihaoyiPprint % "test"
+      activeMqClient % "test",
+      scalatest % "test",
+      akkaActor % "test",
+      akkaStream % "test",
+      akkaStreamTestkit % "test",
+      slf4j % "test",
+      akkaSlf4j % "test",
+      logbackClassic % "test",
+      akkaTestkit % "test",
+      geronimoJms11Spec % "test",
+      dockerJava % "test",
+      geronimoJ2eeMgmtSpec % "test",
+      sttp % "test",
+      lihaoyiPprint % "test"
     )
     override val osgi = false
     override val projectDir = Some("itest/blended.itest.mgmt")

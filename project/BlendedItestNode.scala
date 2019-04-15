@@ -5,12 +5,14 @@ import phoenix.ProjectFactory
 
 object BlendedItestNode extends ProjectFactory {
 
+  import ProjectDependencies._
+  
   object config extends ProjectSettings {
     override val projectName = "blended.itest.node"
     override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
     override val deps = Seq(
       Blended.utilLogging,
-      Dependencies.activeMqClient % "test",
+      activeMqClient % "test",
       Blended.itestSupport % "test",
       Blended.streams % "test",
       Blended.streamsTestsupport % "test",
@@ -19,16 +21,16 @@ object BlendedItestNode extends ProjectFactory {
       Blended.util % "test",
       Blended.akka % "test",
       Blended.securitySsl % "test",
-      Dependencies.scalatest % "test",
-      Dependencies.akkaActor % "test",
-      Dependencies.akkaStream % "test",
-      Dependencies.slf4j % "test",
-      Dependencies.akkaSlf4j % "test",
-      Dependencies.logbackClassic % "test",
-      Dependencies.akkaTestkit % "test",
-      Dependencies.geronimoJms11Spec % "test",
-      Dependencies.dockerJava % "test",
-      Dependencies.geronimoJ2eeMgmtSpec % "test"
+      scalatest % "test",
+      akkaActor % "test",
+      akkaStream % "test",
+      slf4j % "test",
+      akkaSlf4j % "test",
+      logbackClassic % "test",
+      akkaTestkit % "test",
+      geronimoJms11Spec % "test",
+      dockerJava % "test",
+      geronimoJ2eeMgmtSpec % "test"
     )
 
     override val osgi = false

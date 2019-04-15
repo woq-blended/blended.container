@@ -1,22 +1,22 @@
 import sbt._
 import sbt.librarymanagement.{Constant, ModuleID}
-
 import blended.sbt.feature._
 
 object BlendedFeatures {
 
-  import Dependencies._
+  import ProjectDependencies._
 
   lazy val blendedBaseFelix = Feature(
     "blended.launcher.feature.base.felix",
     bundles = Seq(
-      FeatureBundle(dependency = Dependencies.felixFramework, startLevel = Some(0), start = true),
-      FeatureBundle(dependency = Dependencies.jline, startLevel = Some(1)),
-      FeatureBundle(dependency = Dependencies.jlineBuiltins, startLevel = Some(1)),
-      FeatureBundle(dependency = Dependencies.felixGogoJline, startLevel = Some(1), start = true),
-      FeatureBundle(dependency = Dependencies.felixGogoRuntime, startLevel = Some(1), start = true),
-      FeatureBundle(dependency = Dependencies.felixGogoShell, startLevel = Some(1), start = true),
-      FeatureBundle(dependency = Dependencies.felixGogoCommand, startLevel = Some(1), start = true)
+      FeatureBundle(dependency = felixFramework, startLevel = Some(0), start = true),
+      FeatureBundle(dependency = orgOsgiCompendium, startLevel = Some(1), start = true),
+      FeatureBundle(dependency = jline, startLevel = Some(1)),
+      FeatureBundle(dependency = jlineBuiltins, startLevel = Some(1)),
+      FeatureBundle(dependency = felixGogoJline, startLevel = Some(1), start = true),
+      FeatureBundle(dependency = felixGogoRuntime, startLevel = Some(1), start = true),
+      FeatureBundle(dependency = felixGogoShell, startLevel = Some(1), start = true),
+      FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true)
     )
   )
 
