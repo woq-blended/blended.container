@@ -20,7 +20,7 @@ BlendedModel(
           goals = Seq("wget"),
 	  phase = "generate-resources",
           configuration = Config(
-            url = "http://www-eu.apache.org/dist//directory/apacheds/dist/2.0.0-M24/apacheds-2.0.0-M24-x86_64.rpm",
+            url = "http://archive.apache.org/dist//directory/apacheds/dist/2.0.0-M24/apacheds-2.0.0-M24-x86_64.rpm",
             outputDirectory = "${project.build.directory}/docker/apacheds",
             md5 = "8a8b4829908ff74ac63c97c7be34ba09"
           )

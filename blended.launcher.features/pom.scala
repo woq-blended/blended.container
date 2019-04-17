@@ -12,14 +12,14 @@ val features = Seq(
     FeatureBundle(dependency = orgOsgiCompendium, start = true),
     FeatureBundle(dependency = jline, startLevel = 1),
     FeatureBundle(dependency = jlineBuiltins, startLevel = 1),
-    FeatureBundle(dependency = felixGogoJline, startLevel = 1, start = true),
-    FeatureBundle(dependency = felixGogoRuntime, startLevel = 1, start = true),
-    FeatureBundle(dependency = felixGogoShell, startLevel = 1, start = true),
-    FeatureBundle(dependency = felixGogoCommand, startLevel = 1, start = true)
+    FeatureBundle(dependency = felixGogoJline, startLevel = 1),
+    FeatureBundle(dependency = felixGogoRuntime, startLevel = 1),
+    FeatureBundle(dependency = felixGogoShell, startLevel = 1),
+    FeatureBundle(dependency = felixGogoCommand, startLevel = 1)
   )),
   FeatureDef("blended-base-equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = 0, start = true),
-    FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = 1, start = true)
+    FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = 1)
   )),
   FeatureDef("blended-base", bundles = Seq(
     FeatureBundle(dependency = Blended.securityBoot),
