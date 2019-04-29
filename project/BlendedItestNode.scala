@@ -1,7 +1,9 @@
 import sbt.Keys._
 import sbt._
-import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
 import phoenix.ProjectFactory
+import blended.sbt.dockercontainer.BlendedDockerContainerPlugin.{autoImport => DC}
+import blended.sbt.container.BlendedContainerPlugin.{autoImport => BC}
+import de.wayofquality.sbt.testlogconfig.TestLogConfig.{autoImport => TL}
 
 object BlendedItestNode extends ProjectFactory {
 
@@ -38,12 +40,12 @@ object BlendedItestNode extends ProjectFactory {
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
 
-      Test / testlogDefaultLevel := "debug",
+      Test / TL.testlogDefaultLevel := "debug",
 
       Test / resourceGenerators += Def.task {
         // trigger docker containers
-        (BlendedDockerDemoNode.project / BlendedDockerContainer.createDockerImage).value
-        (BlendedDockerDemoApacheds.project / BlendedDockerContainer.createDockerImage).value
+        (BlendedDockerDemoNode.project / DC.createDockerImage).value
+        (BlendedDockerDemoApacheds.project / DC.createDockerImage).value
         Seq()
       }
     )

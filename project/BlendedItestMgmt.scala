@@ -1,8 +1,9 @@
 import sbt._
 import sbt.Keys._
 import de.wayofquality.sbt.testlogconfig.TestLogConfig.autoImport._
-import blended.sbt.container.BlendedContainerPlugin.autoImport._
+import blended.sbt.container.BlendedContainerPlugin.{autoImport => BC}
 import phoenix.ProjectFactory
+import blended.sbt.dockercontainer.BlendedDockerContainerPlugin.{autoImport => DC}
 
 object BlendedItestMgmt extends ProjectFactory {
 
@@ -45,11 +46,11 @@ object BlendedItestMgmt extends ProjectFactory {
 
       Test / resourceGenerators += Def.task {
         // trigger docker container creation
-        (BlendedDockerDemoNode.project / BlendedDockerContainer.createDockerImage).value
-        (BlendedDockerDemoMgmt.project / BlendedDockerContainer.createDockerImage).value
+        (BlendedDockerDemoNode.project / DC.createDockerImage).value
+        (BlendedDockerDemoMgmt.project / DC.createDockerImage).value
 
         // copy deploymentpack used in a test case
-        val packFile = (BlendedDemoNode.project / packageDeploymentPack).value
+        val packFile = (BlendedDemoNode.project / BC.packageDeploymentPack).value
 
         // As we want to rename it, we must copy it, BUT
         // it is essential, that we don't copy under the final resources directory,

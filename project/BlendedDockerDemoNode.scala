@@ -1,7 +1,8 @@
 import sbt._
 import sbt.Keys._
-import blended.sbt.container.BlendedContainerPlugin.autoImport._
 import phoenix.ProjectFactory
+import blended.sbt.container.BlendedContainerPlugin.{autoImport => BC}
+import blended.sbt.dockercontainer.BlendedDockerContainerPlugin.{autoImport => DC}
 
 object BlendedDockerDemoNode extends ProjectFactory {
 
@@ -12,13 +13,11 @@ object BlendedDockerDemoNode extends ProjectFactory {
     override val projectDir = Some("docker/blended.docker.demo.node")
     override val ports = List(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
     override val folder = "node"
-    // TODO: no supported yet!
-    //    overlays = List()
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
-      BlendedDockerContainer.containerImage :=
+      DC.containerImage :=
         s"blended.demo.node_${scalaBinaryVersion.value}-${Blended.blendedVersion}" ->
-        (BlendedDemoNode.project / packageFullNoJreTarGz).value
+        (BlendedDemoNode.project / BC.packageFullNoJreTarGz).value
     )
 
   }

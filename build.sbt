@@ -53,7 +53,7 @@ lazy val root = {
   project
     .in(file("."))
     .settings(global)
-    .settings(PublishConfig.doPublish)
+//    .settings(PublishConfig.doPublish)
     .aggregate(
       blendedLauncherFeature,
       blendedDemoNodeResources,

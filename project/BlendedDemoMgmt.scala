@@ -6,7 +6,6 @@ import sbt.Keys._
 import sbt._
 
 object BlendedDemoMgmt extends ProjectFactory {
-
   object config extends BlendedContainer {
     override val projectName = "blended.demo.mgmt"
     override val description = "A sample blended management container"
@@ -42,5 +41,4 @@ object BlendedDemoMgmt extends ProjectFactory {
       }
     )
   }
-
 }
