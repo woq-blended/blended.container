@@ -31,7 +31,9 @@ trait BlendedDockerContainer extends ProjectSettings {
 
   def maintainer: String = s"Blended Team version: ${Blended.blendedVersion}"
 
-  override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(BlendedDockerContainerPlugin)
+  override def plugins: Seq[AutoPlugin] = super.plugins ++ Seq(
+    BlendedDockerContainerPlugin
+  )
 
   //////
 
@@ -57,5 +59,5 @@ trait BlendedDockerContainer extends ProjectSettings {
   override def deps: Seq[sbt.ModuleID] = containerDep.toList
 
   override def osgi = false
-  
+
 }
