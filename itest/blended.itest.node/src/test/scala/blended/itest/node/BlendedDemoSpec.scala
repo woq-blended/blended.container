@@ -44,6 +44,8 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   private[this] val log = Logger[BlendedDemoSpec]
 
+  private val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
+
   "The demo container should" - {
 
     "Define the sample Camel Route from SampleIn to SampleOut" in {
@@ -54,6 +56,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
         log = log,
+        headerCfg = headerCfg,
         connectionFactory = intCf,
         jmsDestination = Some(JmsQueue("SampleIn"))
       )
@@ -86,6 +89,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
         log = log,
+        headerCfg = headerCfg,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
@@ -121,6 +125,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
         log = log,
+        headerCfg = headerCfg,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
@@ -156,6 +161,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
         log = log,
+        headerCfg = headerCfg,
         connectionFactory = intCf,
         jmsDestination = Some(JmsQueue("internal.data.in"))
       )
