@@ -21,10 +21,10 @@ libraryDependencies ++= Seq(
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 
 // Generate logging config for test execution
-addSbtPlugin("de.wayofquality" % "sbt-testlogconfig" % "0.1.0-SNAPSHOT")
+addSbtPlugin("de.wayofquality.sbt" % "sbt-testlogconfig" % "0.1.0")
 
 // Filter resources (like Maven)
-addSbtPlugin("de.wayofquality" % "sbt-filterresources" % "0.1.1-SNAPSHOT")
+addSbtPlugin("de.wayofquality.sbt" % "sbt-filterresources" % "0.1.2")
 
 // Contains project dependency information from blended project as sbt plugin
 //libraryDependencies ++= Seq(
@@ -38,6 +38,6 @@ addSbtPlugin(
 //  "com.typesafe" % "config" % "1.3.3"
 //)
 
-addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1-SNAPSHOT")
+addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1.0")
 
-addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1-SNAPSHOT")
+addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1.1")

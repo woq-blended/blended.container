@@ -12,6 +12,4 @@ ADD files/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz /opt
 ADD files/profile.d /etc/profile.d
 RUN ln -s /opt/zulu8.33.0.1-jdk8.0.192-linux_x64 /opt/java && yum update -y && yum install -y glibc.i686 
 
-ADD files/jprofiler-bin.tgz /opt
-
 # End of Installation section
