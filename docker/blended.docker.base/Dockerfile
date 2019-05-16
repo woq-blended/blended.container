@@ -11,6 +11,4 @@ ADD files/jre-8u201-linux-x64.tar.gz /opt
 ADD files/profile.d /etc/profile.d
 RUN ln -s /opt/jre1.8.0_201 /opt/java && yum update -y && yum install -y glibc.i686 
 
-ADD files/jprofiler-bin.tgz /opt
-
 # End of Installation section
