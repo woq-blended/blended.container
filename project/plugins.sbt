@@ -32,12 +32,6 @@ addSbtPlugin(
   "de.wayofquality.blended" % "blended.dependencies" % "3.1-SNAPSHOT"
 )
 
-// We use this to materialize profiles to containers
-//libraryDependencies ++= Seq(
-//  "de.wayofquality.blended" %% "blended.updater.tools" % "3.1-SNAPSHOT",
-//  "com.typesafe" % "config" % "1.3.3"
-//)
-
 addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1.0")
 
 addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1.1")
