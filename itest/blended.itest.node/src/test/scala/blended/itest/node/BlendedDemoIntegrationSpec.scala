@@ -59,6 +59,6 @@ class BlendedDemoIntegrationSpec
         log.error(e)(s"Could not read container directory [$dir] of container [$ctr]")
     }
 
-    stopContainers(ctProxy)(timeout, testkit)
+    //stopContainers(ctProxy)(timeout, testkit)
   }
 }

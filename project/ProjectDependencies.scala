@@ -1,5 +1,4 @@
 import phoenix.Utils
-import sbt.Keys._
 import sbt._
 
 object ProjectDependencies extends blended.sbt.Dependencies {
@@ -41,7 +40,7 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val geronimoJaspic = "org.apache.geronimo.specs" % "geronimo-jaspic_1.0_spec" % "1.1"
   val geronimoJ2eeMgmtSpec = "org.apache.geronimo.specs" % "geronimo-j2ee-management_1.1_spec" % "1.0.1"
 
-  val hawtioWeb = "io.hawt" % "hawtio-web" % "1.5.8" withExplicitArtifacts (Vector(Artifact("hawtio-web", `type` = "war", extension = "war")))
+  val hawtioWeb = "io.hawt" % "hawtio-web" % "1.5.11" withExplicitArtifacts (Vector(Artifact("hawtio-web", `type` = "war", extension = "war")))
 
   protected def jetty(n: String) = "org.eclipse.jetty" % s"jetty-${n}" % jettyVersion
 
