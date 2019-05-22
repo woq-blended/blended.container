@@ -34,4 +34,4 @@ addSbtPlugin(
 
 addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1.0")
 
-addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1.2-SNAPSHOT")
+addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1.2")
