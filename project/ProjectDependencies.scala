@@ -65,6 +65,9 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val jlineBuiltins = "org.jline" % "jline-builtins" % "3.9.0"
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "3.0.1"
 
+  val jolokiaOsgi = "org.jolokia" % "jolokia-osgi" % jolokiaVersion
+  val jolokiaWar = "org.jolokia" % "jolokia-war" % jolokiaVersion withExplicitArtifacts(Vector(Artifact("jolokia-war", `type` = "war", extension = "war")))
+
   val lihaoyiPprint = "com.lihaoyi" %% "pprint" % "0.5.3"
 
   val reactiveStreams = "org.reactivestreams" % "reactive-streams" % "1.0.0.final"

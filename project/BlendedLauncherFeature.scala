@@ -18,6 +18,7 @@ object BlendedLauncherFeature extends ProjectFactory {
       BlendedLauncherFeatureCommons.project,
       BlendedLauncherFeatureHawtio.project,
       BlendedLauncherFeatureJetty.project,
+      BlendedLauncherFeatureJolokia.project,
       BlendedLauncherFeatureMgmtClient.project,
       BlendedLauncherFeatureMgmtServer.project,
       BlendedLauncherFeaturePersistence.project,
@@ -97,6 +98,12 @@ object BlendedLauncherFeatureHawtio extends ProjectFactory {
 object BlendedLauncherFeatureJetty extends ProjectFactory {
   object config extends FeatureProjectConfig {
     override val feature = BlendedFeatures.blendedJetty
+  }
+}
+
+object BlendedLauncherFeatureJolokia extends ProjectFactory {
+  object config extends FeatureProjectConfig {
+    override val feature = BlendedFeatures.blendedJolokia
   }
 }
 
