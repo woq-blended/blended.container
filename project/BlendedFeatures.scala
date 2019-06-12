@@ -51,7 +51,7 @@ object BlendedFeatures {
     FeatureBundle(dependency = logbackClassic),
     FeatureBundle(dependency = felixMetatype, start = true),
     FeatureBundle(dependency = typesafeConfig),
-    FeatureBundle(dependency = typesafeConfigSSL),
+    FeatureBundle(dependency = typesafeSslConfigCore),
     FeatureBundle(dependency = reactiveStreams),
     FeatureBundle(dependency = akkaActor),
     FeatureBundle(dependency = akkaSlf4j),

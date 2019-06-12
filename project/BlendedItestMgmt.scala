@@ -8,7 +8,7 @@ import blended.sbt.dockercontainer.BlendedDockerContainerPlugin.{autoImport => D
 object BlendedItestMgmt extends ProjectFactory {
 
   import ProjectDependencies._
-  
+
   object config extends ProjectSettings {
     override val projectName = "blended.itest.mgmt"
     override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
@@ -70,7 +70,6 @@ object BlendedItestMgmt extends ProjectFactory {
         Seq(targetFile)
       }
     )
-
   }
 
 }

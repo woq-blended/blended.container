@@ -45,7 +45,7 @@ object BlendedItestNode extends ProjectFactory {
       Test / resourceGenerators += Def.task {
         // trigger docker containers
         (BlendedDockerDemoNode.project / DC.createDockerImage).value
-        (BlendedDockerDemoApacheds.project / DC.createDockerImage).value
+        //(BlendedDockerDemoApacheds.project / DC.createDockerImage).value
         Seq()
       }
     )
