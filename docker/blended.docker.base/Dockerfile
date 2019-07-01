@@ -1,15 +1,32 @@
 # The basic image to run Blended containers
-FROM centos:centos7
+FROM alpine:3.10
 
-MAINTAINER Andreas Gies version: 2.0-SNAPSHOT
+MAINTAINER Andreas Gies 
+
+ENV USER=blended
+ENV UID=500
+ENV GID=500
+
+ENV JAVA_URL=https://cdn.azul.com/zulu/bin/zulu8.38.0.13-ca-jdk8.0.212-linux_musl_x64.tar.gz
 
 # Installation section
-RUN groupadd blended
-RUN useradd -d /home/blended -s /bin/bash -g blended -m blended
 
-# ADD https://cdn.azul.com/zulu/bin/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz /opt
-ADD files/zulu8.33.0.1-jdk8.0.192-linux_x64.tar.gz /opt
-ADD files/profile.d /etc/profile.d
-RUN ln -s /opt/zulu8.33.0.1-jdk8.0.192-linux_x64 /opt/java && yum update -y && yum install -y glibc.i686 
+RUN apk --no-cache add curl git openssh-client
+
+RUN addgroup -g "${GID}" "${USER}" \
+ && adduser \
+  --disabled-password \
+  --gecos "" \
+  --home "$(pwd)" \
+  --ingroup "$USER" \
+  --no-create-home \
+  --uid "$UID" \
+  "$USER"
+
+ADD files/profile.d /etc/profile.d  
+
+RUN mkdir -p /opt \
+ && curl ${JAVA_URL} | tar -xzC /opt \
+ && ln -s $(ls -d /opt/zulu*) /opt/java 
 
 # End of Installation section
