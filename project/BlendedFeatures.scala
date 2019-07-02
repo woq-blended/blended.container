@@ -1,5 +1,3 @@
-import sbt._
-import sbt.librarymanagement.{Constant, ModuleID}
 import blended.sbt.feature._
 
 object BlendedFeatures {
@@ -53,7 +51,7 @@ object BlendedFeatures {
     FeatureBundle(dependency = logbackClassic),
     FeatureBundle(dependency = felixMetatype, start = true),
     FeatureBundle(dependency = typesafeConfig),
-    FeatureBundle(dependency = typesafeConfigSSL),
+    FeatureBundle(dependency = typesafeSslConfigCore),
     FeatureBundle(dependency = reactiveStreams),
     FeatureBundle(dependency = akkaActor),
     FeatureBundle(dependency = akkaSlf4j),
@@ -115,6 +113,16 @@ object BlendedFeatures {
       FeatureBundle(dependency = commonsHttpclient),
       FeatureBundle(dependency = commonsBeanUtils),
       FeatureBundle(dependency = commonsConfiguration2)
+    )
+  )
+
+  lazy val blendedJolokia = Feature(
+    "blended.launcher.feature.jolokia",
+    features = Seq(
+      blendedJetty
+    ),
+    bundles = Seq(
+      FeatureBundle(dependency = jolokiaOsgi, start = true)
     )
   )
 

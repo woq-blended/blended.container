@@ -28,6 +28,7 @@ lazy val blendedLauncherFeatureCamel = BlendedLauncherFeatureCamel.project
 lazy val blendedLauncherFeatureCommons= BlendedLauncherFeatureCommons.project
 lazy val blendedLauncherFeatureHawtio = BlendedLauncherFeatureHawtio.project
 lazy val blendedLauncherFeatureJetty = BlendedLauncherFeatureJetty.project
+lazy val blendedLauncherFeatureJolokia = BlendedLauncherFeatureJolokia.project
 lazy val blendedLauncherFeatureMgmtClient = BlendedLauncherFeatureMgmtClient.project
 lazy val blendedLauncherFeatureMgmtServer = BlendedLauncherFeatureMgmtServer.project
 lazy val blendedLauncherFeaturePersistence = BlendedLauncherFeaturePersistence.project
