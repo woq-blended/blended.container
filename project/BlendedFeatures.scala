@@ -186,7 +186,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = jjwt),
       FeatureBundle(dependency = Blended.securityLoginApi),
       FeatureBundle(dependency = Blended.securityLoginImpl, start = true),
-      FeatureBundle(dependency = Blended.mgmtWs, start = true),
+      FeatureBundle(dependency = Blended.webSocket, start = true),
       FeatureBundle(dependency = Blended.securityLoginRest, start = true),
       FeatureBundle(dependency = Blended.mgmtUi, start = true)
     )
