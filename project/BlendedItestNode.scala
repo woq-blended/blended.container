@@ -8,7 +8,7 @@ import de.wayofquality.sbt.testlogconfig.TestLogConfig.{autoImport => TL}
 object BlendedItestNode extends ProjectFactory {
 
   import ProjectDependencies._
-  
+
   object config extends ProjectSettings {
     override val projectName = "blended.itest.node"
     override val description = "A sample integration test using docker to fire up the container(s) under test, execute the test suite and shutdown the container(s) afterwards"
@@ -45,7 +45,7 @@ object BlendedItestNode extends ProjectFactory {
       Test / resourceGenerators += Def.task {
         // trigger docker containers
         (BlendedDockerDemoNode.project / DC.createDockerImage).value
-        //(BlendedDockerDemoApacheds.project / DC.createDockerImage).value
+        (BlendedDockerDemoApacheds.project / DC.createDockerImage).value
         Seq()
       }
     )
