@@ -34,7 +34,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   implicit val system : ActorSystem = testKit.system
   implicit val materializer : Materializer = ActorMaterializer()
-  implicit val timeOut : FiniteDuration = 10.seconds
+  implicit val timeOut : FiniteDuration = 20.seconds
   implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
   private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
