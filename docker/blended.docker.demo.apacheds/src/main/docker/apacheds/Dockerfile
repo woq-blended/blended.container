@@ -1,19 +1,18 @@
 FROM atooni/blended-base:latest
 MAINTAINER Blended Team version: 2.4.0-RC6-SNAPSHOT
 
-RUN mkdir -p /opt/apacheds 
-
 ENV JAVA_HOME /opt/java
+ENV APACHEDS_VERSION 2.0.0.AM25
+ENV APACHEDS_URL http://archive.apache.org/dist/directory/apacheds/dist/${APACHEDS_VERSION}/apacheds-${APACHEDS_VERSION}.tar.gz
+
+RUN apk --no-cache add openldap-clients gettext vim bash
+
+RUN curl ${APACHEDS_URL} | tar -xzC /opt \
+ && ln -s $(ls -d /opt/apacheds*) /opt/apacheds
 
 ADD files /opt/apacheds
 
-RUN yum install -y -q openldap-clients gettext vim
-
-ADD apacheds-2.0.0-M24-x86_64.rpm /tmp
-
-RUN yum install -y -q /tmp/apacheds-2.0.0-M24-x86_64.rpm
-
 ENTRYPOINT ["/bin/bash", "-l", "/opt/apacheds/scripts/start.sh"]
 
-EXPOSE 10389 
+EXPOSE 10389
 

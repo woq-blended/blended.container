@@ -34,15 +34,18 @@ object BlendedDockerDemoApacheds extends ProjectFactory {
         IO.transfer(DC.containerImage.value._2, DC.dockerDir.value / DC.containerImage.value._2.getName())
 
         val dockerconf = Seq(
+
           "FROM atooni/blended-base:latest",
           s"MAINTAINER Blended Team version: ${Blended.blendedVersion}",
-          s"RUN mkdir -p /opt/${folder}",
           "ENV JAVA_HOME /opt/java",
-          s"ADD files /opt/${folder}",
-          "RUN yum install -y -q openldap-clients gettext vim",
-          s"ADD ${DC.containerImage.value._2.getName()} /tmp",
-          s"RUN yum install -y -q /tmp/${DC.containerImage.value._2.getName()}",
-          s"""ENTRYPOINT ["/bin/bash", "-l", "/opt/${folder}/scripts/start.sh"]"""
+          "ENV APACHEDS_VERSION 2.0.0.AM25",
+          "ENV APACHEDS_URL http://archive.apache.org/dist/directory/apacheds/dist/${APACHEDS_VERSION}/apacheds-${APACHEDS_VERSION}.tar.gz",
+          "ENV START_DELAY=10",
+          "RUN apk --no-cache add openldap-clients gettext vim bash",
+          "RUN curl ${APACHEDS_URL} | tar -xzC /opt \\",
+          " && ln -s $(ls -d /opt/apacheds*) /opt/apacheds",
+          "ADD files /opt/apacheds",
+          "ENTRYPOINT [\"/bin/bash\", \"-l\", \"/opt/apacheds/scripts/start.sh\"]"
         ) ++
           ports.map(p => s"EXPOSE ${p}")
 

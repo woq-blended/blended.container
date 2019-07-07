@@ -1,14 +1,11 @@
 #!/bin/bash
 
 set -e
-set -x
 
 export DOMAIN_NAME=blended
 export SYSTEM_PWD=blended
 
-START_DELAY=15
-
-APACHE_DS_VERSION=2.0.0_M24
+APACHEDS_CMD=/opt/apacheds/bin/apacheds.sh
 
 function shaPassword() {
   pwd=`echo -n $1 | md5sum | awk '{print $1}' | xxd -r -p | base64`
@@ -16,7 +13,7 @@ function shaPassword() {
 }
 
 function stopADS() {
-  /etc/init.d/apacheds-${APACHE_DS_VERSION}-default stop
+  ${APACHEDS_CMD} stop
 }
 
 function startADS() {
@@ -27,7 +24,7 @@ function startADS() {
     START_MODE=start
   fi
 
-  /etc/init.d/apacheds-${APACHE_DS_VERSION}-default $START_MODE
+  ${APACHEDS_CMD} $START_MODE
 
   if [[ -n $2 ]]; then
     sleep $2
@@ -84,10 +81,12 @@ loadLdif secret admin_pwd
 # Restart to apply changes
 restartADS start $START_DELAY
 
+netstat -anp | grep 10389
+
 # create a new partition
 loadLdif $SYSTEM_PWD partition
-ldapdelete "ads-partitionId=example,ou=partitions,ads-directoryServiceId=default,ou=config" -r -p 10389 -h localhost -D "uid=admin,ou=system" -w $SYSTEM_PWD
-ldapdelete "dc=example,dc=com" -p 10389 -h localhost -D "uid=admin,ou=system" -r -w $SYSTEM_PWD
+ldapdelete -r -H ldap://localhost:10389 -D "uid=admin,ou=system" -w $SYSTEM_PWD "ads-partitionId=example,ou=partitions,ads-directoryServiceId=default,ou=config"
+ldapdelete -r -H ldap://localhost:10389 -D "uid=admin,ou=system" -r -w $SYSTEM_PWD "dc=example,dc=com"
 
 restartADS start $START_DELAY
 
@@ -105,5 +104,7 @@ addToGroup admins "uid=andreas,ou=users,o=blended"
 addGroup blended ""uid=blended,ou=users,o=blended""
 addToGroup blended "uid=andreas,ou=users,o=blended"
 
-restartADS console
+restartADS start
+
+top
 
