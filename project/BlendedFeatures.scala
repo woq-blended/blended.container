@@ -163,6 +163,28 @@ object BlendedFeatures {
     )
   )
 
+  lazy val blendedLogin = Feature(
+    "blended.launcher.feature.login",
+    features = Seq(
+      blendedBase,
+      blendedAkkaHttp,
+      blendedSecurity,
+      blendedPersistence
+    ),
+    bundles = Seq(
+      // Required for Json Web Token
+      FeatureBundle(dependency = jacksonAnnotations),
+      FeatureBundle(dependency = jacksonCore),
+      FeatureBundle(dependency = jacksonBind),
+      // Required for Login API
+      FeatureBundle(dependency = jjwt),
+      FeatureBundle(dependency = Blended.securityLoginApi),
+      FeatureBundle(dependency = Blended.securityLoginImpl, start = true),
+      FeatureBundle(dependency = Blended.webSocket, start = true),
+      FeatureBundle(dependency = Blended.securityLoginRest, start = true),
+    )
+  )
+
   lazy val blendedMgmtServer = Feature(
     "blended.launcher.feature.mgmt.server",
     features = Seq(
@@ -171,7 +193,8 @@ object BlendedFeatures {
       blendedSecurity,
       blendedSsl,
       blendedSpring,
-      blendedPersistence
+      blendedPersistence,
+      blendedLogin
     ),
     bundles = Seq(
       FeatureBundle(dependency = Blended.mgmtRest, start = true),
@@ -180,14 +203,6 @@ object BlendedFeatures {
       FeatureBundle(dependency = Blended.updaterRemote, start = true),
       FeatureBundle(dependency = concurrentLinkedHashMapLru),
       FeatureBundle(dependency = jsr305),
-      FeatureBundle(dependency = jacksonAnnotations),
-      FeatureBundle(dependency = jacksonCore),
-      FeatureBundle(dependency = jacksonBind),
-      FeatureBundle(dependency = jjwt),
-      FeatureBundle(dependency = Blended.securityLoginApi),
-      FeatureBundle(dependency = Blended.securityLoginImpl, start = true),
-      FeatureBundle(dependency = Blended.webSocket, start = true),
-      FeatureBundle(dependency = Blended.securityLoginRest, start = true),
       FeatureBundle(dependency = Blended.mgmtUi, start = true)
     )
   )

@@ -37,6 +37,7 @@ lazy val blendedLauncherFeatureSecurity = BlendedLauncherFeatureSecurity.project
 lazy val blendedLauncherFeatureSpring = BlendedLauncherFeatureSpring.project
 lazy val blendedLauncherFeatureSsl = BlendedLauncherFeatureSsl.project
 lazy val blendedLauncherFeatureStreams = BlendedLauncherFeatureStreams.project
+lazy val blendedLauncherFeaturesLogin = BlendedLauncherFeatureLogin.project
 // aggregator
 lazy val blendedLauncherFeature = BlendedLauncherFeature.project
 
@@ -46,7 +47,7 @@ lazy val blendedDemoNode = BlendedDemoNode.project
 lazy val blendedDemoMgmt = BlendedDemoMgmt.project
 lazy val blendedDockerDemoNode = BlendedDockerDemoNode.project
 lazy val blendedDockerDemoMgmt = BlendedDockerDemoMgmt.project
-lazy val blendedDockerDemoApacheds = BlendedDockerDemoApacheds.project
+//lazy val blendedDockerDemoApacheds = BlendedDockerDemoApacheds.project
 lazy val blendedItestNode = BlendedItestNode.project
 lazy val blendedItestMgmt = BlendedItestMgmt.project
 
@@ -54,7 +55,6 @@ lazy val root = {
   project
     .in(file("."))
     .settings(global)
-//    .settings(PublishConfig.doPublish)
     .aggregate(
       blendedLauncherFeature,
       blendedDemoNodeResources,
@@ -63,7 +63,7 @@ lazy val root = {
       blendedDemoMgmt,
       blendedDockerDemoNode,
       blendedDockerDemoMgmt,
-      blendedDockerDemoApacheds,
+      //blendedDockerDemoApacheds,
       blendedItestNode,
       blendedItestMgmt
     )

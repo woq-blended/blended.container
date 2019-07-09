@@ -38,7 +38,7 @@ class TestContainerProxy(timeout: FiniteDuration)
     )
 
     // the url to the ldap server
-    val ldapUrl : String = cuts("apacheds_0").url("ldap", testHost, "ldap")
+    //val ldapUrl : String = cuts("apacheds_0").url("ldap", testHost, "ldap")
 
     val internalCf : IdAwareConnectionFactory = SimpleIdAwareConnectionFactory(
       vendor = "activemq",
@@ -56,7 +56,7 @@ class TestContainerProxy(timeout: FiniteDuration)
 
     TestConnector.put("jmxRest", jmxRest)
     TestConnector.put("jolokia", jolokia)
-    TestConnector.put("ldap", ldapUrl)
+    //TestConnector.put("ldap", ldapUrl)
     TestConnector.put("internalCf", internalCf)
     TestConnector.put("externalCf", externalCf)
 

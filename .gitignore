@@ -24,7 +24,6 @@ blended.sslcontext/notes.txt
 .idea
 *.iml
 
-# Maven settings and generated files
 .mvn/maven.settings
 .mvn/maven.config
 .polyglot.pom.scala
@@ -32,6 +31,7 @@ blended.sslcontext/notes.txt
 pom.xml
 target/
 .bloop/
+.metals
 
 # SBT files
 /.sbtopts

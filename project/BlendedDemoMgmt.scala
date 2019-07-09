@@ -36,7 +36,8 @@ object BlendedDemoMgmt extends ProjectFactory {
           (BlendedLauncherFeatureAkkaHttp.project / featureGenerate).value,
           (BlendedLauncherFeaturePersistence.project / featureGenerate).value,
           (BlendedLauncherFeatureStreams.project / featureGenerate).value,
-          (BlendedLauncherFeatureSsl.project / featureGenerate).value
+          (BlendedLauncherFeatureSsl.project / featureGenerate).value,
+          (BlendedLauncherFeatureLogin.project / featureGenerate).value
         )
       }
     )

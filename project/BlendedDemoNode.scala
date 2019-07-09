@@ -22,7 +22,7 @@ object BlendedDemoNode extends ProjectFactory {
       materializeExtraDeps += {
         val file = (BlendedDemoNodeResources.project / Universal / packageBin).value
         val artifact = (BlendedDemoNodeResources.project / artifacts).value.filter(a => a.`type` == "zip" && a.extension == "zip").head
-        val moduleId: ModuleID = (Blended.blendedOrganization %% (BlendedDemoNodeResources.project / name).value % Blended.blendedVersion)
+        val moduleId: ModuleID = Blended.blendedOrganization %% (BlendedDemoNodeResources.project / name).value % Blended.blendedVersion
         moduleId.artifacts(artifact) -> file
       },
       materializeExtraFeatures ++= {
@@ -34,7 +34,6 @@ object BlendedDemoNode extends ProjectFactory {
           (BlendedLauncherFeatureSsl.project / featureGenerate).value,
           (BlendedLauncherFeatureJetty.project / featureGenerate).value,
           (BlendedLauncherFeatureHawtio.project / featureGenerate).value,
-          //(BlendedLauncherFeatureJolokia.project / featureGenerate).value,
           (BlendedLauncherFeatureSpring.project / featureGenerate).value,
           (BlendedLauncherFeatureActivemq.project / featureGenerate).value,
           (BlendedLauncherFeatureCamel.project / featureGenerate).value,
@@ -43,7 +42,8 @@ object BlendedDemoNode extends ProjectFactory {
           (BlendedLauncherFeatureAkkaHttp.project / featureGenerate).value,
           (BlendedLauncherFeaturePersistence.project / featureGenerate).value,
           (BlendedLauncherFeatureStreams.project / featureGenerate).value,
-          (BlendedLauncherFeatureSamples.project / featureGenerate).value
+          (BlendedLauncherFeatureSamples.project / featureGenerate).value,
+          (BlendedLauncherFeatureLogin.project / featureGenerate).value
         )
       }
     )

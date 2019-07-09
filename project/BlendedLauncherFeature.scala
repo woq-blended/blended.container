@@ -154,3 +154,9 @@ object BlendedLauncherFeatureSsl extends ProjectFactory {
     override val feature = BlendedFeatures.blendedSsl
   }
 }
+
+object BlendedLauncherFeatureLogin extends ProjectFactory {
+  object config extends FeatureProjectConfig {
+    override val feature = BlendedFeatures.blendedLogin
+  }
+}
