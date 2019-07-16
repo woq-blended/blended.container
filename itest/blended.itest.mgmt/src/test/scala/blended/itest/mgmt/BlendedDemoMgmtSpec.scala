@@ -65,8 +65,8 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
       assert(remoteContState.size >= 3)
       remoteContState
     }
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.mgmt_${scalaBinVersion}")).size == 1)
-    assert(rcs.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}")).size == 2)
+    assert(rcs.count(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.mgmt_${scalaBinVersion}")) == 1)
+    assert(rcs.count(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}")) == 2)
   }
 
   "Upload a deployment pack to mgmt node" in logException {
@@ -86,8 +86,8 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
-    assert(rcs.size >= 1)
-    assert(rcs.find(_.name == s"blended.demo.node_${scalaBinVersion}").isDefined)
+    assert(rcs.nonEmpty)
+    assert(rcs.exists(_.name == s"blended.demo.node_${scalaBinVersion}"))
   }
 
   "Upload two overlays to mgmt node" in logException {
@@ -134,8 +134,8 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
     val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
     val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
     assert(ocs.size >= 2)
-    assert(ocs.find(_.name == "jvm-medium").isDefined)
-    assert(ocs.find(_.name == "jvm-large").isDefined)
+    assert(ocs.exists(_.name == "jvm-medium"))
+    assert(ocs.exists(_.name == "jvm-large"))
   }
 
   case class RolloutCtx(profileName: String, profileVersion: String, overlayName: String, overlayVersion: String, containerId: String)
@@ -166,7 +166,7 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
     val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
     val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
-    assert(rcs.size >= 1)
+    assert(rcs.nonEmpty)
 
     // the new profile to apply
     val profile = rcs.find(_.name == s"blended.demo.node_${scalaBinVersion}").get
