@@ -13,7 +13,6 @@ BlendedModel(
   dependencies = Seq(
     scalaLib,
     Blended.utilLogging,
-    Blended.dockerDemoApacheDS % "provided",
     Blended.dockerDemoNode % "provided",
     activeMqClient % "test",
     Blended.itestSupport % "test",
