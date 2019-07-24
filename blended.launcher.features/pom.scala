@@ -252,7 +252,7 @@ val features = Seq(
       "blended-persistence"
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Blended.streams)
+      FeatureBundle(dependency = Blended.streams, start = true)
     )
   ),
   FeatureDef(
