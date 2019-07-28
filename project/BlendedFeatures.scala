@@ -302,7 +302,7 @@ object BlendedFeatures {
       blendedPersistence
     ),
     bundles = Seq(
-      FeatureBundle(dependency = Blended.streams)
+      FeatureBundle(dependency = Blended.streams, start = true)
     )
   )
 
