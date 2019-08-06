@@ -62,7 +62,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("SampleOut").get,
         log = log
@@ -95,7 +95,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("DispatcherOut").get,
         log = log
@@ -131,7 +131,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("response").get,
         log = log
@@ -167,7 +167,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("response").get,
         log = log
