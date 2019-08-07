@@ -34,7 +34,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   implicit val system : ActorSystem = testKit.system
   implicit val materializer : Materializer = ActorMaterializer()
-  implicit val timeOut : FiniteDuration = 20.seconds
+  implicit val timeOut : FiniteDuration = 30.seconds
   implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
   private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
@@ -231,32 +231,31 @@ class BlendedDemoSpec(implicit testKit: TestKit)
     }
 
     "Allow to execute an arbitrary command on the container" in {
-      pending
-//      val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
-//
-//      implicit val to : Timeout = Timeout(timeOut)
-//      val test = Promise[Unit]()
-//
-//      execContainerCommand(
-//        ctProxy = ctProxy,
-//        ctName = "node_0",
-//        cmdTimeout = 5.seconds,
-//        user = "blended",
-//        cmd = "ls -al /opt/node".split(" "): _*
-//      ) onComplete {
-//        case Failure(t) => test.failure(fail(t.getMessage()))
-//        case Success(r) =>
-//          r.result match {
-//            case Left(t) => test.failure(fail(t.getMessage()))
-//            case Right(er) =>
-//              test.complete(Try {
-//                log.info(s"Command output is [\n${new String(er._2.out)}\n]")
-//                er._2.rc should be(0)
-//              })
-//          }
-//      }
-//
-//      Await.result(test.future, timeOut)
+      val ctProxy : ActorRef = TestConnector.property[ActorRef]("ctProxy").get
+
+      implicit val to : Timeout = Timeout(timeOut)
+      val test = Promise[Unit]()
+
+      execContainerCommand(
+        ctProxy = ctProxy,
+        ctName = "node_0",
+        cmdTimeout = 5.seconds,
+        user = "blended",
+        cmd = "ls -al /opt/node".split(" "): _*
+      ) onComplete {
+        case Failure(t) => test.failure(fail(t.getMessage()))
+        case Success(r) =>
+          r.result match {
+            case Left(t) => test.failure(fail(t.getMessage()))
+            case Right(er) =>
+              test.complete(Try {
+                log.info(s"Command output is [\n${new String(er._2.out)}\n]")
+                er._2.rc should be(0)
+              })
+          }
+      }
+
+      Await.result(test.future, timeOut)
     }
 
     "Only support TLSv1.2" in {

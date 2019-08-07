@@ -44,14 +44,16 @@ class TestContainerProxy(timeout: FiniteDuration)
       vendor = "activemq",
       provider = "internal",
       clientId = "spec-internal",
-      cf = new ActiveMQConnectionFactory(internal)
+      cf = new ActiveMQConnectionFactory(internal),
+      minReconnect = 10.seconds
     )
 
     val externalCf : IdAwareConnectionFactory = SimpleIdAwareConnectionFactory(
       vendor = "activemq",
       provider = "external",
       clientId = "spec-external",
-      cf = new ActiveMQConnectionFactory(external)
+      cf = new ActiveMQConnectionFactory(external),
+      minReconnect = 10.seconds
     )
 
     TestConnector.put("jmxRest", jmxRest)
@@ -74,7 +76,7 @@ class TestContainerProxy(timeout: FiniteDuration)
       JMSAvailableCondition(externalCf, Some(timeout)),
       JolokiaAvailableCondition(jolokia, Some(timeout)),
       CamelContextExistsCondition(jolokia,  "BlendedSampleContext", Some(timeout)),
-      JMSConnectedCondition(jolokia, "activemq", "activemq", Some(timeout))
+      JMSConnectedCondition(jolokia, "activemq", "internal", Some(timeout))
     )
   }
 }
