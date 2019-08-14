@@ -13,7 +13,7 @@ import blended.security.ssl.SslContextInfo
 import blended.streams.jms.{JmsEnvelopeHeader, JmsProducerSettings, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
 import blended.streams.testsupport._
-import blended.streams.transaction.FlowHeaderConfig
+import blended.streams.FlowHeaderConfig
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.FileHelper
 import blended.util.logging.Logger
@@ -64,7 +64,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("SampleOut").get,
         log = log
@@ -97,7 +97,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("DispatcherOut").get,
         log = log
@@ -133,7 +133,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("response").get,
         log = log
@@ -169,7 +169,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       sendMessages(pSettings, log, testMessage)
 
       val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig(prefix = "App"),
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("response").get,
         log = log
