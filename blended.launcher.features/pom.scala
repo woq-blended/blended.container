@@ -59,7 +59,7 @@ val features = Seq(
     FeatureBundle(dependency = Blended.domino),
     FeatureBundle(dependency = Blended.mgmtBase, start = true),
     FeatureBundle(dependency = Blended.prickle),
-    FeatureBundle(dependency = Blended.mgmtServiceJmx, start = true)
+    FeatureBundle(dependency = Blended.mgmtServiceJmx)
   )),
   FeatureDef(
     "blended-activemq",
