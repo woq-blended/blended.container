@@ -61,7 +61,7 @@ object BlendedFeatures {
     FeatureBundle(dependency = Blended.domino),
     FeatureBundle(dependency = Blended.mgmtBase, start = true),
     FeatureBundle(dependency = Blended.prickle),
-    FeatureBundle(dependency = Blended.mgmtServiceJmx, start = true)
+    FeatureBundle(dependency = Blended.mgmtServiceJmx)
   ))
 
   lazy val blendedActivemq = Feature(

@@ -13,7 +13,7 @@ import blended.security.ssl.SslContextInfo
 import blended.streams.jms.{JmsEnvelopeHeader, JmsProducerSettings, JmsStreamSupport}
 import blended.streams.message.{FlowEnvelope, FlowMessage}
 import blended.streams.testsupport._
-import blended.streams.transaction.FlowHeaderConfig
+import blended.streams.FlowHeaderConfig
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.FileHelper
 import blended.util.logging.Logger
