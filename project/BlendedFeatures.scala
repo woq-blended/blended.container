@@ -298,8 +298,7 @@ object BlendedFeatures {
   lazy val blendedStreams = Feature(
     "blended.launcher.feature.streams",
     features = Seq(
-      blendedBase,
-      blendedPersistence
+      blendedBase
     ),
     bundles = Seq(
       FeatureBundle(dependency = Blended.streams, start = true)
