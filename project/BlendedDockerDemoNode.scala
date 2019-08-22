@@ -15,10 +15,11 @@ object BlendedDockerDemoNode extends ProjectFactory {
     override val folder = "node"
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
+      DC.baseImage := "atooni/zulu-8-alpine:1.0.1",
+
       DC.containerImage :=
         s"blended.demo.node_${scalaBinaryVersion.value}-${Blended.blendedVersion}" ->
         (BlendedDemoNode.project / BC.packageFullNoJreTarGz).value
     )
-
   }
 }

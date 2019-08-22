@@ -15,6 +15,8 @@ object BlendedDockerDemoMgmt extends ProjectFactory {
     override val folder = "mgmt"
 
     override def settings: Seq[sbt.Setting[_]] = super.settings ++ Seq(
+      DC.baseImage := "atooni/zulu-8-alpine:1.0.1",
+
       DC.containerImage :=
         s"blended.demo.mgmt_${scalaBinaryVersion.value}-${Blended.blendedVersion}" ->
         (BlendedDemoMgmt.project / BC.packageFullNoJreTarGz).value
