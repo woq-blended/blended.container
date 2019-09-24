@@ -301,8 +301,6 @@ object BlendedFeatures {
       FeatureBundle(dependency = Blended.jmsBridge, start = true),
       FeatureBundle(dependency = Blended.streamsDispatcher, start = true),
       FeatureBundle(dependency = Blended.activemqClient, start = true),
-      FeatureBundle(dependency = Blended.samplesCamel, start = true),
-      FeatureBundle(dependency = Blended.samplesJms, start = true),
       FeatureBundle(dependency = Blended.file),
       FeatureBundle(dependency = Blended.akkaHttpSampleHelloworld, start = true)
     )
