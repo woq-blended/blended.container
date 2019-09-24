@@ -75,7 +75,6 @@ class TestContainerProxy(timeout: FiniteDuration)
       JMSAvailableCondition(internalCf, Some(timeout)),
       JMSAvailableCondition(externalCf, Some(timeout)),
       JolokiaAvailableCondition(jolokia, Some(timeout)),
-      CamelContextExistsCondition(jolokia,  "BlendedSampleContext", Some(timeout)),
       JMSConnectedCondition(jolokia, "activemq", "internal", Some(timeout))
     )
   }

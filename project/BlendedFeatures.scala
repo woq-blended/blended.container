@@ -81,20 +81,6 @@ object BlendedFeatures {
     )
   )
 
-  lazy val blendedCamel = Feature(
-    "blended.launcher.feature.camel",
-    features = Seq(
-      blendedSpring
-    ),
-    bundles = Seq(
-      FeatureBundle(dependency = geronimoJms11Spec),
-      FeatureBundle(dependency = camelCore),
-      FeatureBundle(dependency = camelSpring),
-      FeatureBundle(dependency = camelJms),
-      FeatureBundle(dependency = Blended.camelUtils)
-    )
-  )
-
   lazy val blendedCommons = Feature(
     "blended.launcher.feature.commons",
     bundles = Seq(
@@ -181,7 +167,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = Blended.securityLoginApi),
       FeatureBundle(dependency = Blended.securityLoginImpl, start = true),
       FeatureBundle(dependency = Blended.webSocket, start = true),
-      FeatureBundle(dependency = Blended.securityLoginRest, start = true),
+      FeatureBundle(dependency = Blended.securityLoginRest, start = true)
     )
   )
 
@@ -274,7 +260,6 @@ object BlendedFeatures {
     "blended.launcher.feature.akka.http.modules",
     features = Seq(
       blendedSpring,
-      blendedCamel,
       blendedAkkaHttp
     ),
     bundles = Seq(
@@ -310,7 +295,6 @@ object BlendedFeatures {
     features = Seq(
       blendedAkkaHttp,
       blendedActivemq,
-      blendedCamel,
       blendedStreams
     ),
     bundles = Seq(
@@ -323,5 +307,4 @@ object BlendedFeatures {
       FeatureBundle(dependency = Blended.akkaHttpSampleHelloworld, start = true)
     )
   )
-
 }

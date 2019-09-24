@@ -46,39 +46,6 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   "The demo container should" - {
 
-    "Define the sample Camel Route from SampleIn to SampleOut" in {
-
-      val testMessage = FlowEnvelope(
-        FlowMessage("Hello Blended!")(FlowMessage.props("foo" -> "bar").get)
-      )
-
-      val pSettings : JmsProducerSettings = JmsProducerSettings(
-        log = log,
-        headerCfg = headerCfg,
-        connectionFactory = intCf,
-        jmsDestination = Some(JmsQueue("SampleIn"))
-      )
-
-      sendMessages(pSettings, log, testMessage)
-
-      val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig.create(prefix = "App"),
-        cf = intCf,
-        dest = JmsDestination.create("SampleOut").get,
-        log = log
-      )
-
-      val errorsFut = outColl.result.map { msgs =>
-        FlowMessageAssertion.checkAssertions(msgs:_*)(
-          ExpectedMessageCount(1),
-          ExpectedBodies(Some("Hello Blended!")),
-          ExpectedHeaders("foo" -> "bar")
-        )
-      }
-
-      Await.result(errorsFut, timeOut + 1.second) should be (empty)
-    }
-
     "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
 
       val testMessage : FlowEnvelope = FlowEnvelope(

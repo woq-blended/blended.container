@@ -24,7 +24,6 @@ lazy val blendedLauncherFeatureAkkaHttpModules = BlendedLauncherFeatureAkkaHttpM
 lazy val blendedLauncherFeatureBase = BlendedLauncherFeatureBase.project
 lazy val blendedLauncherFeatureBaseEquinox = BlendedLauncherFeatureBaseEquinox.project
 lazy val blendedLauncherFeatureBaseFelix = BlendedLauncherFeatureBaseFelix.project
-lazy val blendedLauncherFeatureCamel = BlendedLauncherFeatureCamel.project
 lazy val blendedLauncherFeatureCommons= BlendedLauncherFeatureCommons.project
 lazy val blendedLauncherFeatureHawtio = BlendedLauncherFeatureHawtio.project
 lazy val blendedLauncherFeatureJetty = BlendedLauncherFeatureJetty.project
@@ -47,7 +46,6 @@ lazy val blendedDemoNode = BlendedDemoNode.project
 lazy val blendedDemoMgmt = BlendedDemoMgmt.project
 lazy val blendedDockerDemoNode = BlendedDockerDemoNode.project
 lazy val blendedDockerDemoMgmt = BlendedDockerDemoMgmt.project
-//lazy val blendedDockerDemoApacheds = BlendedDockerDemoApacheds.project
 lazy val blendedItestNode = BlendedItestNode.project
 lazy val blendedItestMgmt = BlendedItestMgmt.project
 
@@ -63,7 +61,6 @@ lazy val root = {
       blendedDemoMgmt,
       blendedDockerDemoNode,
       blendedDockerDemoMgmt,
-      //blendedDockerDemoApacheds,
       blendedItestNode,
       blendedItestMgmt
     )

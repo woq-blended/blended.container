@@ -1,5 +1,4 @@
 import sbt._
-import sbt.Keys._
 import blended.sbt.feature._
 import blended.sbt.feature.BlendedFeaturePlugin.autoImport._
 import phoenix.ProjectFactory
@@ -14,7 +13,6 @@ object BlendedLauncherFeature extends ProjectFactory {
       BlendedLauncherFeatureBase.project,
       BlendedLauncherFeatureBaseEquinox.project,
       BlendedLauncherFeatureBaseFelix.project,
-      BlendedLauncherFeatureCamel.project,
       BlendedLauncherFeatureCommons.project,
       BlendedLauncherFeatureHawtio.project,
       BlendedLauncherFeatureJetty.project,
@@ -74,12 +72,6 @@ object BlendedLauncherFeatureBaseEquinox extends ProjectFactory {
 object BlendedLauncherFeatureBaseFelix extends ProjectFactory {
   object config extends FeatureProjectConfig {
     override val feature = BlendedFeatures.blendedBaseFelix
-  }
-}
-
-object BlendedLauncherFeatureCamel extends ProjectFactory {
-  object config extends FeatureProjectConfig {
-    override val feature = BlendedFeatures.blendedCamel
   }
 }
 

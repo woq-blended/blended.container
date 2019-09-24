@@ -36,7 +36,6 @@ object BlendedDemoNode extends ProjectFactory {
           (BlendedLauncherFeatureHawtio.project / featureGenerate).value,
           (BlendedLauncherFeatureSpring.project / featureGenerate).value,
           (BlendedLauncherFeatureActivemq.project / featureGenerate).value,
-          (BlendedLauncherFeatureCamel.project / featureGenerate).value,
           (BlendedLauncherFeatureSecurity.project / featureGenerate).value,
           (BlendedLauncherFeatureMgmtClient.project / featureGenerate).value,
           (BlendedLauncherFeatureAkkaHttp.project / featureGenerate).value,

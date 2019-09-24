@@ -15,7 +15,6 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val ariesUtil = "org.apache.aries" % "org.apache.aries.util" % "1.1.0"
   val asmAll = "org.ow2.asm" % "asm-all" % "4.1"
 
-  val camelSpring = "org.apache.camel" % "camel-spring" % camelVersion
   val commonsConfiguration2 = "org.apache.commons" % "commons-configuration2" % "2.2"
   val commonsCollections = "org.apache.commons" % "com.springsource.org.apache.commons.collections" % "3.2.1"
   val commonsDiscovery = "org.apache.commons" % "com.springsource.org.apache.commons.discovery" % "0.4.0"
