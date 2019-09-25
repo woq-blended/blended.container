@@ -3,7 +3,7 @@ package blended.itest.node
 import akka.actor.{ActorSystem, Props}
 import blended.itestsupport.condition.{Condition, SequentialComposedCondition}
 import blended.itestsupport.jms.{JMSAvailableCondition, JMSConnectedCondition}
-import blended.itestsupport.jolokia.{CamelContextExistsCondition, JolokiaAvailableCondition}
+import blended.itestsupport.jolokia.JolokiaAvailableCondition
 import blended.itestsupport.{ContainerUnderTest, DockerbasedTestconnectorSetupActor, TestConnector, TestConnectorSetup}
 import blended.jms.utils.{IdAwareConnectionFactory, SimpleIdAwareConnectionFactory}
 import blended.jolokia.{JolokiaAddress, JolokiaClient}
