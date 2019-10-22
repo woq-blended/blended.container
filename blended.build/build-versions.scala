@@ -1,7 +1,7 @@
 object BlendedVersions {
 
   val blendedGroupId = "de.wayofquality.blended"
-  val blendedVersion = "3.0.6"
+  val blendedVersion = "3.0.7-SNAPSHOT"
 
   val javaVersion = "1.8"
 
@@ -25,7 +25,7 @@ object BlendedVersions {
 
   val dockerJavaVersion = "3.0.13"
 
-  val jettyVersion = "9.4.8.v20171121"
+  val jettyVersion = "9.4.21.v20190926"
   val jolokiaVersion = "1.5.0"
 
   val parboiledVersion = "1.1.6"
