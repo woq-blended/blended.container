@@ -65,7 +65,9 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("DispatcherOut").get,
-        log = log
+        log = log,
+        completeOn = Some(l => l.size == 1),
+        timeout = None
       )
 
       val errorsFut = outColl.result.map { msgs =>
@@ -101,7 +103,9 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("response").get,
-        log = log
+        log = log,
+        completeOn = Some(l => l.size == 1),
+        timeout = None
       )
 
       val errorsFut = outColl.result.map { msgs =>
@@ -137,7 +141,9 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("response").get,
-        log = log
+        log = log,
+        completeOn = Some(l => l.size == 1),
+        timeout = None
       )
 
       val errorsFut = outColl.result.map { msgs =>
