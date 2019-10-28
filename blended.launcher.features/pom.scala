@@ -42,11 +42,6 @@ val features = Seq(
     FeatureBundle(dependency = felixConfigAdmin, start = true),
     FeatureBundle(dependency = felixEventAdmin, start = true),
     FeatureBundle(dependency = felixFileinstall, start = true),
-    FeatureBundle(dependency = slf4jJcl),
-    FeatureBundle(dependency = slf4jJul),
-    FeatureBundle(dependency = slf4j),
-    FeatureBundle(dependency = logbackCore),
-    FeatureBundle(dependency = logbackClassic),
     FeatureBundle(dependency = felixMetatype, start = true),
     FeatureBundle(dependency = typesafeConfig),
     FeatureBundle(dependency = typesafeConfigSSL),
@@ -104,8 +99,7 @@ val features = Seq(
     FeatureBundle(dependency = commonsIo),
     FeatureBundle(dependency = commonsCodec),
     FeatureBundle(dependency = commonsHttpclient),
-    FeatureBundle(dependency = commonsBeanUtils),
-    FeatureBundle(dependency = commonsConfiguration2)
+    FeatureBundle(dependency = commonsBeanUtils)
   )),
   FeatureDef(
     "blended-hawtio",

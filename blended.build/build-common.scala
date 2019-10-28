@@ -211,6 +211,16 @@ object BlendedModel {
       ),
       id = "SpringExternalBundles",
       url = "http://repository.springsource.com/maven/bundles/external"
+    ),
+    Repository(
+      releases = RepositoryPolicy(
+        enabled = true
+      ),
+      snapshots = RepositoryPolicy(
+        enabled = false
+      ),
+      id = "SpringLibs",
+      url = "https://repo.spring.io/libs-release"
     )
   )
 
