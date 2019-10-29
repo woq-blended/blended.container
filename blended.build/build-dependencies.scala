@@ -194,7 +194,7 @@ object Deps {
   val slf4jLog4j12 = "org.slf4j" % "slf4j-log4j12" % BlendedVersions.slf4jVersion
 
   val snakeyaml = "org.yaml" % "snakeyaml" % "1.18"
-  
+
   val sprayJson = "io.spray" %% s"spray-json" % BlendedVersions.sprayVersion
 
   private def spring(n: String) = "org.apache.servicemix.bundles" % s"org.apache.servicemix.bundles.spring-${n}" % BlendedVersions.springVersion
@@ -240,6 +240,7 @@ object Blended {
   val activemqClient = blended("blended.activemq.client")
   val activemqDefaultbroker = blended("blended.activemq.defaultbroker")
   val akka = blended("blended.akka")
+  val akkaLogging = blended("blended.akka.logging")
   val akkaHttp = blended("blended.akka.http")
   val akkaHttpApi = blended("blended.akka.http.api")
   val akkaHttpJmsQueue = blended("blended.akka.http.jmsqueue")
