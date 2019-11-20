@@ -92,8 +92,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = commonsIo),
       FeatureBundle(dependency = commonsCodec),
       FeatureBundle(dependency = commonsHttpclient),
-      FeatureBundle(dependency = commonsBeanUtils),
-      FeatureBundle(dependency = commonsConfiguration2)
+      FeatureBundle(dependency = commonsBeanUtils)
     )
   )
 
