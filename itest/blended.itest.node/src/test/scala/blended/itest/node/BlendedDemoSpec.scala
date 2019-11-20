@@ -11,7 +11,7 @@ import blended.itestsupport.{BlendedIntegrationTestSupport, TestConnector}
 import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination, JmsQueue}
 import blended.security.ssl.SslContextInfo
 import blended.streams.jms.{JmsEnvelopeHeader, JmsProducerSettings, JmsStreamSupport}
-import blended.streams.message.{FlowEnvelope, FlowMessage}
+import blended.streams.message._
 import blended.streams.testsupport._
 import blended.streams.FlowHeaderConfig
 import blended.testsupport.scalatest.LoggingFreeSpec
@@ -41,8 +41,8 @@ class BlendedDemoSpec(implicit testKit: TestKit)
   private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
 
   private[this] val log = Logger[BlendedDemoSpec]
-
-  private val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
+  private[this] val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
+  private[this] val envLogger : FlowEnvelopeLogger = FlowEnvelopeLogger.create(headerCfg, log)
 
   "The demo container should" - {
 
@@ -53,19 +53,19 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
-        log = log,
+        log = envLogger,
         headerCfg = headerCfg,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
 
-      sendMessages(pSettings, log, testMessage)
+      sendMessages(pSettings, envLogger, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("DispatcherOut").get,
-        log = log,
+        log = envLogger,
         completeOn = Some(l => l.size == 1),
         timeout = None
       )
@@ -91,19 +91,19 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
-        log = log,
+        log = envLogger,
         headerCfg = headerCfg,
         connectionFactory = extCf,
         jmsDestination = Some(JmsQueue("DispatcherIn"))
       )
 
-      sendMessages(pSettings, log, testMessage)
+      sendMessages(pSettings, envLogger, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = extCf,
         dest = JmsDestination.create("response").get,
-        log = log,
+        log = envLogger,
         completeOn = Some(l => l.size == 1),
         timeout = None
       )
@@ -129,19 +129,19 @@ class BlendedDemoSpec(implicit testKit: TestKit)
       )
 
       val pSettings : JmsProducerSettings = JmsProducerSettings(
-        log = log,
+        log = envLogger,
         headerCfg = headerCfg,
         connectionFactory = intCf,
         jmsDestination = Some(JmsQueue("internal.data.in"))
       )
 
-      sendMessages(pSettings, log, testMessage)
+      sendMessages(pSettings, envLogger, testMessage)
 
       val outColl = receiveMessages(
         headerCfg = FlowHeaderConfig.create(prefix = "App"),
         cf = intCf,
         dest = JmsDestination.create("response").get,
-        log = log,
+        log = envLogger,
         completeOn = Some(l => l.size == 1),
         timeout = None
       )

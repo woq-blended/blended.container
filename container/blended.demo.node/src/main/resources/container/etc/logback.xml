@@ -16,11 +16,28 @@
     </encoder>
   </appender>
 
+  <appender name="SPLUNK" class="com.splunk.logging.HttpEventCollectorLogbackAppender">
+    <url>http://splunk:8088</url>
+    <token>7f4531c5-c92b-4f2f-b377-491e42c5c887</token>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%thread] %logger : %msg%n</pattern>
+    </layout>
+
+    <!-- optional parameters -->
+    <!--disableCertificateValidation>false</disableCertificateValidation -->
+
+  </appender>
+
   <logger name="blended" level="debug" />
   <logger name="domino" level="debug" />
   <logger name="App" level="debug" />
 
+  <!--logger name="App" level="info">
+    <appender-ref ref="SPLUNK" />
+  </logger-->
+
   <root level="info">
     <appender-ref ref="ASYNC_FILE" />
+    <appender-ref ref="SPLUNK" />
   </root>
 </configuration>
