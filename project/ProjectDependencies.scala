@@ -26,7 +26,7 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val commonsPool2 = "org.apache.commons" % "commons-pool2" % "2.6.0"
 
   // provides Equinox console commands to gogo shell
-  val eclipseEquinoxConsole = "org.eclipse.platform" % "org.eclipse.equinox.console" % "1.1.300"
+  val eclipseEquinoxConsole = "org.eclipse.platform" % "org.eclipse.equinox.console" % "1.4.0"
   val eclipseOsgi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.12.50"
   val equinoxServlet = "org.eclipse.platform" % "org.eclipse.equinox.http.servlet" % "1.4.0"
   val equinoxGogoAdapter = "org.knowhowlab.osgi.experiments.gogo" % "equinox" % "1.0.0"
