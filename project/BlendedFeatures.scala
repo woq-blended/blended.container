@@ -1,3 +1,4 @@
+import sbt._
 import blended.sbt.feature._
 
 object BlendedFeatures {
@@ -14,13 +15,27 @@ object BlendedFeatures {
       FeatureBundle(dependency = felixGogoJline, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoRuntime, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoShell, startLevel = Some(1), start = true),
-      FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true)
+      FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true),
+      FeatureBundle(
+        dependency = "org.apache.felix" % "org.apache.felix.shell.remote" % "1.2.0",
+        startLevel = Some(1), start=true)
     )
   )
 
   lazy val blendedBaseEquinox = Feature("blended.launcher.feature.base.equinox", bundles = Seq(
     FeatureBundle(dependency = eclipseOsgi, startLevel = Option(0), start = true),
-    FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = Option(1), start = true)
+    FeatureBundle(dependency = eclipseEquinoxConsole, startLevel = Option(1), start = true),
+    FeatureBundle(dependency = jline, startLevel = Some(1)),
+    FeatureBundle(dependency = jlineBuiltins, startLevel = Some(1)),
+    FeatureBundle(dependency = felixGogoJline, startLevel = Some(1), start = true),
+    FeatureBundle(dependency = felixGogoRuntime, startLevel = Some(1), start = true),
+    FeatureBundle(dependency = felixGogoShell, startLevel = Some(1), start = true),
+    FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true),
+    FeatureBundle(
+      dependency = "org.apache.felix" % "org.apache.felix.shell.remote" % "1.2.0",
+      startLevel = Some(1), start=true
+    ),
+    FeatureBundle(dependency = equinoxGogoAdapter, startLevel = Some(1), start = true)
   ))
 
   lazy val blendedBase = Feature("blended.launcher.feature.base", bundles = Seq(

@@ -4,6 +4,9 @@ inThisBuild(version := phoenix.Utils.readAsVersion(file("version.txt")))
 inThisBuild(isSnapshot := version.value.endsWith("SNAPSHOT"))
 inThisBuild(sourcesInBase := false)
 
+val m2Repo : String =
+  "file://" + System.getProperty("maven.repo.local", System.getProperty("user.home") + "/.m2/repository")
+
 lazy val global = Def.settings(
   Global / scalariformAutoformat := false,
   Global / scalariformWithBaseDirectory := true,
@@ -15,7 +18,8 @@ lazy val global = Def.settings(
   Global / pgpSecretRing := baseDirectory.value / "project" / ".gnupg" / "secring.gpg",
   Global / pgpPassphrase := sys.env.get("PGP_PASS").map(_.toArray),
   Global / resolvers += "SpringBundles" at "http://repository.springsource.com/maven/bundles/release",
-  Global / resolvers += "SpringExternal" at "http://repository.springsource.com/maven/bundles/external"
+  Global / resolvers += "SpringExternal" at "http://repository.springsource.com/maven/bundles/external",
+  Global / resolvers += "Maven2 local" at m2Repo
 )
 
 lazy val blendedLauncherFeatureActivemq = BlendedLauncherFeatureActivemq.project

@@ -29,6 +29,7 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val eclipseEquinoxConsole = "org.eclipse.platform" % "org.eclipse.equinox.console" % "1.1.300"
   val eclipseOsgi = "org.eclipse.platform" % "org.eclipse.osgi" % "3.12.50"
   val equinoxServlet = "org.eclipse.platform" % "org.eclipse.equinox.http.servlet" % "1.4.0"
+  val equinoxGogoAdapter = "org.knowhowlab.osgi.experiments.gogo" % "equinox" % "1.0.0"
 
   val felixConfigAdmin = "org.apache.felix" % "org.apache.felix.configadmin" % "1.8.6"
   val felixEventAdmin = "org.apache.felix" % "org.apache.felix.eventadmin" % "1.3.2"
