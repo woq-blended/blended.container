@@ -26,12 +26,6 @@ addSbtPlugin("de.wayofquality.sbt" % "sbt-testlogconfig" % "0.1.0")
 // Filter resources (like Maven)
 addSbtPlugin("de.wayofquality.sbt" % "sbt-filterresources" % "0.1.2")
 
-// Contains project dependency information from blended project as sbt plugin
-//libraryDependencies ++= Seq(
-addSbtPlugin(
-  "de.wayofquality.blended" % "blended.dependencies" % "3.1-SNAPSHOT"
-)
-
 addSbtPlugin("de.wayofquality.sbt" % "sbt-phoenix" % "0.1.0")
 
 addSbtPlugin("de.wayofquality.blended" % "sbt-blendedbuild" % "0.1.2")

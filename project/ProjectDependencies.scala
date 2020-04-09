@@ -1,7 +1,7 @@
 import phoenix.Utils
 import sbt._
 
-object ProjectDependencies extends blended.sbt.Dependencies {
+object ProjectDependencies extends Dependencies {
 
   val activeMqOsgi = "org.apache.activemq" % "activemq-osgi" % activeMqVersion
   val activationApi = "org.apache.servicemix.specs" % "org.apache.servicemix.specs.activation-api-1.1" % "2.2.0"
@@ -79,12 +79,10 @@ object ProjectDependencies extends blended.sbt.Dependencies {
 
 }
 
-object Blended extends blended.sbt.Blended {
+object Blended extends BlendedDependencies {
 
   val blendedOrganization = "de.wayofquality.blended"
-
   override def blendedVersion: String = Utils.readAsVersion(new File("version.txt"))
-
   val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.5-SNAPSHOT"
 
 }
