@@ -223,7 +223,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = jettyWebapp),
       FeatureBundle(dependency = jettyDeploy),
       FeatureBundle(dependency = jettyXml),
-      FeatureBundle(dependency = equinoxServlet),
+      FeatureBundle(dependency = equinoxServlet, start=true),
       FeatureBundle(dependency = felixHttpApi),
       FeatureBundle(dependency = Blended.jettyBoot, start = true),
       FeatureBundle(dependency = jettyHttpService, start = true)
