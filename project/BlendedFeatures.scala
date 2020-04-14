@@ -127,7 +127,7 @@ object BlendedFeatures {
       blendedJetty
     ),
     bundles = Seq(
-      FeatureBundle(dependency = hawtioWeb, start = true),
+      FeatureBundle(dependency = hawtioWeb, start = true, startLevel = Some(10)),
       FeatureBundle(dependency = Blended.hawtioLogin)
     )
   )
@@ -223,7 +223,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = jettyWebapp),
       FeatureBundle(dependency = jettyDeploy),
       FeatureBundle(dependency = jettyXml),
-      FeatureBundle(dependency = equinoxServlet, start=true),
+      FeatureBundle(dependency = equinoxServlet),
       FeatureBundle(dependency = felixHttpApi),
       FeatureBundle(dependency = Blended.jettyBoot, start = true),
       FeatureBundle(dependency = jettyHttpService, start = true)

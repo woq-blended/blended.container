@@ -61,6 +61,8 @@ object ProjectDependencies extends Dependencies {
   val jettyWebapp = jetty("webapp")
   val jettyXml = jetty("xml")
 
+  val jettyOsgiServletApi = "org.eclipse.jetty.toolchain" % "jetty-osgi-servlet-api" % "4.0.1"
+
   val jline = "org.jline" % "jline" % "3.9.0"
   val jlineBuiltins = "org.jline" % "jline-builtins" % "3.9.0"
   val jsr305 = "com.google.code.findbugs" % "jsr305" % "3.0.1"

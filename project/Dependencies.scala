@@ -10,7 +10,7 @@ trait Dependencies {
   val akkaVersion = "2.5.26"
   val akkaHttpVersion = "10.1.11"
   val dominoVersion = "1.1.3"
-  val jettyVersion = "9.4.24.v20191120"
+  val jettyVersion = "9.4.28.v20200408"
   val jolokiaVersion = "1.6.0"
   val microJsonVersion = "1.4"
   val parboiledVersion = "1.1.6"
