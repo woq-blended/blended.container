@@ -85,6 +85,6 @@ object Blended extends BlendedDependencies {
 
   val blendedOrganization = "de.wayofquality.blended"
   override def blendedVersion: String = Utils.readAsVersion(new File("version.txt"))
-  val mgmtUi = blendedOrganization %% "blended.mgmt.ui.server" % "0.5-SNAPSHOT"
+  val mgmtUi = blendedOrganization %% "blended.mgmt.ui.mgmtApp.webBundle" % "0.6-SNAPSHOT"
 
 }
