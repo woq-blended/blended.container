@@ -46,6 +46,8 @@ trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
     ExtraPublish(featureConf(), "confs", ".conf")
   )}
 
+  def blendedCoreVersion : T[String] = blended.version()
+
   def featureBundles : T[Seq[FeatureBundle]] = T { Seq.empty[FeatureBundle] }
 
   def featureConf : T[PathRef] = T {
@@ -111,25 +113,24 @@ object blended extends Module {
         }
 
         object common extends BlendedFeatureModule {
-
           override def featureBundles = T { Seq(
-            FeatureBundle(BlendedDeps.securityBoot(blended.version())),
+            FeatureBundle(BlendedDeps.securityBoot(blendedCoreVersion())),
             FeatureBundle(Deps.asmAll, 4, true),
-            FeatureBundle(BlendedDeps.updater(blended.version()), 4, true),
-            FeatureBundle(BlendedDeps.updaterConfig(blended.version()), 4, true),
+            FeatureBundle(BlendedDeps.updater(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.updaterConfig(blendedCoreVersion()), 4, true),
             FeatureBundle(Deps.scalaReflect),
             FeatureBundle(Deps.scalaLibrary),
             FeatureBundle(Deps.scalaXml),
             FeatureBundle(Deps.scalaCompatJava8),
             FeatureBundle(Deps.scalaParser),
-            FeatureBundle(BlendedDeps.akka(blended.version()), 4, true),
-            FeatureBundle(BlendedDeps.utilLogging(blended.version())),
-            FeatureBundle(BlendedDeps.util(blended.version()), 4, true),
+            FeatureBundle(BlendedDeps.akka(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.utilLogging(blendedCoreVersion())),
+            FeatureBundle(BlendedDeps.util(blendedCoreVersion()), 4, true),
             FeatureBundle(Deps.springCore),
             FeatureBundle(Deps.springExpression),
-            FeatureBundle(BlendedDeps.containerContextApi(blended.version())),
-            FeatureBundle(BlendedDeps.containerContextImpl(blended.version()), 4, true),
-            FeatureBundle(BlendedDeps.securityCrypto(blended.version())),
+            FeatureBundle(BlendedDeps.containerContextApi(blendedCoreVersion())),
+            FeatureBundle(BlendedDeps.containerContextImpl(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.securityCrypto(blendedCoreVersion())),
             FeatureBundle(Deps.felixConfigAdmin, 4, true),
             FeatureBundle(Deps.felixEventAdmin, 4, true),
             FeatureBundle(Deps.felixFileinstall, 4, true),
@@ -138,16 +139,32 @@ object blended extends Module {
             FeatureBundle(Deps.typesafeSslConfigCore),
             FeatureBundle(Deps.reactiveStreams),
             FeatureBundle(Deps.akkaActor),
-            FeatureBundle(BlendedDeps.akkaLogging(blended.version())),
+            FeatureBundle(BlendedDeps.akkaLogging(blendedCoreVersion())),
             FeatureBundle(Deps.akkaProtobuf),
             FeatureBundle(Deps.akkaStream),
             FeatureBundle(Deps.domino),
-            FeatureBundle(BlendedDeps.domino(blended.version())),
-            FeatureBundle(BlendedDeps.mgmtBase(blended.version()), 4, true),
-            FeatureBundle(BlendedDeps.prickle(blended.version())),
-            FeatureBundle(BlendedDeps.mgmtServiceJmx(blended.version()))
+            FeatureBundle(BlendedDeps.domino(blendedCoreVersion())),
+            FeatureBundle(BlendedDeps.mgmtBase(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.prickle(blendedCoreVersion())),
+            FeatureBundle(BlendedDeps.mgmtServiceJmx(blendedCoreVersion()))
           )}
         }
+      }
+
+      object activemq extends BlendedFeatureModule {
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.ariesProxyApi),
+          FeatureBundle(Deps.ariesBlueprintApi),
+          FeatureBundle(Deps.ariesBlueprintCore),
+          FeatureBundle(Deps.geronimoAnnotation),
+          FeatureBundle(Deps.geronimoJms11Spec),
+          FeatureBundle(Deps.geronimoJ2eeMgmtSpec),
+          FeatureBundle(Deps.servicemixStaxApi),
+          FeatureBundle(Deps.activeMqOsgi),
+          FeatureBundle(BlendedDeps.activemqBrokerstarter(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.jmsUtils(blendedCoreVersion())),
+          FeatureBundle(Deps.springJms)
+        )}
       }
     }
   }

@@ -20,14 +20,20 @@ object Deps {
   val sprayVersion = "1.3.4"
   val springVersion = "4.3.12.RELEASE_1"
 
-  protected def akka(m : String) : Dep = ivy"com.typesafe.akka::akka-$m::$akkaVersion"
-  protected def akkaHttpModule(m : String) : Dep = ivy"com.typesafe.akka::akka-$m:$akkaHttpVersion"
+  val activeMqOsgi = ivy"org.apache.activemq:activemq-osgi:$activeMqVersion"
+  val ariesProxyApi = ivy"org.apache.aries.proxy:org.apache.aries.proxy.api:1.0.1"
+  val ariesBlueprintApi = ivy"org.apache.aries.blueprint:org.apache.aries.blueprint.api:1.0.1"
+  val ariesBlueprintCore = "org.apache.aries.blueprint:org.apache.aries.blueprint.core:1.4.3"
 
-//  val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
+
+  //  val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
 //  val activeMqClient = "org.apache.activemq" % "activemq-client" % activeMqVersion
 //  val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
 //  val activeMqSpring = "org.apache.activemq" % "activemq-spring" % activeMqVersion
 //
+  protected def akka(m : String) : Dep = ivy"com.typesafe.akka::akka-$m::$akkaVersion"
+  protected def akkaHttpModule(m : String) : Dep = ivy"com.typesafe.akka::akka-$m:$akkaHttpVersion"
+
   val akkaActor = akka("actor")
 //  val akkaHttp = akkaHttpModule("http")
 //  val akkaHttpCore = akkaHttpModule("http-core")
@@ -72,9 +78,13 @@ object Deps {
   val felixGogoRuntime = ivy"org.apache.felix:org.apache.felix.gogo.runtime:1.1.2"
   val felixMetatype = ivy"org.apache.felix:org.apache.felix.metatype:1.0.12"
   val felixShellRemote = ivy"org.apache.felix:org.apache.felix.shell.remote:1.2.0"
-//
-//  val geronimoJms11Spec = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1"
-//
+
+  val geronimoAnnotation = ivy"org.apache.geronimo.specs:geronimo-annotation_1.1_spec:1.0.1"
+  val geronimoJaspic = ivy"org.apache.geronimo.specs:geronimo-jaspic_1.0_spec:1.1"
+  val geronimoJ2eeMgmtSpec = ivy"org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1"
+  val geronimoJms11Spec = ivy"org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1"
+
+  //
 //  val h2 = "com.h2database" % "h2" % "1.4.197"
 //  val hikaricp = "com.zaxxer" % "HikariCP" % "3.1.0"
 //
@@ -122,7 +132,10 @@ object Deps {
   val scalaReflect = ivy"org.scala-lang:scala-reflect:$scalaVersion"
   val scalaParser = ivy"org.scala-lang.modules::scala-parser-combinators:1.1.1"
   val scalaXml = ivy"org.scala-lang.modules::scala-xml:1.1.0"
-//
+
+  val servicemixStaxApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.stax-api-1.0:2.4.0"
+
+  //
 //  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.14.0"
 //  val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion
 //  val shapeless = "com.chuusai" %% "shapeless" % "1.2.4"
@@ -152,7 +165,7 @@ object Deps {
   val springExpression = spring("expression")
   val springCore = spring("core")
 //  val springJdbc = spring("jdbc")
-//  val springJms = spring("jms")
+  val springJms = spring("jms")
 //  val springTx = spring("tx")
 //
 //  val sttp = "com.softwaremill.sttp" %% "core" % "1.3.0"
