@@ -48,6 +48,10 @@ trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
 
   def blendedCoreVersion : T[String] = blended.version()
 
+  def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
+
+  override def moduleDeps = super.moduleDeps
+
   def featureBundles : T[Seq[FeatureBundle]] = T { Seq.empty[FeatureBundle] }
 
   def featureConf : T[PathRef] = T {
@@ -56,13 +60,22 @@ trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
       .map(_.formatConfig(scalaBinVersion()))
       .mkString(",\n")
 
-    val confDir = T.dest / "featureConf"
-    os.makeDir.all(confDir)
+    val featureConf : String = if (featureDeps.isEmpty) {
+      ""
+    } else {
+      T.traverse(featureDeps)( fd =>
+        T.task { s"""    { name = "${fd.artifactName()}", version = "${fd.publishVersion()}" }""" }
+      )().mkString("  features = [\n", ",\n", "\n  ]")
+    }
+
+    val confDir = T.dest
 
     val content =
       s"""{
          |  name = "${artifactName()}"
          |  version = "${publishVersion()}"
+         |""".stripMargin + featureConf +
+         """
          |  bundles = [
          |""".stripMargin + bundleConf +
          """
@@ -164,6 +177,33 @@ object blended extends Module {
           FeatureBundle(BlendedDeps.activemqBrokerstarter(blendedCoreVersion()), 4, true),
           FeatureBundle(BlendedDeps.jmsUtils(blendedCoreVersion())),
           FeatureBundle(Deps.springJms)
+        )}
+      }
+
+      object jetty extends BlendedFeatureModule {
+
+        override def featureDeps = Seq(blended.launcher.feature.base.common)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.activationApi),
+          FeatureBundle(Deps.javaxServlet31),
+          FeatureBundle(Deps.javaxMail),
+          FeatureBundle(Deps.geronimoAnnotation),
+          FeatureBundle(Deps.geronimoJaspic),
+          FeatureBundle(Deps.jettyUtil),
+          FeatureBundle(Deps.jettyHttp),
+          FeatureBundle(Deps.jettyIo),
+          FeatureBundle(Deps.jettyJmx),
+          FeatureBundle(Deps.jettySecurity),
+          FeatureBundle(Deps.jettyServlet),
+          FeatureBundle(Deps.jettyServer),
+          FeatureBundle(Deps.jettyWebapp),
+          FeatureBundle(Deps.jettyDeploy),
+          FeatureBundle(Deps.jettyXml),
+          FeatureBundle(Deps.equinoxServlet),
+          FeatureBundle(Deps.felixHttpApi),
+          FeatureBundle(BlendedDeps.jettyBoot(blendedCoreVersion()), 4, true),
+          FeatureBundle(Deps.jettyHttpService, 4, true)
         )}
       }
     }

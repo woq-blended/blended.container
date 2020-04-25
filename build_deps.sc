@@ -20,6 +20,7 @@ object Deps {
   val sprayVersion = "1.3.4"
   val springVersion = "4.3.12.RELEASE_1"
 
+  val activationApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.activation-api-1.1:2.2.0"
   val activeMqOsgi = ivy"org.apache.activemq:activemq-osgi:$activeMqVersion"
   val ariesProxyApi = ivy"org.apache.aries.proxy:org.apache.aries.proxy.api:1.0.1"
   val ariesBlueprintApi = ivy"org.apache.aries.blueprint:org.apache.aries.blueprint.api:1.0.1"
@@ -66,8 +67,9 @@ object Deps {
 //
   val eclipseEquinoxConsole = ivy"org.eclipse.platform:org.eclipse.equinox.console:1.4.0"
   val eclipseOsgi = ivy"org.eclipse.platform:org.eclipse.osgi:3.12.50"
+  val equinoxServlet = ivy"org.eclipse.platform:org.eclipse.equinox.http.servlet:1.4.0"
 
-//  val felixConnect = "org.apache.felix" % "org.apache.felix.connect" % "0.1.0"
+  //  val felixConnect = "org.apache.felix" % "org.apache.felix.connect" % "0.1.0"
   val felixConfigAdmin = ivy"org.apache.felix:org.apache.felix.configadmin:1.8.6"
   val felixEventAdmin = ivy"org.apache.felix:org.apache.felix.eventadmin:1.3.2"
   val felixFileinstall = ivy"org.apache.felix:org.apache.felix.fileinstall:3.4.2"
@@ -76,6 +78,7 @@ object Deps {
   val felixGogoJline = ivy"org.apache.felix:org.apache.felix.gogo.jline:1.1.4"
   val felixGogoShell = ivy"org.apache.felix:org.apache.felix.gogo.shell:1.1.2"
   val felixGogoRuntime = ivy"org.apache.felix:org.apache.felix.gogo.runtime:1.1.2"
+  val felixHttpApi = ivy"org.apache.felix:org.apache.felix.http.api:3.0.0"
   val felixMetatype = ivy"org.apache.felix:org.apache.felix.metatype:1.0.12"
   val felixShellRemote = ivy"org.apache.felix:org.apache.felix.shell.remote:1.2.0"
 
@@ -88,7 +91,23 @@ object Deps {
 //  val h2 = "com.h2database" % "h2" % "1.4.197"
 //  val hikaricp = "com.zaxxer" % "HikariCP" % "3.1.0"
 //
-//  protected def jettyOsgi(n : String) : ModuleID = "org.eclipse.jetty.osgi" % s"jetty-$n" % jettyVersion
+  val javaxMail = ivy"javax.mail:mail:1.4.5"
+  val javaxServlet31 = ivy"org.everit.osgi.bundles:org.everit.osgi.bundles.javax.servlet.api:3.1.0"
+
+  protected def jetty(n: String) = ivy"org.eclipse.jetty:jetty-${n}:$jettyVersion"
+  protected def jettyOsgi(n : String) = ivy"org.eclipse.jetty.osgi:jetty-${n}:$jettyVersion"
+
+  val jettyDeploy = jetty("deploy")
+  val jettyHttp = jetty("http")
+  val jettyHttpService = jettyOsgi("httpservice")
+  val jettyIo = jetty("io")
+  val jettyJmx = jetty("jmx")
+  val jettySecurity = jetty("security")
+  val jettyServlet = jetty("servlet")
+  val jettyServer = jetty("server")
+  val jettyUtil = jetty("util")
+  val jettyWebapp = jetty("webapp")
+  val jettyXml = jetty("xml")
 //
 //  val jcip = "net.jcip" % "jcip-annotations" % "1.0"
 //  val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % slf4jVersion
