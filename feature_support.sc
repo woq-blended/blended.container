@@ -6,6 +6,8 @@ object FeatureBundle {
 
   def apply(dependency : Dep, level : Int, start : Boolean) : FeatureBundle =
     FeatureBundle(dependency, startLevel = Some(level), start = start)
+
+  implicit def rw : upickle.default.ReadWriter[FeatureBundle] = upickle.default.macroRW
 }
 
 case class FeatureBundle private (
@@ -14,7 +16,7 @@ case class FeatureBundle private (
   start: Boolean
 ) {
 
-  def formatConfig: String = {
+  def formatConfig(scalaBinVersion : String): String = {
 
     val builder: StringBuilder = new StringBuilder("    { ")
 
@@ -22,8 +24,10 @@ case class FeatureBundle private (
     builder.append("mvn:")
 
     builder.append(dependency.dep.module.orgName)
-    //builder.append(":")
-    //builder.append(dependency.dep.module.)
+    if (dependency.cross.isBinary) {
+      builder.append(s"_$scalaBinVersion")
+    }
+
     builder.append(":")
 
     builder.append(dependency.dep.version)

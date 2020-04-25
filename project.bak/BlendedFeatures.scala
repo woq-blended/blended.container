@@ -35,7 +35,6 @@ object BlendedFeatures {
       dependency = "org.apache.felix" % "org.apache.felix.shell.remote" % "1.2.0",
       startLevel = Some(1), start=true
     )
-    // FeatureBundle(dependency = equinoxGogoAdapter, startLevel = Some(1), start = true)
   ))
 
   lazy val blendedBase = Feature("blended.launcher.feature.base", bundles = Seq(

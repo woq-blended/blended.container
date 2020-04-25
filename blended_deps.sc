@@ -1,9 +1,9 @@
 import mill._
 import scalalib._
 
-object BlendedDependencies {
+object BlendedDeps {
 
-  protected def blended : String => String => Dep = name => blendedVersion => ivy"de.wayofquality.blended:$name:$blendedVersion"
+  protected def blended : String => String => Dep = name => blendedVersion => ivy"de.wayofquality.blended::$name:$blendedVersion"
 
   val activemqBrokerstarter = blended("blended.activemq.brokerstarter")
   val activemqClient = blended("blended.activemq.client")

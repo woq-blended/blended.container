@@ -28,19 +28,21 @@ object Deps {
 //  val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
 //  val activeMqSpring = "org.apache.activemq" % "activemq-spring" % activeMqVersion
 //
-//  val akkaActor = akka("actor")
+  val akkaActor = akka("actor")
 //  val akkaHttp = akkaHttpModule("http")
 //  val akkaHttpCore = akkaHttpModule("http-core")
 //  val akkaHttpTestkit = akkaHttpModule("http-testkit")
 //  val akkaOsgi = akka("osgi")
 //  val akkaParsing = akkaHttpModule("parsing")
 //  val akkaPersistence = akka("persistence")
-//  val akkaStream = akka("stream")
+  val akkaProtobuf = akka("protobuf")
+  val akkaStream = akka("stream")
 //  val akkaStreamTestkit = akka("stream-testkit")
 //  val akkaTestkit = akka("testkit")
 //  val akkaSlf4j = akka("slf4j")
 //
 //  val asciiRender = "com.indvd00m.ascii.render" % "ascii-render" % "1.2.3"
+  val asmAll = ivy"org.ow2.asm:asm-all:4.1"
 //
 //  val bouncyCastleBcprov = "org.bouncycastle" % "bcprov-jdk15on" % "1.60"
 //  val bouncyCastlePkix = "org.bouncycastle" % "bcpkix-jdk15on" % "1.60"
@@ -54,15 +56,21 @@ object Deps {
 //  val concurrentLinkedHashMapLru = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
 //
 //  val dockerJava = "com.github.docker-java" % "docker-java" % "3.0.13"
-//  val domino = "com.github.domino-osgi" %% "domino" % dominoVersion
+  val domino = ivy"com.github.domino-osgi::domino:$dominoVersion"
 //
+  val eclipseEquinoxConsole = ivy"org.eclipse.platform:org.eclipse.equinox.console:1.4.0"
+  val eclipseOsgi = ivy"org.eclipse.platform:org.eclipse.osgi:3.12.50"
+
 //  val felixConnect = "org.apache.felix" % "org.apache.felix.connect" % "0.1.0"
+  val felixConfigAdmin = ivy"org.apache.felix:org.apache.felix.configadmin:1.8.6"
+  val felixEventAdmin = ivy"org.apache.felix:org.apache.felix.eventadmin:1.3.2"
+  val felixFileinstall = ivy"org.apache.felix:org.apache.felix.fileinstall:3.4.2"
+  val felixFramework = ivy"org.apache.felix:org.apache.felix.framework:6.0.2"
   val felixGogoCommand = ivy"org.apache.felix:org.apache.felix.gogo.command:1.1.0"
   val felixGogoJline = ivy"org.apache.felix:org.apache.felix.gogo.jline:1.1.4"
   val felixGogoShell = ivy"org.apache.felix:org.apache.felix.gogo.shell:1.1.2"
   val felixGogoRuntime = ivy"org.apache.felix:org.apache.felix.gogo.runtime:1.1.2"
-//val felixFileinstall = ivy"org.apache.felix:org.apache.felix.fileinstall:3.4.2"
-  val felixFramework = ivy"org.apache.felix:org.apache.felix.framework:6.0.2"
+  val felixMetatype = ivy"org.apache.felix:org.apache.felix.metatype:1.0.12"
   val felixShellRemote = ivy"org.apache.felix:org.apache.felix.shell.remote:1.2.0"
 //
 //  val geronimoJms11Spec = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1"
@@ -107,11 +115,13 @@ object Deps {
 //  val parboiledScala = "org.parboiled" %% "parboiled-scala" % parboiledVersion
 //  val prickle = "com.github.benhutchison" %% "prickle" % prickleVersion
 //
+  val reactiveStreams = ivy"org.reactivestreams:reactive-streams:1.0.0.final"
 //  // SCALA
-//  val scalaLibrary = "org.scala-lang" % "scala-library" % scalaVersion
-//  val scalaReflect = "org.scala-lang" % "scala-reflect" % scalaVersion
-//  val scalaParser = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1"
-//  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.1.0"
+  val scalaCompatJava8 = ivy"org.scala-lang.modules::scala-java8-compat:0.8.0"
+  val scalaLibrary = ivy"org.scala-lang:scala-library:$scalaVersion"
+  val scalaReflect = ivy"org.scala-lang:scala-reflect:$scalaVersion"
+  val scalaParser = ivy"org.scala-lang.modules::scala-parser-combinators:1.1.1"
+  val scalaXml = ivy"org.scala-lang.modules::scala-xml:1.1.0"
 //
 //  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.14.0"
 //  val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion
@@ -133,14 +143,14 @@ object Deps {
 //  val sprayJson = "io.spray" %% s"spray-json" % sprayVersion
 //
 //  //  protected def spring(n: String) = "org.springframework" % s"spring-${n}" % springVersion
-//  protected def spring(n : String): ModuleID = "org.apache.servicemix.bundles" % s"org.apache.servicemix.bundles.spring-$n" % springVersion
+  protected def spring(n : String): Dep = ivy"org.apache.servicemix.bundles:org.apache.servicemix.bundles.spring-${n}:$springVersion"
 //
 //  val springBeans = spring("beans")
 //  val springAop = spring("aop")
 //  val springContext = spring("context")
 //  val springContextSupport = spring("context-support")
-//  val springExpression = spring("expression")
-//  val springCore = spring("core")
+  val springExpression = spring("expression")
+  val springCore = spring("core")
 //  val springJdbc = spring("jdbc")
 //  val springJms = spring("jms")
 //  val springTx = spring("tx")
@@ -150,7 +160,7 @@ object Deps {
 //
 //  val travesty = "net.mikolak" %% "travesty" % s"0.9.1_2.5.17"
 //
-//  val typesafeConfig = "com.typesafe" % "config" % "1.3.3"
-//  val typesafeSslConfigCore = "com.typesafe" %% "ssl-config-core" % "0.3.6"
+  val typesafeConfig = ivy"com.typesafe:config:1.3.3"
+  val typesafeSslConfigCore = ivy"com.typesafe::ssl-config-core:0.3.6"
 
 }
