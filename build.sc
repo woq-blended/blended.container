@@ -54,6 +54,10 @@ trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
 
   def featureBundles : T[Seq[FeatureBundle]] = T { Seq.empty[FeatureBundle] }
 
+  override def ivyDeps = T { featureBundles().map(_.dependency) }
+
+
+
   def featureConf : T[PathRef] = T {
 
     val bundleConf : String = featureBundles()
@@ -204,6 +208,15 @@ object blended extends Module {
           FeatureBundle(Deps.felixHttpApi),
           FeatureBundle(BlendedDeps.jettyBoot(blendedCoreVersion()), 4, true),
           FeatureBundle(Deps.jettyHttpService, 4, true)
+        )}
+      }
+
+      object security extends BlendedFeatureModule {
+
+        override def featureDeps = Seq(blended.launcher.feature.base.common)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(BlendedDeps.security(blendedCoreVersion()), 4, true)
         )}
       }
     }
