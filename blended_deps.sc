@@ -3,7 +3,10 @@ import scalalib._
 
 object BlendedDeps {
 
-  protected def blended : String => String => Dep = name => blendedVersion => ivy"de.wayofquality.blended::$name:$blendedVersion"
+  protected val organization = "de.wayofquality.blended"
+  protected def blended : String => String => Dep = name => blendedVersion => ivy"$organization::$name:$blendedVersion"
+
+  val mgmtUi = ivy"$organization::blended.mgmt.ui.mgmtApp.webBundle:0.6-SNAPSHOT"
 
   val activemqBrokerstarter = blended("blended.activemq.brokerstarter")
   val activemqClient = blended("blended.activemq.client")

@@ -58,7 +58,7 @@ trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with
     ExtraPublish(featureConf(), "confs", ".conf")
   )}
 
-  def blendedCoreVersion : T[String] = "3.1-RC2"// blended.version()
+  def blendedCoreVersion : T[String] = blended.version()
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
 
@@ -110,6 +110,51 @@ object blended extends Module {
 
   object launcher extends Module {
     object feature extends Module {
+
+      object activemq extends BlendedFeatureModule {
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.ariesProxyApi),
+          FeatureBundle(Deps.ariesBlueprintApi),
+          FeatureBundle(Deps.ariesBlueprintCore),
+          FeatureBundle(Deps.geronimoAnnotation),
+          FeatureBundle(Deps.geronimoJms11Spec),
+          FeatureBundle(Deps.geronimoJ2eeMgmtSpec),
+          FeatureBundle(Deps.servicemixStaxApi),
+          FeatureBundle(Deps.activeMqOsgi),
+          FeatureBundle(BlendedDeps.activemqBrokerstarter(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.jmsUtils(blendedCoreVersion())),
+          FeatureBundle(Deps.springJms)
+        )}
+      }
+
+      object akka extends Module {
+        object http extends Module {
+          object base extends BlendedFeatureModule {
+            override def featureDeps = Seq(blended.launcher.feature.base.common)
+
+            override def featureBundles = T { Seq(
+              FeatureBundle(BlendedDeps.akkaHttpApi(blendedCoreVersion())),
+              FeatureBundle(BlendedDeps.akkaHttp(blendedCoreVersion()), 4, true),
+              FeatureBundle(BlendedDeps.prickleAkkaHttp(blendedCoreVersion())),
+              FeatureBundle(BlendedDeps.securityAkkaHttp(blendedCoreVersion()))
+            )}
+          }
+
+          object modules extends BlendedFeatureModule {
+            override def featureDeps = Seq(
+              blended.launcher.feature.akka.http.base,
+              blended.launcher.feature.spring
+            )
+
+            override def featureBundles = T { Seq(
+              FeatureBundle(BlendedDeps.akkaHttpProxy(blendedCoreVersion())),
+              FeatureBundle(BlendedDeps.akkaHttpRestJms(blendedCoreVersion())),
+              FeatureBundle(BlendedDeps.akkaHttpJmsQueue(blendedCoreVersion()))
+            )}
+          }
+        }
+      }
+
       object base extends Module {
         object felix extends BlendedFeatureModule {
           override def featureBundles = T { Seq(
@@ -178,22 +223,6 @@ object blended extends Module {
         }
       }
 
-      object activemq extends BlendedFeatureModule {
-        override def featureBundles = T { Seq(
-          FeatureBundle(Deps.ariesProxyApi),
-          FeatureBundle(Deps.ariesBlueprintApi),
-          FeatureBundle(Deps.ariesBlueprintCore),
-          FeatureBundle(Deps.geronimoAnnotation),
-          FeatureBundle(Deps.geronimoJms11Spec),
-          FeatureBundle(Deps.geronimoJ2eeMgmtSpec),
-          FeatureBundle(Deps.servicemixStaxApi),
-          FeatureBundle(Deps.activeMqOsgi),
-          FeatureBundle(BlendedDeps.activemqBrokerstarter(blendedCoreVersion()), 4, true),
-          FeatureBundle(BlendedDeps.jmsUtils(blendedCoreVersion())),
-          FeatureBundle(Deps.springJms)
-        )}
-      }
-
       object commons extends BlendedFeatureModule {
         override def featureBundles = T { Seq(
           FeatureBundle(Deps.ariesUtil),
@@ -215,7 +244,7 @@ object blended extends Module {
 
       object jetty extends BlendedFeatureModule {
 
-        override def featureDeps = Seq(blended.launcher.feature.base.common)
+        override def featureDeps = Seq(base.common)
 
         override def featureBundles = T { Seq(
           FeatureBundle(Deps.activationApi),
@@ -240,12 +269,144 @@ object blended extends Module {
         )}
       }
 
+      object hawtio extends BlendedFeatureModule {
+        override def featureDeps = Seq(jetty)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.hawtioWeb, 10, true),
+          FeatureBundle(BlendedDeps.hawtioLogin(blendedCoreVersion()))
+        )}
+      }
+
+      object jolokia extends BlendedFeatureModule {
+        override def featureDeps = Seq(jetty)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.jolokiaOsgi, 4, true)
+        )}
+      }
+
+      object login extends BlendedFeatureModule {
+        override def featureDeps = Seq(
+          blended.launcher.feature.base.common,
+          blended.launcher.feature.akka.http.base,
+          blended.launcher.feature.security,
+          blended.launcher.feature.persistence
+        )
+
+        override def featureBundles = T { Seq(
+          // Required for Json Web Token
+          FeatureBundle(Deps.jacksonAnnotations),
+          FeatureBundle(Deps.jacksonCore),
+          FeatureBundle(Deps.jacksonBind),
+          FeatureBundle(Deps.jjwt),
+          // Required for Login API
+          FeatureBundle(BlendedDeps.securityLoginApi(blendedCoreVersion())),
+          FeatureBundle(BlendedDeps.securityLoginImpl(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.webSocket(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.securityLoginRest(blendedCoreVersion()), 4, true)
+        )}
+      }
+
+      object mgmt extends Module {
+        object client extends BlendedFeatureModule {
+          override def featureBundles = T { Seq(
+            FeatureBundle(BlendedDeps.mgmtAgent(blendedCoreVersion()), 4, true)
+          )}
+        }
+
+        object server extends BlendedFeatureModule  {
+          override def featureDeps = Seq(
+            blended.launcher.feature.base.common,
+            blended.launcher.feature.akka.http.base,
+            blended.launcher.feature.security,
+            blended.launcher.feature.ssl,
+            blended.launcher.feature.spring,
+            blended.launcher.feature.persistence,
+            blended.launcher.feature.login
+          )
+
+          override def featureBundles = T { Seq(
+            FeatureBundle(BlendedDeps.mgmtRest(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.mgmtRepo(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.mgmtRepoRest(blendedCoreVersion()), 4, true),
+            FeatureBundle(BlendedDeps.updaterRemote(blendedCoreVersion()), 4, true),
+            FeatureBundle(Deps.concurrentLinkedHashMapLru),
+            FeatureBundle(Deps.jsr305),
+            FeatureBundle(BlendedDeps.mgmtUi, 4, true)
+          )}
+        }
+      }
+
+      object persistence extends BlendedFeatureModule {
+        override def featureDeps = Seq(base.common)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(BlendedDeps.persistence(blendedCoreVersion())),
+          FeatureBundle(BlendedDeps.persistenceH2(blendedCoreVersion()), 4, true),
+          // for Blended.persistenceH2
+          FeatureBundle(Deps.h2),
+          // for Blended.persistenceH2
+          FeatureBundle(Deps.hikaricp),
+          // for Blended.persistenceH2
+          FeatureBundle(Deps.liquibase),
+          // for Deps.liquibase
+          FeatureBundle(Deps.snakeyaml)
+        )}
+      }
+
+      object samples extends BlendedFeatureModule {
+        override def featureDeps = Seq(
+          blended.launcher.feature.akka.http.base,
+          blended.launcher.feature.activemq,
+          blended.launcher.feature.streams
+        )
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(BlendedDeps.jmsBridge(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.streamsDispatcher(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.activemqClient(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.file(blendedCoreVersion())),
+          FeatureBundle(BlendedDeps.akkaHttpSampleHelloworld(blendedCoreVersion()), 4, true)
+        )}
+      }
+
       object security extends BlendedFeatureModule {
 
         override def featureDeps = Seq(blended.launcher.feature.base.common)
 
         override def featureBundles = T { Seq(
           FeatureBundle(BlendedDeps.security(blendedCoreVersion()), 4, true)
+        )}
+      }
+
+      object spring extends BlendedFeatureModule {
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.aopAlliance),
+          FeatureBundle(Deps.springBeans),
+          FeatureBundle(Deps.springAop),
+          FeatureBundle(Deps.springContext),
+          FeatureBundle(Deps.springContextSupport),
+          FeatureBundle(Deps.springJdbc),
+          FeatureBundle(Deps.springTx)
+        )}
+      }
+
+      object ssl extends BlendedFeatureModule {
+        override def featureDeps = Seq(blended.launcher.feature.base.common)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.javaxServlet31),
+          FeatureBundle(BlendedDeps.securityScep(blendedCoreVersion()), 4, true),
+          FeatureBundle(BlendedDeps.securitySsl(blendedCoreVersion()), 4, true)
+        )}
+      }
+
+      object streams extends BlendedFeatureModule {
+        override def featureDeps = Seq(blended.launcher.feature.base.common)
+
+        override def featureBundles = T { Seq(
+          FeatureBundle(BlendedDeps.streams(blendedCoreVersion()), 4, true)
         )}
       }
     }

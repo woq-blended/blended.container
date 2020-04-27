@@ -23,6 +23,8 @@ object Deps {
   val activationApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.activation-api-1.1:2.2.0"
   val activeMqOsgi = ivy"org.apache.activemq:activemq-osgi:$activeMqVersion"
 
+  val aopAlliance = ivy"org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance:1.0_6"
+
   val ariesBlueprintApi = ivy"org.apache.aries.blueprint:org.apache.aries.blueprint.api:1.0.1"
   val ariesBlueprintCore = "org.apache.aries.blueprint:org.apache.aries.blueprint.core:1.4.3"
   val ariesJmxApi = ivy"org.apache.aries.jmx:org.apache.aries.jmx.api:1.1.1"
@@ -71,8 +73,8 @@ object Deps {
   val commonsNet = ivy"commons-net:commons-net:3.3"
   val commonsPool2 = ivy"org.apache.commons:commons-pool2:2.6.0"
 //  val commonsLang2 = "commons-lang" % "commons-lang" % "2.6"
-//  val concurrentLinkedHashMapLru = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
-//
+  val concurrentLinkedHashMapLru = ivy"com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2"
+
 //  val dockerJava = "com.github.docker-java" % "docker-java" % "3.0.13"
   val domino = ivy"com.github.domino-osgi::domino:$dominoVersion"
 //
@@ -98,10 +100,15 @@ object Deps {
   val geronimoJ2eeMgmtSpec = ivy"org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1"
   val geronimoJms11Spec = ivy"org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1"
 
-  //
-//  val h2 = "com.h2database" % "h2" % "1.4.197"
-//  val hikaricp = "com.zaxxer" % "HikariCP" % "3.1.0"
-//
+  val hawtioWeb = ivy"io.hawt:hawtio-web:1.5.11;classifier=war"
+
+  val h2 = ivy"com.h2database:h2:1.4.197"
+  val hikaricp = ivy"com.zaxxer:HikariCP:3.1.0"
+
+  val jacksonCore = ivy"com.fasterxml.jackson.core:jackson-core:2.9.3"
+  val jacksonBind = ivy"com.fasterxml.jackson.core:jackson-databind:2.9.3"
+  val jacksonAnnotations = ivy"com.fasterxml.jackson.core:jackson-annotations:2.9.3"
+
   val javaxMail = ivy"javax.mail:mail:1.4.5"
   val javaxServlet31 = ivy"org.everit.osgi.bundles:org.everit.osgi.bundles.javax.servlet.api:3.1.0"
 
@@ -123,21 +130,23 @@ object Deps {
 //  val jcip = "net.jcip" % "jcip-annotations" % "1.0"
 //  val jclOverSlf4j = "org.slf4j" % "jcl-over-slf4j" % slf4jVersion
 //  val jettyOsgiBoot = jettyOsgi("osgi-boot")
-//  val jjwt = "io.jsonwebtoken" % "jjwt" % "0.7.0"
+  val jjwt = ivy"io.jsonwebtoken:jjwt:0.7.0"
   val jline = ivy"org.jline:jline:3.9.0"
   val jlineBuiltins = ivy"org.jline:jline-builtins:3.9.0"
 //  val jms11Spec = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1"
-//  val jolokiaJvm = "org.jolokia" % "jolokia-jvm" % jolokiaVersion
+  val jolokiaOsgi = ivy"org.jolokia:jolokia-osgi:$jolokiaVersion"
+  //  val jolokiaJvm = "org.jolokia" % "jolokia-jvm" % jolokiaVersion
 //  val jolokiaJvmAgent = jolokiaJvm.classifier("agent")
 //  val jscep = "com.google.code.jscep" % "jscep" % "2.5.0"
 //  val jsonLenses = "net.virtual-void" %% "json-lenses" % "0.6.2"
+  val jsr305 = ivy"com.google.code.findbugs:jsr305:3.0.1"
 //  val julToSlf4j = "org.slf4j" % "jul-to-slf4j" % slf4jVersion
 //  val junit = "junit" % "junit" % "4.12"
 //
 //  val lambdaTest = "de.tototec" % "de.tobiasroeser.lambdatest" % "0.6.2"
 //  val levelDbJava = "org.iq80.leveldb" % "leveldb" % "0.9"
 //  val levelDbJni = "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
-//  val liquibase = "org.liquibase" % "liquibase-core" % "3.6.1"
+  val liquibase = ivy"org.liquibase:liquibase-core:3.6.1"
 //  /** Only for use in test that also runs in JS */
 //  val log4s = "org.log4s" %% "log4s" % "1.6.1"
 //  val logbackCore = "ch.qos.logback" % "logback-core" % "1.2.3"
@@ -171,7 +180,7 @@ object Deps {
 //  val shapeless = "com.chuusai" %% "shapeless" % "1.2.4"
 //  val slf4j = "org.slf4j" % "slf4j-api" % slf4jVersion
 //  val slf4jLog4j12 = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
-//  val snakeyaml = "org.yaml" % "snakeyaml" % "1.18"
+  val snakeyaml = ivy"org.yaml:snakeyaml:1.18"
 //
 //  // libs for splunk support via HEC
 //  val splunkjava = "com.splunk.logging" % "splunk-library-javalogging" % "1.7.3"
@@ -187,16 +196,16 @@ object Deps {
 //
 //  //  protected def spring(n: String) = "org.springframework" % s"spring-${n}" % springVersion
   protected def spring(n : String): Dep = ivy"org.apache.servicemix.bundles:org.apache.servicemix.bundles.spring-${n}:$springVersion"
-//
-//  val springBeans = spring("beans")
-//  val springAop = spring("aop")
-//  val springContext = spring("context")
-//  val springContextSupport = spring("context-support")
+
+  val springBeans = spring("beans")
+  val springAop = spring("aop")
+  val springContext = spring("context")
+  val springContextSupport = spring("context-support")
   val springExpression = spring("expression")
   val springCore = spring("core")
-//  val springJdbc = spring("jdbc")
+  val springJdbc = spring("jdbc")
   val springJms = spring("jms")
-//  val springTx = spring("tx")
+  val springTx = spring("tx")
 //
 //  val sttp = "com.softwaremill.sttp" %% "core" % "1.3.0"
 //  val sttpAkka = "com.softwaremill.sttp" %% "akka-http-backend" % "1.3.0"

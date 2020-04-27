@@ -20,6 +20,8 @@ case class FeatureBundle private (
 
     val builder: StringBuilder = new StringBuilder("    { ")
 
+    val classifier : String = dependency.dep.attributes.classifier.value
+
     builder.append("url=\"")
     builder.append("mvn:")
 
@@ -29,8 +31,15 @@ case class FeatureBundle private (
     }
 
     builder.append(":")
+    if (classifier.nonEmpty) {
+      builder.append(":")
+    }
 
     builder.append(dependency.dep.version)
+
+    if (classifier.nonEmpty) {
+      builder.append(s":$classifier")
+    }
 
     builder.append("\"")
 
