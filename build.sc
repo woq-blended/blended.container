@@ -58,7 +58,7 @@ trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with
     ExtraPublish(featureConf(), "confs", ".conf")
   )}
 
-  def blendedCoreVersion : T[String] = "3.1-RC4"// blended.version()
+  def blendedCoreVersion : T[String] = "3.1-RC2"// blended.version()
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
 
