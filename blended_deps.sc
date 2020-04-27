@@ -3,7 +3,7 @@ import scalalib._
 
 object BlendedDeps {
 
-  protected val organization = "de.wayofquality.blended"
+  val organization = "de.wayofquality.blended"
   protected def blended : String => String => Dep = name => blendedVersion => ivy"$organization::$name:$blendedVersion"
 
   val mgmtUi = ivy"$organization::blended.mgmt.ui.mgmtApp.webBundle:0.6-SNAPSHOT"

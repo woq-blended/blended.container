@@ -12,6 +12,9 @@ import mill.scalalib.publish._
 ///** Project directory. */
 val baseDir: os.Path = build.millSourcePath
 
+import $file.build_util
+import build_util.{FilterUtil, ZipUtil}
+
 import $file.blended_deps
 import blended_deps.BlendedDeps
 
@@ -25,8 +28,12 @@ trait BlendedCoursierModule extends CoursierModule {
   )
 }
 
-trait BlendedModule extends ScalaModule {
+trait BlendedModule extends BlendedCoursierModule {
   def blendedModule: String = millModuleSegments.parts.mkString(".")
+  def blendedCoreVersion : T[String] = blended.version()
+}
+
+trait BlendedScalaModule extends ScalaModule with BlendedModule {
   override def artifactName: T[String] = blendedModule
   def scalaVersion = Deps.scalaVersion
   val scalaBinVersion = T {scalaVersion().split("[.]").take(2).mkString(".") }
@@ -50,15 +57,13 @@ trait BlendedPublishModule extends PublishModule {
   }
 }
 
-trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with BlendedPublishModule {
+trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule with BlendedPublishModule {
 
   override def artifactName = T { blendedModule }
 
   override def extraPublish = T { super.extraPublish() ++ Seq(
     ExtraPublish(featureConf(), "confs", ".conf")
   )}
-
-  def blendedCoreVersion : T[String] = blended.version()
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
 
@@ -100,6 +105,22 @@ trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with
 
     PathRef(confDir)
   }
+}
+
+trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
+
+  def blendedLauncherZip : T[Agg[Dep]] = T { Agg(
+    ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=zip"
+  )}
+
+  def resolveLauncher : T[Agg[PathRef]] = T {
+    resolveDeps(blendedLauncherZip)
+  }
+
+  def unpackLauncher : T[PathRef] = T {
+    PathRef(T.dest)
+  }
+
 }
 
 object blended extends Module {
@@ -409,6 +430,12 @@ object blended extends Module {
           FeatureBundle(BlendedDeps.streams(blendedCoreVersion()), 4, true)
         )}
       }
+    }
+  }
+
+  object demo extends Module {
+    object node extends BlendedContainer {
+
     }
   }
 }
