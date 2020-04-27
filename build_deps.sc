@@ -22,10 +22,13 @@ object Deps {
 
   val activationApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.activation-api-1.1:2.2.0"
   val activeMqOsgi = ivy"org.apache.activemq:activemq-osgi:$activeMqVersion"
-  val ariesProxyApi = ivy"org.apache.aries.proxy:org.apache.aries.proxy.api:1.0.1"
+
   val ariesBlueprintApi = ivy"org.apache.aries.blueprint:org.apache.aries.blueprint.api:1.0.1"
   val ariesBlueprintCore = "org.apache.aries.blueprint:org.apache.aries.blueprint.core:1.4.3"
-
+  val ariesJmxApi = ivy"org.apache.aries.jmx:org.apache.aries.jmx.api:1.1.1"
+  val ariesJmxCore = ivy"org.apache.aries.jmx:org.apache.aries.jmx.core:1.1.1"
+  val ariesProxyApi = ivy"org.apache.aries.proxy:org.apache.aries.proxy.api:1.0.1"
+  val ariesUtil = ivy"org.apache.aries:org.apache.aries.util:1.1.0"
 
   //  val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
 //  val activeMqClient = "org.apache.activemq" % "activemq-client" % activeMqVersion
@@ -55,10 +58,18 @@ object Deps {
 //  val bouncyCastlePkix = "org.bouncycastle" % "bcpkix-jdk15on" % "1.60"
 //
 //  val cmdOption = "de.tototec" % "de.tototec.cmdoption" % "0.6.0"
-//  val commonsBeanUtils = "commons-beanutils" % "commons-beanutils" % "1.9.3"
-//  val commonsCodec = "commons-codec" % "commons-codec" % "1.11"
+
+  val commonsBeanUtils = ivy"commons-beanutils:commons-beanutils:1.9.3"
+  val commonsCodec = ivy"commons-codec:commons-codec:1.11"
+  val commonsCollections = ivy"org.apache.commons:com.springsource.org.apache.commons.collections:3.2.1"
+  val commonsDiscovery = ivy"org.apache.commons:com.springsource.org.apache.commons.discovery:0.4.0"
+  val commonsExec = ivy"org.apache.commons:commons-exec:1.3"
 //  val commonsDaemon = "commons-daemon" % "commons-daemon" % "1.0.15"
-//  val commonsIo = "commons-io" % "commons-io" % "2.6"
+  val commonsHttpclient = ivy"org.apache.commons:com.springsource.org.apache.commons.httpclient:3.1.0"
+  val commonsIo = ivy"commons-io:commons-io:2.6"
+  val commonsLang3 = ivy"org.apache.commons:commons-lang3:3.7"
+  val commonsNet = ivy"commons-net:commons-net:3.3"
+  val commonsPool2 = ivy"org.apache.commons:commons-pool2:2.6.0"
 //  val commonsLang2 = "commons-lang" % "commons-lang" % "2.6"
 //  val concurrentLinkedHashMapLru = "com.googlecode.concurrentlinkedhashmap" % "concurrentlinkedhashmap-lru" % "1.4.2"
 //

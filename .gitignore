@@ -13,6 +13,7 @@ nohup.out
 package-lock.json
 .sbtopts
 out
+testRepo
 
 blended.sslcontext/notes.txt
 

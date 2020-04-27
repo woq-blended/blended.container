@@ -4,6 +4,8 @@ import $file.feature_support
 import feature_support.FeatureBundle
 import $file.build_deps
 import build_deps.Deps
+import coursier.Repository
+import coursier.maven.MavenRepository
 import mill.scalalib.PublishModule.ExtraPublish
 import mill.scalalib.publish._
 
@@ -12,6 +14,15 @@ val baseDir: os.Path = build.millSourcePath
 
 import $file.blended_deps
 import blended_deps.BlendedDeps
+
+/** Configure additional repositories. */
+trait BlendedCoursierModule extends CoursierModule {
+  private def zincWorker: ZincWorkerModule = mill.scalalib.ZincWorkerModule
+  override def repositories: Seq[Repository] = zincWorker.repositories ++ Seq(
+    MavenRepository("http://repository.springsource.com/maven/bundles/release"),
+    MavenRepository("http://repository.springsource.com/maven/bundles/external")
+  )
+}
 
 trait BlendedModule extends ScalaModule {
   def blendedModule: String = millModuleSegments.parts.mkString(".")
@@ -38,7 +49,7 @@ trait BlendedPublishModule extends PublishModule {
   }
 }
 
-trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
+trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with BlendedPublishModule {
 
   override def artifactName = T { blendedModule }
 
@@ -55,8 +66,6 @@ trait BlendedFeatureModule extends BlendedModule with BlendedPublishModule {
   def featureBundles : T[Seq[FeatureBundle]] = T { Seq.empty[FeatureBundle] }
 
   override def ivyDeps = T { featureBundles().map(_.dependency) }
-
-
 
   def featureConf : T[PathRef] = T {
 
@@ -181,6 +190,25 @@ object blended extends Module {
           FeatureBundle(BlendedDeps.activemqBrokerstarter(blendedCoreVersion()), 4, true),
           FeatureBundle(BlendedDeps.jmsUtils(blendedCoreVersion())),
           FeatureBundle(Deps.springJms)
+        )}
+      }
+
+      object commons extends BlendedFeatureModule {
+        override def featureBundles = T { Seq(
+          FeatureBundle(Deps.ariesUtil),
+          FeatureBundle(Deps.ariesJmxApi),
+          FeatureBundle(Deps.ariesJmxCore, 4, true),
+          FeatureBundle(BlendedDeps.jmx(blendedCoreVersion()), 4, true),
+          FeatureBundle(Deps.commonsCollections),
+          FeatureBundle(Deps.commonsDiscovery),
+          FeatureBundle(Deps.commonsLang3),
+          FeatureBundle(Deps.commonsPool2),
+          FeatureBundle(Deps.commonsNet),
+          FeatureBundle(Deps.commonsExec),
+          FeatureBundle(Deps.commonsIo),
+          FeatureBundle(Deps.commonsCodec),
+          FeatureBundle(Deps.commonsHttpclient),
+          FeatureBundle(Deps.commonsBeanUtils)
         )}
       }
 
