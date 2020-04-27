@@ -5,6 +5,7 @@ import feature_support.FeatureBundle
 import $file.build_deps
 import build_deps.Deps
 import coursier.Repository
+import coursier.core.{Extension, Publication}
 import coursier.maven.MavenRepository
 import mill.scalalib.PublishModule.ExtraPublish
 import mill.scalalib.publish._
@@ -109,9 +110,24 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
 
-  def blendedLauncherZip : T[Agg[Dep]] = T { Agg(
-    ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=zip"
-  )}
+  def blendedLauncherZip : T[Agg[Dep]] = T {
+
+    val d = ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()}"
+    val pub = Publication(
+      name = d.dep.publication.name,
+      `type` = coursier.core.Type("zip"),
+      ext = Extension("zip"),
+      classifier = d.dep.publication.classifier
+    )
+
+    val dep = d.copy(dep = d.dep
+      .withTransitive(false)
+      .withPublication(pub)
+    )
+    println(dep)
+
+    Agg(dep)
+  }
 
   def resolveLauncher : T[Agg[PathRef]] = T {
     resolveDeps(blendedLauncherZip)
