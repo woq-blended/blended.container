@@ -19,6 +19,7 @@ import blended_deps.BlendedDeps
 trait BlendedCoursierModule extends CoursierModule {
   private def zincWorker: ZincWorkerModule = mill.scalalib.ZincWorkerModule
   override def repositories: Seq[Repository] = zincWorker.repositories ++ Seq(
+    MavenRepository("https://repo.spring.io/libs-release"),
     MavenRepository("http://repository.springsource.com/maven/bundles/release"),
     MavenRepository("http://repository.springsource.com/maven/bundles/external")
   )
@@ -57,7 +58,7 @@ trait BlendedFeatureModule extends BlendedModule with BlendedCoursierModule with
     ExtraPublish(featureConf(), "confs", ".conf")
   )}
 
-  def blendedCoreVersion : T[String] = blended.version()
+  def blendedCoreVersion : T[String] = "3.1-RC4"// blended.version()
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
 
