@@ -136,7 +136,6 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
   def unpackLauncher : T[PathRef] = T {
     PathRef(T.dest)
   }
-
 }
 
 object blended extends Module {
