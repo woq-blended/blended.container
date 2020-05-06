@@ -110,30 +110,17 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
 
-  def blendedLauncherZip : T[Agg[Dep]] = T {
+  def blendedLauncherZip : T [Agg[Dep]] = T { Agg(
+    ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=dist".exclude("*" -> "*")
+  )}
 
-    val d = ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()}"
-    val pub = Publication(
-      name = d.dep.publication.name,
-      `type` = coursier.core.Type("zip"),
-      ext = Extension("zip"),
-      classifier = d.dep.publication.classifier
-    )
-
-    val dep = d.copy(dep = d.dep
-      .withTransitive(false)
-      .withPublication(pub)
-    )
-    println(dep)
-
-    Agg(dep)
-  }
-
-  def resolveLauncher : T[Agg[PathRef]] = T {
-    resolveDeps(blendedLauncherZip)
+  def resolveLauncher : T[PathRef] = T {
+    val resolved = resolveDeps(blendedLauncherZip)()
+    resolved.items.next()
   }
 
   def unpackLauncher : T[PathRef] = T {
+    ZipUtil.unpackZip(resolveLauncher().path, T.dest)
     PathRef(T.dest)
   }
 }
