@@ -7,7 +7,6 @@ import build_deps.Deps
 import coursier.Repository
 import coursier.core.{Extension, Publication}
 import coursier.maven.MavenRepository
-import mill.scalalib.PublishModule.ExtraPublish
 import mill.scalalib.publish._
 
 ///** Project directory. */
@@ -63,7 +62,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
   override def artifactName = T { blendedModule }
 
   override def extraPublish = T { super.extraPublish() ++ Seq(
-    ExtraPublish(featureConf(), "confs", ".conf")
+    ExtraPublish(featureConf(), ivyType="conf", ivyExt="conf")
   )}
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
@@ -88,7 +87,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
       )().mkString("  features = [\n", ",\n", "\n  ]")
     }
 
-    val confDir = T.dest
+    val conf = T.dest / s"${artifactName()}.conf"
 
     val content =
       s"""{
@@ -102,9 +101,9 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
           |  ]
           |}""".stripMargin
 
-    os.write(confDir / s"${artifactName()}.conf", content)
+    os.write(conf, content)
 
-    PathRef(confDir)
+    PathRef(conf)
   }
 }
 
