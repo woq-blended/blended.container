@@ -96,8 +96,9 @@ trait FilterUtil {
 
         quoteReplacement(properties.getOrElse(
           variable,
-          if (failOnMiss) sys.error(s"Unknown variable: [$variable]") else {
-            ctx.log.error(s"${source}: Can't replace unknown variable: [${variable}]")
+          if (failOnMiss) {
+            sys.error(s"Unknown variable: [$variable]")
+          } else {
             matched
           }
         ))

@@ -6,10 +6,12 @@ import $file.build_deps
 import ammonite.ops.Path
 import build_deps.Deps
 import coursier.Repository
-import coursier.core.{Extension, Publication}
 import coursier.maven.MavenRepository
+import mill.define.Task
 import mill.modules.Jvm
 import mill.scalalib.publish._
+
+import scala.util.Success
 
 ///** Project directory. */
 val baseDir: os.Path = build.millSourcePath
@@ -35,7 +37,7 @@ trait BlendedModule extends BlendedCoursierModule {
   def blendedCoreVersion : T[String] = blended.version()
 }
 
-trait BlendedScalaModule extends ScalaModule with SbtModulewith BlendedModule {
+trait BlendedScalaModule extends ScalaModule with SbtModule with BlendedModule {
   override def artifactName: T[String] = blendedModule
   def scalaVersion = Deps.scalaVersion
   val scalaBinVersion = T {scalaVersion().split("[.]").take(2).mkString(".") }
@@ -111,16 +113,44 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { outer =>
 
-  def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
+  def featureModuleDeps : Seq[BlendedFeatureModule] = Seq.empty
   def profileName : T[String]
   def profileVersion : T[String] = T { blended.version() }
 
-  override def ivyDeps = T {
-    val bundles : Seq[FeatureBundle] = T.traverse(featureDeps)(fd =>
-      T.task { fd.featureBundles() }
-    )().flatten
+  def resolveDep(dep : Dep) = T.task {
+    println(dep.dep.module.name.value)
+    dep.dep.module.name.value
+  }
 
-    super.ivyDeps() ++ bundles.distinct.map(_.dependency.exclude("*" -> "*"))
+  def artifactMap : T[Map[String, String]] = T {
+
+    val bundles = T.traverse(featureModuleDeps)(fd =>
+      T.task {
+        val depToGav : Dep => String = d => {
+          s"${d.dep.module.organization.value}:${d.dep.module.name.value}:${d.dep.version}"
+        }
+
+        fd.featureBundles().map{ fb =>
+          val gav : String = depToGav(fb.dependency)
+
+          val singleDep : Seq[PathRef] = Lib.resolveDependencies(
+            repositories,
+            resolveCoursierDependency().apply(_),
+            Agg(fb.dependency.exclude("*" -> "*")),
+            false,
+            mapDependencies = None,
+            Some(implicitly[mill.util.Ctx.Log])
+          ) match {
+            case mill.api.Result.Success(r) => r.toSeq
+            case mill.api.Result.Failure(m, _)  => sys.error(s"Failed to resolve [$gav] : $m")
+          }
+
+          singleDep.map(pr => (gav, pr.path.toIO.getAbsolutePath()))
+        }
+      }
+    )()
+
+    bundles.flatten.flatten.toMap
   }
 
   def blendedLauncherZip : T [Agg[Dep]] = T { Agg(
@@ -141,19 +171,82 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     PathRef(T.dest)
   }
 
-  def materializeProfile : T[PathRef] = T {
+  def filterResources : T[PathRef] = T {
 
-    val toolsCp : Agg[Path] = resolveDeps(blendedToolsDeps)().map(_.path)
-
-    Jvm.runSubprocess(
-      mainClass = "blended.updater.tools.configbuilder.RuntimeConfigBuilder",
-      classPath = toolsCp,
-      mainArgs = Seq("--help")
+    FilterUtil.filterDirs(
+      unfilteredResourcesDirs = resources().map(_.path),
+      pattern = """\$\{(.+?)\}""",
+      filterTargetDir = T.dest,
+      props = Map(
+        "profile.name" -> profileName(),
+        "profile.version" -> profileVersion(),
+        "blended.version" -> publishVersion()
+      ),
+      failOnMiss = false
     )
 
     PathRef(T.dest)
   }
 
+  def enhanceProfileConf : T[PathRef] = T {
+
+    val content : String = os.read(filterResources().path / "profile" / "profile.conf")
+
+    val features : Seq[String] = T.traverse(featureModuleDeps)(fd =>
+      T.task { s"""  { name=${fd.artifactName()}, version="${fd.publishVersion()}" }""" }
+    )()
+
+    val generated = content + features.mkString("features = [\n", ",\n", "\n]\n") + "bundles = []\n"
+
+    os.write(T.dest / "profile.conf", generated)
+    PathRef(T.dest / "profile.conf")
+  }
+
+  def featureFiles : T[Seq[String]] = T.traverse(featureModuleDeps)(fd =>
+    T.task { fd.featureConf() }
+  )().map(_.path.toIO.getAbsolutePath)
+
+  override def compileClasspath = super.compileClasspath
+
+
+
+
+  def runtimeConfigBuilderClass : String = "blended.updater.tools.configbuilder.RuntimeConfigBuilder"
+
+  def materializeProfile : T[PathRef] = T {
+
+    val toolsCp : Agg[Path] = resolveDeps(blendedToolsDeps)().map(_.path)
+
+    // First do required replacements in the source profile file
+    val profileSource : Path = filterResources().path / "profile" / "profile.conf"
+
+    // This is the target profile file
+    val profileFile : Path = T.dest / "profile.conf"
+
+    // Assemble the command line parameters
+    val toolArgs : Seq[String] = Seq(
+      "-f", enhanceProfileConf().path.toIO.getAbsolutePath(),
+      "-o", profileFile.toIO.getAbsolutePath(),
+      "--download-missing",
+      "--update-checksums",
+      "--write-overlays-config"
+    ) ++
+      featureFiles().flatMap(f => Seq[String]("--feature-repo", f)) ++
+      artifactMap().flatMap{ case(k,v) => Seq[String]("--maven-artifact", k, v) }
+
+    T.log.info(s"Calling $runtimeConfigBuilderClass with arguments : ${toolArgs.mkString("\n", "\n", "\n")}")
+
+    Jvm.runSubprocess(
+      mainClass = runtimeConfigBuilderClass,
+      classPath = toolsCp,
+      mainArgs = toolArgs
+    )
+
+    // Voila - the final profile.conf
+    PathRef(profileFile)
+  }
+
+  // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
   // per default package downloadable resources in a separate jar
   object ctResources extends BlendedScalaModule with BlendedPublishModule {
     override def artifactName : T[String] = T { outer.artifactName() + ".resources" }
@@ -477,7 +570,7 @@ object blended extends Module {
 
       override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.node"
 
-      override def featureDeps = Seq(
+      override def featureModuleDeps = Seq(
         blended.launcher.feature.base.felix,
         blended.launcher.feature.base.common,
         blended.launcher.feature.commons
