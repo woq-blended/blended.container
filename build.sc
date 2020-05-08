@@ -3,10 +3,12 @@ import mill.scalalib._
 import $file.feature_support
 import feature_support.FeatureBundle
 import $file.build_deps
+import ammonite.ops.Path
 import build_deps.Deps
 import coursier.Repository
 import coursier.core.{Extension, Publication}
 import coursier.maven.MavenRepository
+import mill.modules.Jvm
 import mill.scalalib.publish._
 
 ///** Project directory. */
@@ -33,7 +35,7 @@ trait BlendedModule extends BlendedCoursierModule {
   def blendedCoreVersion : T[String] = blended.version()
 }
 
-trait BlendedScalaModule extends ScalaModule with BlendedModule {
+trait BlendedScalaModule extends ScalaModule with SbtModulewith BlendedModule {
   override def artifactName: T[String] = blendedModule
   def scalaVersion = Deps.scalaVersion
   val scalaBinVersion = T {scalaVersion().split("[.]").take(2).mkString(".") }
@@ -62,7 +64,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
   override def artifactName = T { blendedModule }
 
   override def extraPublish = T { super.extraPublish() ++ Seq(
-    ExtraPublish(featureConf(), ivyType="conf", ivyExt="conf")
+    PublishInfo(featureConf(), ext = "conf", ivyType = "conf", ivyConfig = "compile")
   )}
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
@@ -107,7 +109,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
   }
 }
 
-trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
+trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { outer =>
 
   def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
   def profileName : T[String]
@@ -125,6 +127,10 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
     ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=dist".exclude("*" -> "*")
   )}
 
+  def blendedToolsDeps : T [Agg[Dep]] = T { Agg(
+    BlendedDeps.updaterTools(blendedCoreVersion())
+  )}
+
   def resolveLauncher : T[PathRef] = T {
     val resolved = resolveDeps(blendedLauncherZip)()
     resolved.items.next()
@@ -133,6 +139,24 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
   def unpackLauncher : T[PathRef] = T {
     ZipUtil.unpackZip(resolveLauncher().path, T.dest)
     PathRef(T.dest)
+  }
+
+  def materializeProfile : T[PathRef] = T {
+
+    val toolsCp : Agg[Path] = resolveDeps(blendedToolsDeps)().map(_.path)
+
+    Jvm.runSubprocess(
+      mainClass = "blended.updater.tools.configbuilder.RuntimeConfigBuilder",
+      classPath = toolsCp,
+      mainArgs = Seq("--help")
+    )
+
+    PathRef(T.dest)
+  }
+
+  // per default package downloadable resources in a separate jar
+  object ctResources extends BlendedScalaModule with BlendedPublishModule {
+    override def artifactName : T[String] = T { outer.artifactName() + ".resources" }
   }
 }
 
@@ -450,6 +474,8 @@ object blended extends Module {
     object node extends BlendedContainer {
 
       override def profileName : T[String] = T { "node" }
+
+      override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.node"
 
       override def featureDeps = Seq(
         blended.launcher.feature.base.felix,
