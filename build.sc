@@ -127,7 +127,12 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     val bundles = T.traverse(featureModuleDeps)(fd =>
       T.task {
         val depToGav : Dep => String = d => {
-          s"${d.dep.module.organization.value}:${d.dep.module.name.value}:${d.dep.version}"
+          val scalaId : String = if(d.cross.isBinary) {
+            s"_${scalaBinVersion()}"
+          } else {
+            ""
+          }
+          s"${d.dep.module.toString()}$scalaId:${d.dep.version}"
         }
 
         fd.featureBundles().map{ fb =>
@@ -192,11 +197,20 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
 
     val content : String = os.read(filterResources().path / "profile" / "profile.conf")
 
+    val ctResArtifact = ctResources.artifactMetadata()
+
+    val resources : String =
+      s"""
+         |resources = [
+         |  { url="mvn:${ctResources.mvnGav()}" }
+         |]
+         |""".stripMargin
+
     val features : Seq[String] = T.traverse(featureModuleDeps)(fd =>
       T.task { s"""  { name=${fd.artifactName()}, version="${fd.publishVersion()}" }""" }
     )()
 
-    val generated = content + features.mkString("features = [\n", ",\n", "\n]\n") + "bundles = []\n"
+    val generated = content + resources + features.mkString("features = [\n", ",\n", "\n]\n") + "bundles = []\n"
 
     os.write(T.dest / "profile.conf", generated)
     PathRef(T.dest / "profile.conf")
@@ -207,9 +221,6 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   )().map(_.path.toIO.getAbsolutePath)
 
   override def compileClasspath = super.compileClasspath
-
-
-
 
   def runtimeConfigBuilderClass : String = "blended.updater.tools.configbuilder.RuntimeConfigBuilder"
 
@@ -223,18 +234,27 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     // This is the target profile file
     val profileFile : Path = T.dest / "profile.conf"
 
+    // TODO: use other repo types ?
+    val repoUrls : Seq[String] = repositories
+      .filter(_.isInstanceOf[MavenRepository])
+      .map(_.asInstanceOf[MavenRepository].root)
+
     // Assemble the command line parameters
     val toolArgs : Seq[String] = Seq(
       "-f", enhanceProfileConf().path.toIO.getAbsolutePath(),
       "-o", profileFile.toIO.getAbsolutePath(),
       "--download-missing",
       "--update-checksums",
-      "--write-overlays-config"
+      "--write-overlays-config",
+      //"-debug",
+      "--maven-url", "https://repo1.maven.org/maven2",
+      "--maven-artifact", ctResources.mvnGav(), ctResources.jar().path.toIO.getAbsolutePath()
     ) ++
       featureFiles().flatMap(f => Seq[String]("--feature-repo", f)) ++
-      artifactMap().flatMap{ case(k,v) => Seq[String]("--maven-artifact", k, v) }
+      artifactMap().flatMap{ case(k,v) => Seq[String]("--maven-artifact", k, v) } ++
+      repoUrls.flatMap(r => Seq("--maven-url", r))
 
-    T.log.info(s"Calling $runtimeConfigBuilderClass with arguments : ${toolArgs.mkString("\n", "\n", "\n")}")
+    T.log.debug(s"Calling $runtimeConfigBuilderClass with arguments : ${toolArgs.mkString("\n", "\n", "\n")}")
 
     Jvm.runSubprocess(
       mainClass = runtimeConfigBuilderClass,
@@ -250,6 +270,10 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   // per default package downloadable resources in a separate jar
   object ctResources extends BlendedScalaModule with BlendedPublishModule {
     override def artifactName : T[String] = T { outer.artifactName() + ".resources" }
+
+    def mvnGav : T [String] = T {
+      s"${artifactMetadata().group}:${artifactMetadata().id}:${artifactMetadata().version}"
+    }
   }
 }
 
