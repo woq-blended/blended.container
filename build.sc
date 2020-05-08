@@ -109,6 +109,18 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule {
 
+  def featureDeps : Seq[BlendedFeatureModule] = Seq.empty
+  def profileName : T[String]
+  def profileVersion : T[String] = T { blended.version() }
+
+  override def ivyDeps = T {
+    val bundles : Seq[FeatureBundle] = T.traverse(featureDeps)(fd =>
+      T.task { fd.featureBundles() }
+    )().flatten
+
+    super.ivyDeps() ++ bundles.distinct.map(_.dependency.exclude("*" -> "*"))
+  }
+
   def blendedLauncherZip : T [Agg[Dep]] = T { Agg(
     ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=dist".exclude("*" -> "*")
   )}
@@ -437,6 +449,13 @@ object blended extends Module {
   object demo extends Module {
     object node extends BlendedContainer {
 
+      override def profileName : T[String] = T { "node" }
+
+      override def featureDeps = Seq(
+        blended.launcher.feature.base.felix,
+        blended.launcher.feature.base.common,
+        blended.launcher.feature.commons
+      )
     }
   }
 }
