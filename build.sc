@@ -121,26 +121,13 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
 
   def debugTool : Boolean = false
 
-  def resolveDep(dep : Dep) = T.task {
-    println(dep.dep.module.name.value)
-    dep.dep.module.name.value
-  }
-
   def artifactMap : T[Map[String, String]] = T {
 
     val bundles = T.traverse(featureModuleDeps)(fd =>
       T.task {
-        val depToGav : Dep => String = d => {
-          val scalaId : String = if(d.cross.isBinary) {
-            s"_${scalaBinVersion()}"
-          } else {
-            ""
-          }
-          s"${d.dep.module.toString()}$scalaId:${d.dep.version}"
-        }
 
         fd.featureBundles().map{ fb =>
-          val gav : String = depToGav(fb.dependency)
+          val gav : String = fb.gav(scalaBinVersion())
 
           val singleDep : Seq[PathRef] = Lib.resolveDependencies(
             repositories,
@@ -150,7 +137,11 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
             mapDependencies = None,
             Some(implicitly[mill.util.Ctx.Log])
           ) match {
-            case mill.api.Result.Success(r) => r.toSeq
+            case mill.api.Result.Success(r) =>
+              if (r.isEmpty) {
+                T.log.error(s"No artifact found for [$gav]")
+              }
+              r.toSeq
             case mill.api.Result.Failure(m, _)  => sys.error(s"Failed to resolve [$gav] : $m")
           }
 
@@ -180,6 +171,8 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     PathRef(T.dest)
   }
 
+  override def resources = T.sources { millSourcePath / "src"/ "profile" }
+
   def filterResources : T[PathRef] = T {
 
     FilterUtil.filterDirs(
@@ -199,7 +192,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
 
   def enhanceProfileConf : T[PathRef] = T {
 
-    val content : String = os.read(filterResources().path / "profile" / "profile.conf")
+    val content : String = os.read(filterResources().path / "profile.conf")
 
     val ctResArtifact = ctResources.artifactMetadata()
 
@@ -223,8 +216,6 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   def featureFiles : T[Seq[String]] = T.traverse(featureModuleDeps)(fd =>
     T.task { fd.featureConf() }
   )().map(_.path.toIO.getAbsolutePath)
-
-  override def compileClasspath = super.compileClasspath
 
   def runtimeConfigBuilderClass : String = "blended.updater.tools.configbuilder.RuntimeConfigBuilder"
 
@@ -276,11 +267,46 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     )
 
     os.remove.all(profileDir / "META-INF")
-    os.remove.all(profileDir / "resources")
 
     T.log.info(s"Materialized profile in [${profileDir.toIO.getAbsolutePath()}]")
     // Voila - the final profile configs
     PathRef(profileDir)
+  }
+
+  def containerExtraFiles  = T.sources { millSourcePath / "src"/ "package" / "container" }
+  def profileExtraFiles = T.sources { millSourcePath / "src" / "package" / "profile" }
+
+  def container : T [PathRef] = T {
+
+    def copyOver(src: Path, dest: Path) : Unit = {
+      if (src.toIO.exists()) {
+        os.walk(src).foreach { p =>
+          if (p.toIO.isFile()) {
+            os.copy(p, dest / p.relativeTo(src), replaceExisting = true)
+          }
+        }
+      }
+    }
+
+    val ctDir = T.dest
+
+    val launcher : Path = unpackLauncher().path
+    val profile : Path = materializeProfile().path
+
+    val profileDir = ctDir / "profiles" / profileName() / profileVersion()
+
+    os.list(launcher).iterator.foreach { p => os.copy.into(p, ctDir) }
+    os.remove.all(ctDir / "META-INF")
+
+    os.copy.into(profile / "launch.conf", ctDir)
+    os.copy(profile, profileDir, createFolders = true)
+
+    containerExtraFiles().map(_.path).foreach(copyOver(_, ctDir) )
+    profileExtraFiles().map(_.path).foreach(copyOver(_, profileDir))
+
+    os.remove(ctDir / "profiles" / profileName() / profileVersion() / "launch.conf")
+
+    PathRef(ctDir)
   }
 
   // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
@@ -619,17 +645,16 @@ object blended extends Module {
         blended.launcher.feature.spring,
         blended.launcher.feature.ssl,
         blended.launcher.feature.jetty,
-        blended.launcher.feature.jolokia
-
-        ////    { name=blended.launcher.feature.hawtio, version="${blended.version}" },
-        ////    { name=blended.launcher.feature.activemq, version="${blended.version}" },
-        ////    { name=blended.launcher.feature.security, version = "${blended.version}" },
-        ////    {name = blended.launcher.feature.login, version = "${blended.version}"},
-        ////    { name=blended.launcher.feature.mgmt.client, version = "${blended.version}" },
-        ////    { name=blended.launcher.feature.akka.http, version = "${blended.version}" },
-        ////    { name=blended.launcher.feature.persistence, version="${blended.version}" },
-        ////    { name=blended.launcher.feature.streams, version="${blended.version}" },
-        ////    { name=blended.launcher.feature.samples, version="${blended.version}" }
+        blended.launcher.feature.jolokia,
+        blended.launcher.feature.hawtio,
+        blended.launcher.feature.activemq,
+        blended.launcher.feature.security,
+        blended.launcher.feature.login,
+        blended.launcher.feature.mgmt.client,
+        blended.launcher.feature.akka.http.base,
+        blended.launcher.feature.persistence,
+        blended.launcher.feature.streams,
+        blended.launcher.feature.samples
       )
     }
   }

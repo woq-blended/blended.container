@@ -1,3 +1,4 @@
+import coursier.core.Extension
 import mill._
 import scalalib._
 
@@ -100,7 +101,11 @@ object Deps {
   val geronimoJ2eeMgmtSpec = ivy"org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1"
   val geronimoJms11Spec = ivy"org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1"
 
-  val hawtioWeb = ivy"io.hawt:hawtio-web:1.5.11;classifier=war"
+  val hawtioWeb = {
+    val dep = ivy"io.hawt:hawtio-web:1.5.11"
+    val publ = dep.dep.publication.withExt(Extension("war"))
+    dep.copy(dep = dep.dep.withPublication(publ))
+  }
 
   val h2 = ivy"com.h2database:h2:1.4.197"
   val hikaricp = ivy"com.zaxxer:HikariCP:3.1.0"

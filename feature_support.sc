@@ -16,31 +16,38 @@ case class FeatureBundle private (
   start: Boolean
 ) {
 
-  def formatConfig(scalaBinVersion : String): String = {
-
-    val builder: StringBuilder = new StringBuilder("    { ")
+  def gav(scalaBinVersion : String) : String = {
 
     val classifier : String = dependency.dep.attributes.classifier.value
+    val ext : String = dependency.dep.publication.ext.value
+    val fullFormat : Boolean = classifier.nonEmpty ||  !List("", "jar").contains(ext)
 
-    builder.append("url=\"")
-    builder.append("mvn:")
-
-    builder.append(dependency.dep.module.orgName)
-    if (dependency.cross.isBinary) {
+    val builder : StringBuilder = new StringBuilder(dependency.dep.module.toString())
+    if (dependency.cross.isBinary){
       builder.append(s"_$scalaBinVersion")
     }
 
     builder.append(":")
-    if (classifier.nonEmpty) {
+
+    if (fullFormat) {
+      builder.append(classifier)
       builder.append(":")
+      builder.append(dependency.dep.version)
+      builder.append(":")
+      builder.append(ext)
+    } else {
+      builder.append(dependency.dep.version)
     }
 
-    builder.append(dependency.dep.version)
+    builder.toString()
+  }
 
-    if (classifier.nonEmpty) {
-      builder.append(s":$classifier")
-    }
+  def formatConfig(scalaBinVersion : String): String = {
 
+    val builder: StringBuilder = new StringBuilder("    { ")
+
+    builder.append("url=\"mvn:")
+    builder.append(gav(scalaBinVersion))
     builder.append("\"")
 
     startLevel.foreach { sl => builder.append(s", startLevel=${sl}") }
