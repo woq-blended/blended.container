@@ -7,9 +7,11 @@ import ammonite.ops.Path
 import build_deps.Deps
 import coursier.Repository
 import coursier.maven.MavenRepository
+import mill.api.Logger
 import mill.define.Task
 import mill.modules.Jvm
 import mill.scalalib.publish._
+import mill.util.PrintLogger
 
 import scala.util.Success
 
@@ -116,6 +118,8 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   def featureModuleDeps : Seq[BlendedFeatureModule] = Seq.empty
   def profileName : T[String]
   def profileVersion : T[String] = T { blended.version() }
+
+  def debugTool : Boolean = false
 
   def resolveDep(dep : Dep) = T.task {
     println(dep.dep.module.name.value)
@@ -232,24 +236,33 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     val profileSource : Path = filterResources().path / "profile" / "profile.conf"
 
     // This is the target profile file
-    val profileFile : Path = T.dest / "profile.conf"
+    val profileDir : Path = T.dest
 
     // TODO: use other repo types ?
     val repoUrls : Seq[String] = repositories
       .filter(_.isInstanceOf[MavenRepository])
       .map(_.asInstanceOf[MavenRepository].root)
 
+    // TODO: How do I determine if mill is started in debug mode
+    val debugArgs : Seq[String] = if (debugTool) {
+      Seq("--debug")
+    } else {
+      Seq.empty
+    }
+
     // Assemble the command line parameters
     val toolArgs : Seq[String] = Seq(
       "-f", enhanceProfileConf().path.toIO.getAbsolutePath(),
-      "-o", profileFile.toIO.getAbsolutePath(),
+      "-o", (profileDir / "profile.conf").toIO.getAbsolutePath(),
+      "--create-launch-config", (profileDir / "launch.conf").toIO.getAbsolutePath(),
       "--download-missing",
       "--update-checksums",
       "--write-overlays-config",
-      //"-debug",
+      "--explode-resources",
       "--maven-url", "https://repo1.maven.org/maven2",
       "--maven-artifact", ctResources.mvnGav(), ctResources.jar().path.toIO.getAbsolutePath()
     ) ++
+      debugArgs ++
       featureFiles().flatMap(f => Seq[String]("--feature-repo", f)) ++
       artifactMap().flatMap{ case(k,v) => Seq[String]("--maven-artifact", k, v) } ++
       repoUrls.flatMap(r => Seq("--maven-url", r))
@@ -262,8 +275,12 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
       mainArgs = toolArgs
     )
 
-    // Voila - the final profile.conf
-    PathRef(profileFile)
+    os.remove.all(profileDir / "META-INF")
+    os.remove.all(profileDir / "resources")
+
+    T.log.info(s"Materialized profile in [${profileDir.toIO.getAbsolutePath()}]")
+    // Voila - the final profile configs
+    PathRef(profileDir)
   }
 
   // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
@@ -591,13 +608,28 @@ object blended extends Module {
     object node extends BlendedContainer {
 
       override def profileName : T[String] = T { "node" }
-
       override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.node"
+
+      //override def debugTool = true
 
       override def featureModuleDeps = Seq(
         blended.launcher.feature.base.felix,
         blended.launcher.feature.base.common,
-        blended.launcher.feature.commons
+        blended.launcher.feature.commons,
+        blended.launcher.feature.spring,
+        blended.launcher.feature.ssl,
+        blended.launcher.feature.jetty,
+        blended.launcher.feature.jolokia
+
+        ////    { name=blended.launcher.feature.hawtio, version="${blended.version}" },
+        ////    { name=blended.launcher.feature.activemq, version="${blended.version}" },
+        ////    { name=blended.launcher.feature.security, version = "${blended.version}" },
+        ////    {name = blended.launcher.feature.login, version = "${blended.version}"},
+        ////    { name=blended.launcher.feature.mgmt.client, version = "${blended.version}" },
+        ////    { name=blended.launcher.feature.akka.http, version = "${blended.version}" },
+        ////    { name=blended.launcher.feature.persistence, version="${blended.version}" },
+        ////    { name=blended.launcher.feature.streams, version="${blended.version}" },
+        ////    { name=blended.launcher.feature.samples, version="${blended.version}" }
       )
     }
   }
