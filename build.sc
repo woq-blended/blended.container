@@ -113,6 +113,9 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
   }
 }
 
+/**
+ * Define how blended containers are assembled.
+ */
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { outer =>
 
   def featureModuleDeps : Seq[BlendedFeatureModule] = Seq.empty
@@ -121,6 +124,12 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
 
   def debugTool : Boolean = false
 
+  /**
+   * The artifact map is a map from maven gavs to actual files. Typically all dependencies
+   * that come from features are resolved by mill via coursier. In this list we keep track
+   * of gav's to the absolute path of the associated file, so that we can pass this information
+   * to blended's RuntimeConfigBuilder.
+   */
   def artifactMap : T[Map[String, String]] = T {
 
     val bundles = T.traverse(featureModuleDeps)(fd =>
@@ -139,6 +148,9 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
           ) match {
             case mill.api.Result.Success(r) =>
               if (r.isEmpty) {
+                // TODO: This will appear in the log, but won't break the build. The RuntimeConfigBuilder
+                // will try to download that file itself.
+                // This happens i.e. when dependencies are not "jar"s
                 T.log.error(s"No artifact found for [$gav]")
               }
               r.toSeq
@@ -153,26 +165,47 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     bundles.flatten.flatten.toMap
   }
 
+  /**
+   * The binaries packaged within the blended launcher. The content of this archive will be used as a starting
+   * point for all blended containers.
+   */
   def blendedLauncherZip : T [Agg[Dep]] = T { Agg(
     ivy"${BlendedDeps.organization}::blended.launcher:${blendedCoreVersion()};classifier=dist".exclude("*" -> "*")
   )}
 
+  /**
+   * The dependency to the blended updater tools. These contain the tools to actually generate the
+   * profile configuration.
+   */
   def blendedToolsDeps : T [Agg[Dep]] = T { Agg(
     BlendedDeps.updaterTools(blendedCoreVersion())
   )}
 
+  /**
+   * Resolve the launcher distribution file.
+   */
   def resolveLauncher : T[PathRef] = T {
     val resolved = resolveDeps(blendedLauncherZip)()
     resolved.items.next()
   }
 
+  /**
+   * Unpack the content of the launcher distribution file.
+   */
   def unpackLauncher : T[PathRef] = T {
     ZipUtil.unpackZip(resolveLauncher().path, T.dest)
     PathRef(T.dest)
   }
 
+  /**
+   * The resource path will be subject to filtering. We need to inject the profile name
+   * and the profile version into the final profile.conf.
+   */
   override def resources = T.sources { millSourcePath / "src"/ "profile" }
 
+  /**
+   * Run resource filtering across all <code>resources()</code>.
+   */
   def filterResources : T[PathRef] = T {
 
     FilterUtil.filterDirs(
@@ -190,6 +223,11 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     PathRef(T.dest)
   }
 
+  /**
+   * Generate a profile conf that can be fed into RuntimeConfigBuilder. This will take the
+   * filtered profile.conf from the sourcce file and append the configuration for the
+   * container resource archive and the feature definitions.
+   */
   def enhanceProfileConf : T[PathRef] = T {
 
     val content : String = os.read(filterResources().path / "profile.conf")
@@ -213,12 +251,22 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
     PathRef(T.dest / "profile.conf")
   }
 
+  /**
+   * Return a sequence of all feature files used in this container. These files will be handed over
+   * to the RuntimeConfigBuilder.
+   */
   def featureFiles : T[Seq[String]] = T.traverse(featureModuleDeps)(fd =>
     T.task { fd.featureConf() }
   )().map(_.path.toIO.getAbsolutePath)
 
+  /**
+   * The class we need to run to materialze the profile.
+   */
   def runtimeConfigBuilderClass : String = "blended.updater.tools.configbuilder.RuntimeConfigBuilder"
 
+  /**
+   * Materialize the container profile.
+   */
   def materializeProfile : T[PathRef] = T {
 
     val toolsCp : Agg[Path] = resolveDeps(blendedToolsDeps)().map(_.path)
@@ -276,13 +324,22 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   def containerExtraFiles  = T.sources { millSourcePath / "src"/ "package" / "container" }
   def profileExtraFiles = T.sources { millSourcePath / "src" / "package" / "profile" }
 
+  /**
+   * Create the runnable container by copying all resources into the right place.
+   */
   def container : T [PathRef] = T {
 
+    /**
+     * Helper to copy the content of a given directory into a destination directory.
+     * The given directory may not be present (i.e. no extra files are required).
+     * File within the destination folder will be overwritten by the content of the
+     * given directory.
+     */
     def copyOver(src: Path, dest: Path) : Unit = {
       if (src.toIO.exists()) {
         os.walk(src).foreach { p =>
           if (p.toIO.isFile()) {
-            os.copy(p, dest / p.relativeTo(src), replaceExisting = true)
+            os.copy(p, dest / p.relativeTo(src), replaceExisting = true, createFolders = true)
           }
         }
       }
@@ -308,6 +365,23 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
 
     PathRef(ctDir)
   }
+
+  /**
+   * Package the runnable container into a zip archive.
+   */
+  def dist = T {
+    val zip = T.dest / "container.zip"
+    ZipUtil.createZip(zip, Seq(container().path))
+
+    PathRef(zip)
+  }
+
+  /**
+   * Make sure the container zips are also published.
+   */
+  override def extraPublish = T  { super.extraPublish() ++ Seq(
+    PublishInfo(file = dist(), classifier = Some("full-nojre"), ext = "zip", ivyConfig = "compile", ivyType = "dist")
+  )}
 
   // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
   // per default package downloadable resources in a separate jar
