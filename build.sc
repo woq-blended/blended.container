@@ -640,6 +640,7 @@ object blended extends Module {
 
       override def featureModuleDeps = Seq(
         blended.launcher.feature.base.felix,
+        //blended.launcher.feature.base.equinox,
         blended.launcher.feature.base.common,
         blended.launcher.feature.commons,
         blended.launcher.feature.spring,
@@ -655,6 +656,31 @@ object blended extends Module {
         blended.launcher.feature.persistence,
         blended.launcher.feature.streams,
         blended.launcher.feature.samples
+      )
+    }
+
+    object mgmt extends BlendedContainer {
+
+      override def profileName : T[String] = T { "mgmt" }
+      override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.mgmt"
+
+      //override def debugTool = true
+
+      override def featureModuleDeps = Seq(
+        blended.launcher.feature.base.felix,
+        //blended.launcher.feature.base.equinox,
+        blended.launcher.feature.base.common,
+        blended.launcher.feature.commons,
+        blended.launcher.feature.jetty,
+        blended.launcher.feature.hawtio,
+        blended.launcher.feature.spring,
+        blended.launcher.feature.ssl,
+        blended.launcher.feature.security,
+        blended.launcher.feature.login,
+        blended.launcher.feature.mgmt.client,
+        blended.launcher.feature.mgmt.server,
+        blended.launcher.feature.akka.http.base,
+        blended.launcher.feature.persistence
       )
     }
   }
