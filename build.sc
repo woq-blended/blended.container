@@ -116,7 +116,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 /**
  * Define how blended containers are assembled.
  */
-trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { outer =>
+trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ctModule =>
 
   def featureModuleDeps : Seq[BlendedFeatureModule] = Seq.empty
   def profileName : T[String]
@@ -371,7 +371,11 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
    */
   def dist = T {
     val zip = T.dest / "container.zip"
-    ZipUtil.createZip(zip, Seq(container().path))
+    ZipUtil.createZip(
+      outputPath = zip,
+      inputPaths = Seq(container().path),
+      prefix = s"${artifactId()}-${artifactMetadata().version}/"
+    )
 
     PathRef(zip)
   }
@@ -386,10 +390,75 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ou
   // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
   // per default package downloadable resources in a separate jar
   object ctResources extends BlendedScalaModule with BlendedPublishModule {
-    override def artifactName : T[String] = T { outer.artifactName() + ".resources" }
+    override def artifactName : T[String] = T { ctModule.artifactName() + ".resources" }
 
     def mvnGav : T [String] = T {
       s"${artifactMetadata().group}:${artifactMetadata().id}:${artifactMetadata().version}"
+    }
+  }
+
+  /**
+   * Docker definitions if we want to create a docker image from the container.
+   */
+  trait Docker extends BlendedModule {
+
+    /**
+     * The maintainer as it should appear in the docker file.
+     */
+    def maintainer : String = "Blended Team"
+
+    /**
+     * The base image that shall be used for the generated docker image.
+     */
+    def baseImage : String = "atooni/blended-base:latest"
+
+    /**
+     * The ports exposed from the docker image
+     */
+    def exposedPorts : Seq[Int] = Seq.empty
+
+    /**
+     * The folder under /opt where the application shall be installed.
+     */
+    def appFolder : T[String] = T { ctModule.profileName() }
+
+    /**
+     * The user who owns the application folder
+     */
+    def appUser : String = "blended"
+
+    def dockerImage : T[String] = T { s"atooni/blended-${appFolder()}:${ctModule.profileVersion()}" }
+
+    def dockerconfig : T[PathRef] = T {
+
+      val dir = T.dest
+
+      os.copy(ctModule.container().path, dir / "files" / "container" / appFolder(), createFolders = true)
+
+      val content : String =
+        s"""FROM $baseImage
+           |LABEL maintainer="$maintainer"
+           |LABEL version="${ctModule.profileVersion()}"
+           |ADD files/container /opt
+           |RUN chown -R $appUser.$appUser /opt/${appFolder()}
+           |USER $appUser
+           |ENV JAVA_HOME /opt/java
+           |ENV PATH $${PATH}:$${JAVA_HOME}/bin
+           |ENTRYPOINT ["/bin/sh", "/opt/${appFolder()}/bin/blended.sh"]
+           |""".stripMargin ++ exposedPorts.map(p => s"EXPOSE $p").mkString("\n", "\n", "\n")
+
+      os.write(dir / "Dockerfile", content)
+
+      PathRef(dir)
+    }
+
+    def dockerbuild()  = T.command {
+      val process = Jvm.spawnSubprocess(commandArgs = Seq(
+        "docker", "build", "-t", dockerImage(), "."
+      ), envArgs = Map.empty, workingDir = dockerconfig().path)
+
+      process.join()
+      process.exitCode()
     }
   }
 }
@@ -731,6 +800,10 @@ object blended extends Module {
         blended.launcher.feature.streams,
         blended.launcher.feature.samples
       )
+
+      object docker extends Docker {
+        override def exposedPorts = Seq(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
+      }
     }
 
     object mgmt extends BlendedContainer {
@@ -756,6 +829,10 @@ object blended extends Module {
         blended.launcher.feature.akka.http.base,
         blended.launcher.feature.persistence
       )
+
+      object docker extends Docker {
+        override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
+      }
     }
   }
 }
