@@ -1,13 +1,21 @@
 package blended.itest.node
 
 import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
+import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination, JmsQueue}
+import blended.streams.FlowHeaderConfig
+import blended.streams.jms.{JmsProducerSettings, JmsStreamSupport}
+import blended.streams.message.{FlowEnvelope, FlowEnvelopeLogger, FlowMessage}
+import blended.streams.testsupport.{ExpectedBodies, ExpectedHeaders, ExpectedMessageCount, FlowMessageAssertion}
 import blended.testsupport.BlendedTestSupport
+import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.logging.Logger
-import org.scalatest.refspec.RefSpec
-import org.scalatest.{Args, BeforeAndAfterAll, Status, Suite}
+import org.scalactic.Requirements.requireNonNull
+import org.scalatest.events.{InfoProvided, NameInfo}
+import org.scalatest.{Args, BeforeAndAfterAll, CompositeStatus, Resources, Status, SucceededStatus, Suite, SuiteHelpers}
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration._
@@ -15,11 +23,13 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success}
 
 class BlendedDemoIntegrationSpec
-  extends RefSpec
+  extends LoggingFreeSpec
   with BeforeAndAfterAll
-  with BlendedIntegrationTestSupport {
+  with BlendedIntegrationTestSupport
+  with JmsStreamSupport {
 
   private implicit val system : ActorSystem = ActorSystem("Blended")
+  private implicit val materializer : Materializer = ActorMaterializer()
   private implicit val testkit : TestKit = new TestKit(system)
   private implicit val eCtxt : ExecutionContext = system.dispatcher
 
@@ -27,6 +37,9 @@ class BlendedDemoIntegrationSpec
 
   private[this] implicit val timeout : Timeout = Timeout(300.seconds)
   private[this] val ctProxy = system.actorOf(TestContainerProxy.props(timeout.duration))
+
+  private[this] val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
+  private[this] val envLogger : FlowEnvelopeLogger = FlowEnvelopeLogger.create(headerCfg, log)
 
   /** Even when unused, this one triggers the container start. */
   private[this] val cuts : Map[String, ContainerUnderTest] = {
@@ -36,6 +49,9 @@ class BlendedDemoIntegrationSpec
     Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
   }
 
+  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
+  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
+
   override def nestedSuites : IndexedSeq[Suite] = {
     val result = IndexedSeq(
       new BlendedDemoSpec()
@@ -43,11 +59,6 @@ class BlendedDemoIntegrationSpec
     log.info(s"Found sub specs [${result.map(_.suiteName)}]" )
 
     result
-  }
-
-  override def run(testName: Option[String], args: Args): Status = {
-    log.info(s"Running tests with test name [$testName], args [$args]")
-    super.run(testName, args)
   }
 
   override def beforeAll(): Unit = {}
@@ -72,5 +83,47 @@ class BlendedDemoIntegrationSpec
     }
 
     //stopContainers(ctProxy)(timeout, testkit)
+  }
+
+  "foo should" - {
+
+    "do nothing" in {
+      assert(false)
+    }
+
+    "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
+
+      val testMessage : FlowEnvelope = FlowEnvelope(
+        FlowMessage("Hello Blended!")(FlowMessage.props("ResourceType" -> "SampleIn").get)
+      )
+
+      val pSettings : JmsProducerSettings = JmsProducerSettings(
+        log = envLogger,
+        headerCfg = headerCfg,
+        connectionFactory = extCf,
+        jmsDestination = Some(JmsQueue("DispatcherIn"))
+      )
+
+      sendMessages(pSettings, envLogger, testMessage)
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
+        cf = extCf,
+        dest = JmsDestination.create("DispatcherOut").get,
+        log = envLogger,
+        completeOn = Some(l => l.size == 1),
+        timeout = None
+      )
+
+      val errorsFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
+          ExpectedMessageCount(1),
+          ExpectedBodies(Some("Hello Blended!")),
+          ExpectedHeaders("ResourceType" -> "SampleIn")
+        )
+      }
+
+      assert(Await.result(errorsFut, 10.seconds + 1.second).isEmpty)
+    }
   }
 }

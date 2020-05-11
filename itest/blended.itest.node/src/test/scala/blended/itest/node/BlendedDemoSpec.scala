@@ -18,7 +18,8 @@ import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.FileHelper
 import blended.util.logging.Logger
 import org.scalactic.source
-import org.scalatest.{Assertions, DoNotDiscover, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertions, DoNotDiscover}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Promise}
