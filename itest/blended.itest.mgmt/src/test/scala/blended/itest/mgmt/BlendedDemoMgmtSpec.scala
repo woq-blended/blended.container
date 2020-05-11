@@ -18,7 +18,6 @@ import prickle.Pickle
 
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
-//import com.softwaremill.sttp.sttp
 import org.scalatest.{DoNotDiscover, Matchers}
 import prickle.Unpickle
 

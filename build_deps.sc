@@ -148,13 +148,14 @@ object Deps {
 //  val lambdaTest = "de.tototec" % "de.tobiasroeser.lambdatest" % "0.6.2"
 //  val levelDbJava = "org.iq80.leveldb" % "leveldb" % "0.9"
 //  val levelDbJni = "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8"
+  val lihaoyiPprint = ivy"com.lihaoyi::pprint:0.5.3"
   val liquibase = ivy"org.liquibase:liquibase-core:3.6.1"
 //  /** Only for use in test that also runs in JS */
 //  val log4s = "org.log4s" %% "log4s" % "1.6.1"
   val logbackCore = ivy"ch.qos.logback:logback-core:1.2.3"
   val logbackClassic = ivy"ch.qos.logback:logback-classic:1.2.3"
 //
-//  val microjson = "com.github.benhutchison" %% "microjson" % microJsonVersion
+  val microjson = ivy"com.github.benhutchison::microjson:$microJsonVersion"
 //  val mimepull = "org.jvnet.mimepull" % "mimepull" % "1.9.5"
 //  val mockitoAll = "org.mockito" % "mockito-all" % "1.9.5"
 //
@@ -164,9 +165,10 @@ object Deps {
 //
 //  val parboiledCore = "org.parboiled" % "parboiled-core" % parboiledVersion
 //  val parboiledScala = "org.parboiled" %% "parboiled-scala" % parboiledVersion
-//  val prickle = "com.github.benhutchison" %% "prickle" % prickleVersion
-//
+  val prickle = ivy"com.github.benhutchison::prickle:$prickleVersion"
+
   val reactiveStreams = ivy"org.reactivestreams:reactive-streams:1.0.0.final"
+
   // SCALA
   val scalaCompatJava8 = ivy"org.scala-lang.modules::scala-java8-compat:0.8.0"
   val scalaLibrary = ivy"org.scala-lang:scala-library:$scalaVersion"
@@ -208,10 +210,10 @@ object Deps {
   val springJdbc = spring("jdbc")
   val springJms = spring("jms")
   val springTx = spring("tx")
-//
-//  val sttp = "com.softwaremill.sttp" %% "core" % "1.3.0"
-//  val sttpAkka = "com.softwaremill.sttp" %% "akka-http-backend" % "1.3.0"
-//
+
+  val sttp = ivy"com.softwaremill.sttp::core:1.3.0"
+  val sttpAkka = ivy"com.softwaremill.sttp::akka-http-backend:1.3.0"
+
 //  val travesty = "net.mikolak" %% "travesty" % s"0.9.1_2.5.17"
 //
   val typesafeConfig = ivy"com.typesafe:config:1.3.3"

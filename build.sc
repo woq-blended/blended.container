@@ -514,7 +514,7 @@ trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
     s"-Ddocker.port=$dockerport"
   )}
 
-  override def ivyDeps = T { super.ivyDeps() ++ Agg(
+  override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
     Deps.activeMqClient,
     Deps.scalatest,
     Deps.slf4j,
@@ -918,9 +918,21 @@ object blended extends Module {
   object itest extends Module {
 
     object node extends BlendedIntegrationTest {
-
       override def millSourcePath: Path = baseDir / "itest" / "blended.itest.node"
+    }
 
+    object mgmt extends BlendedIntegrationTest {
+
+
+      override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
+        Deps.sttp,
+        Deps.sttpAkka,
+        Deps.microjson,
+        Deps.prickle,
+        Deps.lihaoyiPprint
+      )}
+
+      override def millSourcePath: Path = baseDir / "itest" / "blended.itest.mgmt"
     }
   }
 }
