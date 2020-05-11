@@ -510,6 +510,7 @@ trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
   )
 
   override def forkArgs = T { super.forkArgs() ++ Seq(
+    s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
     s"-Ddocker.host=$dockerhost",
     s"-Ddocker.port=$dockerport"
   )}
@@ -922,7 +923,6 @@ object blended extends Module {
     }
 
     object mgmt extends BlendedIntegrationTest {
-
 
       override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
         Deps.sttp,

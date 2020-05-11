@@ -18,7 +18,8 @@ import prickle.Pickle
 
 import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
-import org.scalatest.{DoNotDiscover, Matchers}
+import org.scalatest.DoNotDiscover
+import org.scalatest.matchers.should.Matchers
 import prickle.Unpickle
 
 @DoNotDiscover
@@ -34,6 +35,7 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
   private[this] val log = Logger[BlendedDemoMgmtSpec]
 
+  // TODO: Make this generic for cross build
   private val scalaBinVersion = "2.12"
 
   implicit val backend = HttpURLConnectionBackend()

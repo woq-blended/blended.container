@@ -5,7 +5,7 @@ import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
-import org.scalatest.{BeforeAndAfterAll, TestSuite}
+import org.scalatest.{Args, BeforeAndAfterAll, Status, TestSuite}
 import org.scalatest.refspec.RefSpec
 
 import scala.collection.immutable.IndexedSeq
@@ -42,7 +42,13 @@ class BlendedDemoMgmtIntegrationSpec
     Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
   }
 
-  override def nestedSuites : IndexedSeq[TestSuite] = IndexedSeq(new BlendedDemoMgmtSpec())
+  override def nestedSuites : IndexedSeq[TestSuite] = {
+    IndexedSeq(new BlendedDemoMgmtSpec())
+  }
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+  }
 
   override def afterAll() {
     log.info("Running afterAll...")
