@@ -8,7 +8,7 @@ import build_deps.Deps
 import coursier.Repository
 import coursier.maven.MavenRepository
 import mill.api.Logger
-import mill.define.Task
+import mill.define.{Sources, Task}
 import mill.modules.Jvm
 import mill.scalalib.publish._
 import mill.util.PrintLogger
@@ -225,7 +225,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
 
   /**
    * Generate a profile conf that can be fed into RuntimeConfigBuilder. This will take the
-   * filtered profile.conf from the sourcce file and append the configuration for the
+   * filtered profile.conf from the sourcce files and append the configuration for the
    * container resource archive and the feature definitions.
    */
   def enhanceProfileConf : T[PathRef] = T {
@@ -298,7 +298,6 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
       "--update-checksums",
       "--write-overlays-config",
       "--explode-resources",
-      "--maven-url", "https://repo1.maven.org/maven2",
       "--maven-artifact", ctResources.mvnGav(), ctResources.jar().path.toIO.getAbsolutePath()
     ) ++
       debugArgs ++
@@ -332,7 +331,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
     /**
      * Helper to copy the content of a given directory into a destination directory.
      * The given directory may not be present (i.e. no extra files are required).
-     * File within the destination folder will be overwritten by the content of the
+     * Files within the destination folder will be overwritten by the content of the
      * given directory.
      */
     def copyOver(src: Path, dest: Path) : Unit = {
@@ -387,7 +386,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
     PublishInfo(file = dist(), classifier = Some("full-nojre"), ext = "zip", ivyConfig = "compile", ivyType = "dist")
   )}
 
-  // TODO: Apply magic to turn ctResources to magic overridable val (i.e. ScoverageData)
+  // TODO: Apply magic to turn ctResources to magic overridable val (i.e. as in ScoverageData)
   // per default package downloadable resources in a separate jar
   object ctResources extends BlendedScalaModule with BlendedPublishModule {
     override def artifactName : T[String] = T { ctModule.artifactName() + ".resources" }
@@ -461,6 +460,86 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
       process.exitCode()
     }
   }
+}
+
+trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
+
+  def dockerhost = "localhost"
+  def dockerport = 2375
+
+  override def testFrameworks = Seq("org.scalatest.tools.Framework")
+
+  def logResources = T {
+    val moduleSpec = toString()
+    val dest = T.ctx().dest
+    val logConfig =
+      s"""<configuration>
+         |
+         |  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+         |    <file>${baseDir.toString()}/target/test-${moduleSpec}.log</file>
+         |
+         |    <encoder>
+         |      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%t] %logger : %msg%n</pattern>
+         |    </encoder>
+         |  </appender>
+         |
+         |  <logger name="blended" level="debug" />
+         |  <logger name="domino" level="debug" />
+         |  <logger name="App" level="debug" />
+         |
+         |  <root level="INFO">
+         |    <appender-ref ref="FILE" />
+         |  </root>
+         |
+         |</configuration>
+         |""".stripMargin
+    os.write(dest / "logback-test.xml", logConfig)
+    PathRef(dest)
+  }
+
+
+  override def runClasspath = T { super.runClasspath() ++ Seq(logResources()) }
+
+  override def sources: Sources = T.sources (
+    millSourcePath / "src" / "test" / "scala",
+    millSourcePath / "src" / "test" / "java"
+  )
+
+  override def resources = T.sources(
+    millSourcePath / "src" / "test" / "resources"
+  )
+
+  override def forkArgs = T { super.forkArgs() ++ Seq(
+    s"-Ddocker.host=$dockerhost",
+    s"-Ddocker.port=$dockerport"
+  )}
+
+  override def ivyDeps = T { super.ivyDeps() ++ Agg(
+    Deps.activeMqClient,
+    Deps.scalatest,
+    Deps.slf4j,
+    Deps.akkaActor,
+    Deps.akkaStream,
+    Deps.akkaSlf4j,
+    Deps.logbackClassic,
+    Deps.logbackCore,
+    Deps.geronimoJ2eeMgmtSpec,
+    Deps.geronimoJms11Spec,
+
+    Deps.dockerJava,
+    Deps.akkaTestkit,
+
+    BlendedDeps.utilLogging(blendedCoreVersion()),
+    BlendedDeps.jmsUtils(blendedCoreVersion()),
+    BlendedDeps.util(blendedCoreVersion()),
+    BlendedDeps.akka(blendedCoreVersion()),
+    BlendedDeps.securitySsl(blendedCoreVersion()),
+    BlendedDeps.streams(blendedCoreVersion()),
+
+    BlendedDeps.testSupport(blendedCoreVersion()),
+    BlendedDeps.streamsTestsupport(blendedCoreVersion()),
+    BlendedDeps.itestSupport(blendedCoreVersion())
+  )}
 }
 
 object blended extends Module {
@@ -833,6 +912,15 @@ object blended extends Module {
       object docker extends Docker {
         override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
       }
+    }
+  }
+
+  object itest extends Module {
+
+    object node extends BlendedIntegrationTest {
+
+      override def millSourcePath: Path = baseDir / "itest" / "blended.itest.node"
+
     }
   }
 }

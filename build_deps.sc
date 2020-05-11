@@ -33,26 +33,23 @@ object Deps {
   val ariesProxyApi = ivy"org.apache.aries.proxy:org.apache.aries.proxy.api:1.0.1"
   val ariesUtil = ivy"org.apache.aries:org.apache.aries.util:1.1.0"
 
-  //  val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
-//  val activeMqClient = "org.apache.activemq" % "activemq-client" % activeMqVersion
-//  val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
-//  val activeMqSpring = "org.apache.activemq" % "activemq-spring" % activeMqVersion
-//
+  //val activeMqBroker = "org.apache.activemq" % "activemq-broker" % activeMqVersion
+  val activeMqClient = ivy"org.apache.activemq:activemq-client:$activeMqVersion"
+  //val activeMqKahadbStore = "org.apache.activemq" % "activemq-kahadb-store" % activeMqVersion
+  //val activeMqSpring = "org.apache.activemq" % "activemq-spring" % activeMqVersion
+
   protected def akka(m : String) : Dep = ivy"com.typesafe.akka::akka-$m::$akkaVersion"
   protected def akkaHttpModule(m : String) : Dep = ivy"com.typesafe.akka::akka-$m:$akkaHttpVersion"
 
   val akkaActor = akka("actor")
-//  val akkaHttp = akkaHttpModule("http")
-//  val akkaHttpCore = akkaHttpModule("http-core")
-//  val akkaHttpTestkit = akkaHttpModule("http-testkit")
-//  val akkaOsgi = akka("osgi")
-//  val akkaParsing = akkaHttpModule("parsing")
-//  val akkaPersistence = akka("persistence")
+  val akkaHttp = akkaHttpModule("http")
+  val akkaHttpCore = akkaHttpModule("http-core")
+  val akkaHttpTestkit = akkaHttpModule("http-testkit")
   val akkaProtobuf = akka("protobuf")
   val akkaStream = akka("stream")
-//  val akkaStreamTestkit = akka("stream-testkit")
-//  val akkaTestkit = akka("testkit")
-//  val akkaSlf4j = akka("slf4j")
+  val akkaStreamTestkit = akka("stream-testkit")
+  val akkaTestkit = akka("testkit")
+  val akkaSlf4j = akka("slf4j")
 //
 //  val asciiRender = "com.indvd00m.ascii.render" % "ascii-render" % "1.2.3"
   val asmAll = ivy"org.ow2.asm:asm-all:4.1"
@@ -76,7 +73,7 @@ object Deps {
 //  val commonsLang2 = "commons-lang" % "commons-lang" % "2.6"
   val concurrentLinkedHashMapLru = ivy"com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2"
 
-//  val dockerJava = "com.github.docker-java" % "docker-java" % "3.0.13"
+  val dockerJava = ivy"com.github.docker-java:docker-java:3.0.13"
   val domino = ivy"com.github.domino-osgi::domino:$dominoVersion"
 //
   val eclipseEquinoxConsole = ivy"org.eclipse.platform:org.eclipse.equinox.console:1.4.0"
@@ -154,8 +151,8 @@ object Deps {
   val liquibase = ivy"org.liquibase:liquibase-core:3.6.1"
 //  /** Only for use in test that also runs in JS */
 //  val log4s = "org.log4s" %% "log4s" % "1.6.1"
-//  val logbackCore = "ch.qos.logback" % "logback-core" % "1.2.3"
-//  val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
+  val logbackCore = ivy"ch.qos.logback:logback-core:1.2.3"
+  val logbackClassic = ivy"ch.qos.logback:logback-classic:1.2.3"
 //
 //  val microjson = "com.github.benhutchison" %% "microjson" % microJsonVersion
 //  val mimepull = "org.jvnet.mimepull" % "mimepull" % "1.9.5"
@@ -170,7 +167,7 @@ object Deps {
 //  val prickle = "com.github.benhutchison" %% "prickle" % prickleVersion
 //
   val reactiveStreams = ivy"org.reactivestreams:reactive-streams:1.0.0.final"
-//  // SCALA
+  // SCALA
   val scalaCompatJava8 = ivy"org.scala-lang.modules::scala-java8-compat:0.8.0"
   val scalaLibrary = ivy"org.scala-lang:scala-library:$scalaVersion"
   val scalaReflect = ivy"org.scala-lang:scala-reflect:$scalaVersion"
@@ -180,11 +177,11 @@ object Deps {
   val servicemixStaxApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.stax-api-1.0:2.4.0"
 
   //
-//  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.14.0"
-//  val scalatest = "org.scalatest" %% "scalatest" % scalatestVersion
-//  val shapeless = "com.chuusai" %% "shapeless" % "1.2.4"
-//  val slf4j = "org.slf4j" % "slf4j-api" % slf4jVersion
-//  val slf4jLog4j12 = "org.slf4j" % "slf4j-log4j12" % slf4jVersion
+  //  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.14.0"
+  val scalatest = ivy"org.scalatest::scalatest:$scalatestVersion"
+  //  val shapeless = "com.chuusai" %% "shapeless" % "1.2.4"
+  val slf4j = ivy"org.slf4j:slf4j-api:$slf4jVersion"
+  val slf4jLog4j12 = ivy"org.slf4j:slf4j-log4j12:$slf4jVersion"
   val snakeyaml = ivy"org.yaml:snakeyaml:1.18"
 //
 //  // libs for splunk support via HEC
@@ -195,7 +192,7 @@ object Deps {
 //  val httpAsync = "org.apache.httpcomponents" % "httpasyncclient" % "4.1.3"
 //  val commonsLogging = "commons-logging" % "commons-logging" % "1.2"
 //  val jsonSimple = "com.googlecode.json-simple" % "json-simple" % "1.1.1"
-//  // -------------- end of splunk libs -----------------------------------------
+//  -------------- end of splunk libs -----------------------------------------
 //
 //  val sprayJson = "io.spray" %% s"spray-json" % sprayVersion
 //
