@@ -75,6 +75,6 @@ class BlendedDemoMgmtIntegrationSpec
     writeLog("node1_0", "opt/node/log")
     writeLog("node2_0", "opt/node/log")
 
-    stopContainers(ctProxy)(timeout, testkit)
+    //stopContainers(ctProxy)(timeout, testkit)
   }
 }

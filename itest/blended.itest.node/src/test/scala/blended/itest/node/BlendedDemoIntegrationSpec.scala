@@ -52,14 +52,9 @@ class BlendedDemoIntegrationSpec
   private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
   private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
 
-  override def nestedSuites : IndexedSeq[Suite] = {
-    val result = IndexedSeq(
-      new BlendedDemoSpec()
-    )
-    log.info(s"Found sub specs [${result.map(_.suiteName)}]" )
-
-    result
-  }
+  override def nestedSuites : IndexedSeq[Suite] = IndexedSeq(
+    new BlendedDemoSpec()
+  )
 
   override def beforeAll(): Unit = {}
 
@@ -83,47 +78,5 @@ class BlendedDemoIntegrationSpec
     }
 
     //stopContainers(ctProxy)(timeout, testkit)
-  }
-
-  "foo should" - {
-
-    "do nothing" in {
-      assert(false)
-    }
-
-    "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
-
-      val testMessage : FlowEnvelope = FlowEnvelope(
-        FlowMessage("Hello Blended!")(FlowMessage.props("ResourceType" -> "SampleIn").get)
-      )
-
-      val pSettings : JmsProducerSettings = JmsProducerSettings(
-        log = envLogger,
-        headerCfg = headerCfg,
-        connectionFactory = extCf,
-        jmsDestination = Some(JmsQueue("DispatcherIn"))
-      )
-
-      sendMessages(pSettings, envLogger, testMessage)
-
-      val outColl = receiveMessages(
-        headerCfg = FlowHeaderConfig.create(prefix = "App"),
-        cf = extCf,
-        dest = JmsDestination.create("DispatcherOut").get,
-        log = envLogger,
-        completeOn = Some(l => l.size == 1),
-        timeout = None
-      )
-
-      val errorsFut = outColl.result.map { msgs =>
-        FlowMessageAssertion.checkAssertions(msgs:_*)(
-          ExpectedMessageCount(1),
-          ExpectedBodies(Some("Hello Blended!")),
-          ExpectedHeaders("ResourceType" -> "SampleIn")
-        )
-      }
-
-      assert(Await.result(errorsFut, 10.seconds + 1.second).isEmpty)
-    }
   }
 }

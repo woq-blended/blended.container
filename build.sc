@@ -119,7 +119,7 @@ trait BlendedFeatureModule extends BlendedScalaModule with BlendedCoursierModule
 trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ctModule =>
 
   def featureModuleDeps : Seq[BlendedFeatureModule] = Seq.empty
-  def profileName : T[String]
+  def profileName : T[String] = artifactId()
   def profileVersion : T[String] = T { blended.version() }
 
   def debugTool : Boolean = false
@@ -409,7 +409,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
     /**
      * The base image that shall be used for the generated docker image.
      */
-    def baseImage : String = "atooni/blended-base:latest"
+    def baseImage : String = "atooni/zulu-8-alpine:1.0.1"
 
     /**
      * The ports exposed from the docker image
@@ -426,7 +426,7 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
      */
     def appUser : String = "blended"
 
-    def dockerImage : T[String] = T { s"atooni/blended-${appFolder()}:${ctModule.profileVersion()}" }
+    def dockerImage : T[String]
 
     def dockerconfig : T[PathRef] = T {
 
@@ -464,8 +464,8 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
 
 trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
 
-  def dockerhost = "localhost"
-  def dockerport = 2375
+  def dockerhost = T.input { T.env.getOrElse("DOCKERHOST", "unix:///var/run/docker.sock") }
+  def dockerport = T.input { T.env.getOrElse("DOCKERPORT", "2375") }
 
   override def testFrameworks = Seq("org.scalatest.tools.Framework")
 
@@ -497,7 +497,6 @@ trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
     PathRef(dest)
   }
 
-
   override def runClasspath = T { super.runClasspath() ++ Seq(logResources()) }
 
   override def sources: Sources = T.sources (
@@ -511,8 +510,8 @@ trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
 
   override def forkArgs = T { super.forkArgs() ++ Seq(
     s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
-    s"-Ddocker.host=$dockerhost",
-    s"-Ddocker.port=$dockerport"
+    s"-Ddocker.host=${dockerhost()}",
+    s"-Ddocker.port=${dockerport()}"
   )}
 
   override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
@@ -541,6 +540,24 @@ trait BlendedIntegrationTest extends TestModule with BlendedScalaModule {
     BlendedDeps.streamsTestsupport(blendedCoreVersion()),
     BlendedDeps.itestSupport(blendedCoreVersion())
   )}
+
+  /* This is just a workaround to see if it actually works */
+  def itest() = T.command {
+
+    val dir = T.dest
+
+    Jvm.runSubprocess(
+      mainClass = "org.scalatest.tools.Runner",
+      classPath = runClasspath().map(_.path),
+      mainArgs = Seq(
+        "-R", compile().classes.path.toIO.getAbsolutePath(),
+        "-o"
+      ),
+      jvmArgs = forkArgs()
+    )
+
+    PathRef(dir)
+  }
 }
 
 object blended extends Module {
@@ -856,7 +873,6 @@ object blended extends Module {
   object demo extends Module {
     object node extends BlendedContainer {
 
-      override def profileName : T[String] = T { "node" }
       override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.node"
 
       //override def debugTool = true
@@ -882,13 +898,13 @@ object blended extends Module {
       )
 
       object docker extends Docker {
+        override def dockerImage = T { s"atooni/blended-node:${blended.version()}"}
         override def exposedPorts = Seq(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
       }
     }
 
     object mgmt extends BlendedContainer {
 
-      override def profileName : T[String] = T { "mgmt" }
       override def millSourcePath : os.Path = baseDir / "container" / "blended.demo.mgmt"
 
       //override def debugTool = true
@@ -911,6 +927,9 @@ object blended extends Module {
       )
 
       object docker extends Docker {
+
+        override def dockerImage = T { s"atooni/blended-mgmt:${blended.version()}"}
+
         override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
       }
     }
