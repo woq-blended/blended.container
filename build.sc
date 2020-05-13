@@ -7,11 +7,11 @@ import ammonite.ops.Path
 import build_deps.Deps
 import coursier.Repository
 import coursier.maven.MavenRepository
-import mill.api.Logger
-import mill.define.{Sources, Task}
+import mill.define.Sources
 import mill.modules.Jvm
 import mill.scalalib.publish._
 import mill.util.PrintLogger
+import os.RelPath
 
 import scala.util.Success
 
@@ -380,10 +380,32 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
   }
 
   /**
+   * Package a deployment package that can be uploaded to a running blended container as a self contained profile
+   */
+  def deploymentpack = T {
+
+    val deploy = T.dest / "deployment.zip"
+
+    val profileDir : Path = container().path / "profiles" / profileName() / profileVersion()
+
+    val includes : Seq[RelPath] = Seq( "profile.conf", "bundles", "resources").map(s => RelPath(s))
+
+    ZipUtil.createZip(
+      outputPath = deploy,
+      inputPaths = Seq(profileDir),
+      fileFilter = (_, rel) => includes.exists(i => rel.startsWith(i)),
+      includeDirs = true
+    )
+
+    PathRef(deploy)
+  }
+
+  /**
    * Make sure the container zips are also published.
    */
   override def extraPublish = T  { super.extraPublish() ++ Seq(
-    PublishInfo(file = dist(), classifier = Some("full-nojre"), ext = "zip", ivyConfig = "compile", ivyType = "dist")
+    PublishInfo(file = dist(), classifier = Some("full-nojre"), ext = "zip", ivyConfig = "compile", ivyType = "dist"),
+    PublishInfo(file = deploymentpack(), classifier = Some("deploymentpack"), ext = "zip", ivyConfig = "compile", ivyType = "dist")
   )}
 
   // TODO: Apply magic to turn ctResources to magic overridable val (i.e. as in ScoverageData)
@@ -949,6 +971,11 @@ object blended extends Module {
         Deps.microjson,
         Deps.prickle,
         Deps.lihaoyiPprint
+      )}
+
+
+      override def forkArgs = T { super.forkArgs() ++ Seq(
+        s"-Ddeploymentpack=${blended.demo.node.deploymentpack().path.toIO.getAbsolutePath()}"
       )}
 
       override def millSourcePath: Path = baseDir / "itest" / "blended.itest.mgmt"

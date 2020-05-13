@@ -72,7 +72,7 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
   "Upload a deployment pack to mgmt node" in logException {
     log.info(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
-    val packFile = new File(BlendedTestSupport.projectTestOutput, s"blended.demo.node_${scalaBinVersion}-deploymentpack.zip")
+    val packFile = new File(System.getProperty("deploymentpack"))
     assert(packFile.exists() === true)
 
     val uploadUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
