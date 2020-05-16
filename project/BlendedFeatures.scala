@@ -14,7 +14,8 @@ object BlendedFeatures {
       FeatureBundle(dependency = felixGogoJline, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoRuntime, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoShell, startLevel = Some(1), start = true),
-      FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true)
+      FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true),
+      FeatureBundle(dependency = felixShellRemote, startLevel = Some(1), start = true)
     )
   )
 

@@ -34,6 +34,7 @@ object ProjectDependencies extends blended.sbt.Dependencies {
   val felixEventAdmin = "org.apache.felix" % "org.apache.felix.eventadmin" % "1.3.2"
   val felixHttpApi = "org.apache.felix" % "org.apache.felix.http.api" % "3.0.0"
   val felixMetatype = "org.apache.felix" % "org.apache.felix.metatype" % "1.0.12"
+  val felixShellRemote = "org.apache.felix" % "org.apache.felix.shell.remote" % "1.2.0"
 
   val geronimoAnnotation = "org.apache.geronimo.specs" % "geronimo-annotation_1.1_spec" % "1.0.1"
   val geronimoJaspic = "org.apache.geronimo.specs" % "geronimo-jaspic_1.0_spec" % "1.1"
