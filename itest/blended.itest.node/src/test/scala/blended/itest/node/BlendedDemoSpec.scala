@@ -47,6 +47,28 @@ class BlendedDemoSpec(implicit testKit: TestKit)
 
   "The demo container should" - {
 
+    "Send a startup message once the dispatcher has started" in {
+
+      val outColl = receiveMessages(
+        headerCfg = FlowHeaderConfig.create(prefix = "App"),
+        cf = extCf,
+        dest = JmsQueue("startup"),
+        log = envLogger,
+        completeOn = Some(l => l.size == 1),
+        timeout = None
+      )
+
+      val outFut = outColl.result.map { msgs =>
+        FlowMessageAssertion.checkAssertions(msgs:_*)(
+          ExpectedMessageCount(1),
+          ExpectedHeaders("ResourceType" -> "DispatcherStarted"),
+          ExpectedBodies(Some("de;blended"))
+        )
+      }
+
+      Await.result(outFut, timeOut + 1.second) should be (empty)
+    }
+
     "Define a dispatcher Route from DispatcherIn to DispatcherOut" in {
 
       val testMessage : FlowEnvelope = FlowEnvelope(

@@ -16,9 +16,7 @@ object BlendedFeatures {
       FeatureBundle(dependency = felixGogoRuntime, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoShell, startLevel = Some(1), start = true),
       FeatureBundle(dependency = felixGogoCommand, startLevel = Some(1), start = true),
-      FeatureBundle(
-        dependency = "org.apache.felix" % "org.apache.felix.shell.remote" % "1.2.0",
-        startLevel = Some(1), start=true)
+      FeatureBundle(dependency = felixShellRemote, startLevel = Some(1), start = true)
     )
   )
 
