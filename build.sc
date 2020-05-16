@@ -7,7 +7,7 @@ import ammonite.ops.Path
 import build_deps.Deps
 import coursier.Repository
 import coursier.maven.MavenRepository
-import mill.define.Sources
+import mill.define.{Sources, Target}
 import mill.modules.Jvm
 import mill.scalalib.publish._
 import mill.util.PrintLogger
@@ -960,6 +960,11 @@ object blended extends Module {
   object itest extends Module {
 
     object node extends BlendedIntegrationTest {
+
+      override def forkArgs: Target[Seq[String]] = T { super.forkArgs() ++ Seq(
+        s"-DappFolder=${blended.demo.node.docker.appFolder()}"
+      )}
+
       override def millSourcePath: Path = baseDir / "itest" / "blended.itest.node"
     }
 

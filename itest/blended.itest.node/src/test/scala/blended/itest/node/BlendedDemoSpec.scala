@@ -45,6 +45,8 @@ class BlendedDemoSpec(implicit testKit: TestKit)
   private[this] val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
   private[this] val envLogger : FlowEnvelopeLogger = FlowEnvelopeLogger.create(headerCfg, log)
 
+  private[this] val appFolder : String = System.getProperty("appFolder", "node")
+
   "The demo container should" - {
 
     "Send a startup message once the dispatcher has started" in {
@@ -197,20 +199,20 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         })
       }
 
-      writeContainerDirectory(ctProxy, "node_0", "/opt/node", file).onComplete {
+      writeContainerDirectory(ctProxy, "node_0", s"/opt/$appFolder", file).onComplete {
         case Failure(t) => fail(t.getMessage())
         case Success(r) => r.result match {
           case Left(t) => fail(t.getMessage())
           case Right(f) =>
             if (!f._2) fail("Error writing container directory")
             else {
-              readContainerDirectory(ctProxy, "node_0", "/opt/node/data") onComplete {
+              readContainerDirectory(ctProxy, "node_0", s"/opt/$appFolder/data") onComplete {
                 case Failure(t) => fail(t.getMessage())
                 case Success(cdr) => cdr.result match {
                   case Left(t) => fail(t.getMessage())
                   case Right(cd) =>
                     cd.content.get("data/testFile.txt") match {
-                      case None => fail("expected file [/opt/node/data/testFile.txt] not found in container")
+                      case None => fail(s"expected file [/opt/$appFolder/data/testFile.txt] not found in container")
                       case Some(c) =>
                         test.complete(Try {
                           val fContent = FileHelper.readFile("data/testFile.txt")
@@ -237,7 +239,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         ctName = "node_0",
         cmdTimeout = 5.seconds,
         user = "blended",
-        cmd = "ls -al /opt/node".split(" "): _*
+        cmd = s"ls -al /opt/$appFolder".split(" "): _*
       ) onComplete {
         case Failure(t) => test.failure(fail(t.getMessage()))
         case Success(r) =>
