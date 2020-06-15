@@ -6,15 +6,15 @@ object Deps {
 
   // Versions
   val activeMqVersion = "5.15.6"
-  val akkaVersion = "2.5.26"
-  val akkaHttpVersion = "10.1.11"
-  val dominoVersion = "1.1.3"
+  val akkaVersion = "2.6.6"
+  val akkaHttpVersion = "10.1.12"
+  val dominoVersion = "1.1.5"
   val jettyVersion = "9.4.28.v20200408"
   val jolokiaVersion = "1.6.0"
   val microJsonVersion = "1.4"
   val parboiledVersion = "1.1.6"
   val prickleVersion = "1.1.14"
-  val scalaVersion = "2.12.11"
+  val scalaVersion = "2.13.2"
   val scalatestVersion = "3.1.1"
   val scalaCheckVersion = "1.14.1"
   val slf4jVersion = "1.7.25"
@@ -170,11 +170,11 @@ object Deps {
   val reactiveStreams = ivy"org.reactivestreams:reactive-streams:1.0.0.final"
 
   // SCALA
-  val scalaCompatJava8 = ivy"org.scala-lang.modules::scala-java8-compat:0.8.0"
+  val scalaCompatJava8 = ivy"org.scala-lang.modules::scala-java8-compat:0.9.1"
   val scalaLibrary = ivy"org.scala-lang:scala-library:$scalaVersion"
   val scalaReflect = ivy"org.scala-lang:scala-reflect:$scalaVersion"
-  val scalaParser = ivy"org.scala-lang.modules::scala-parser-combinators:1.1.1"
-  val scalaXml = ivy"org.scala-lang.modules::scala-xml:1.1.0"
+  val scalaParser = ivy"org.scala-lang.modules::scala-parser-combinators:1.1.2"
+  val scalaXml = ivy"org.scala-lang.modules::scala-xml:1.3.0"
 
   val servicemixStaxApi = ivy"org.apache.servicemix.specs:org.apache.servicemix.specs.stax-api-1.0:2.4.0"
 
@@ -216,7 +216,7 @@ object Deps {
 
 //  val travesty = "net.mikolak" %% "travesty" % s"0.9.1_2.5.17"
 //
-  val typesafeConfig = ivy"com.typesafe:config:1.3.3"
-  val typesafeSslConfigCore = ivy"com.typesafe::ssl-config-core:0.3.6"
+  val typesafeConfig = ivy"com.typesafe:config:1.4.0"
+  val typesafeSslConfigCore = ivy"com.typesafe::ssl-config-core:0.4.2"
 
 }

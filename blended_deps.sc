@@ -6,7 +6,7 @@ object BlendedDeps {
   val organization = "de.wayofquality.blended"
   protected def blended : String => String => Dep = name => blendedVersion => ivy"$organization::$name:$blendedVersion"
 
-  val mgmtUi = ivy"$organization::blended.mgmt.ui.mgmtApp.webBundle:0.6-SNAPSHOT"
+  val mgmtUi = ivy"$organization::blended.mgmt.ui.mgmtApp.webBundle:0.6"
 
   val activemqBrokerstarter = blended("blended.activemq.brokerstarter")
   val activemqClient = blended("blended.activemq.client")

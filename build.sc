@@ -2,11 +2,14 @@ import mill._
 import mill.scalalib._
 import $file.feature_support
 import feature_support.FeatureBundle
+
 import $file.build_deps
-import ammonite.ops.Path
 import build_deps.Deps
+
+import ammonite.ops.Path
 import coursier.Repository
 import coursier.maven.MavenRepository
+import coursier.core.Authentication
 import mill.define.{Sources, Target}
 import mill.modules.Jvm
 import mill.scalalib.publish._
@@ -15,9 +18,14 @@ import os.RelPath
 
 import scala.util.Success
 
-///** Project directory. */
+/** The versions of the blended mill plugin, the core and the mgmt ui */
+val blendedCoreVersion : String = "3.2-alpha1-41-g89bae49f7"
+val blendedUiVersion : String = "0.6"
+
+/** Project directory. */
 val baseDir: os.Path = build.millSourcePath
 
+import $ivy.`de.wayofquality.blended::blended-mill:0.3`
 import $file.build_util
 import build_util.{FilterUtil, ZipUtil}
 
@@ -30,13 +38,21 @@ trait BlendedCoursierModule extends CoursierModule {
   override def repositories: Seq[Repository] = zincWorker.repositories ++ Seq(
     MavenRepository("https://repo.spring.io/libs-release"),
     MavenRepository("http://repository.springsource.com/maven/bundles/release"),
-    MavenRepository("http://repository.springsource.com/maven/bundles/external")
+    MavenRepository("http://repository.springsource.com/maven/bundles/external"),
+    MavenRepository(
+      s"https://u233308-sub2.your-storagebox.de/blended/$blendedCoreVersion",
+      Some(Authentication("u233308-sub2", "px8Kumv98zIzSF7k"))
+    ),
+    MavenRepository(
+      s"https://u233308-sub2.your-storagebox.de/mgmt-ui/$blendedUiVersion",
+      Some(Authentication("u233308-sub2", "px8Kumv98zIzSF7k"))
+    )
   )
 }
 
 trait BlendedModule extends BlendedCoursierModule {
   def blendedModule: String = millModuleSegments.parts.mkString(".")
-  def blendedCoreVersion : T[String] = blended.version()
+  def blendedCoreVersion : T[String] = "3.2-SNAPSHOT"
 }
 
 trait BlendedScalaModule extends ScalaModule with SbtModule with BlendedModule {
@@ -154,7 +170,10 @@ trait BlendedContainer extends BlendedPublishModule with BlendedScalaModule { ct
                 T.log.error(s"No artifact found for [$gav]")
               }
               r.toSeq
-            case mill.api.Result.Failure(m, _)  => sys.error(s"Failed to resolve [$gav] : $m")
+            case mill.api.Result.Failure(m, _)  =>
+              T.log.error(s"No artifact found for [$gav]")
+              Seq.empty
+              //sys.error(s"Failed to resolve [$gav] : $m")
           }
 
           singleDep.map(pr => (gav, pr.path.toIO.getAbsolutePath()))
