@@ -23,7 +23,7 @@ val akkaBundleRevision : String = "844b627"
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.4-SNAPSHOT`
+import $ivy.`de.wayofquality.blended::blended-mill:0.3-4-g312bf5f`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
@@ -417,7 +417,6 @@ object blended extends Module {
             FeatureBundle(blendedDep("mgmt.rest"), 4, true),
             FeatureBundle(blendedDep("mgmt.repo"), 4, true),
             FeatureBundle(blendedDep("mgmt.repo.rest"), 4, true),
-            FeatureBundle(blendedDep("updater.remote"), 4, true),
             FeatureBundle(deps.concurrentLinkedHashMapLru),
             FeatureBundle(deps.jsr305),
             FeatureBundle(ivy"${deps.blendedOrg}::blended.mgmt.ui.mgmtApp.webBundle:$blendedUiVersion", 4, true)
