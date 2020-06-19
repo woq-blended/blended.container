@@ -33,6 +33,7 @@ blended.sslcontext/notes.txt
 pom.xml
 target/
 .bloop/
+.bsp/
 .metals
 
 # SBT files

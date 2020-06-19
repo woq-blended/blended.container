@@ -1,3 +1,5 @@
+import $ivy.`com.lihaoyi::mill-contrib-bsp:$MILL_VERSION`
+
 import mill._
 import mill.scalalib._
 
@@ -81,6 +83,8 @@ trait ContainerModule extends BlendedContainerModule with BlendedPublishModule w
 
   override def githubRepo = "blended.container"
   override def publishVersion : T[String] = T { projectVersion() }
+
+  override def extraPublish : T[Seq[PublishInfo]] = T { super.extraPublish() ++ ctArtifacts() }
 }
 
 // trait BlendedIntegrationTest extends TestModule with CtScalaModule {
