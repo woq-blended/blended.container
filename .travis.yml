@@ -1,8 +1,0 @@
-language: java
-
-jdk:
-  - openjdk8
-  - opendjdk11
-
-script:
-  - ./millw __.publishLocal
