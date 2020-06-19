@@ -40,7 +40,7 @@ jobs:
       - run: echo ::set-env name=GIT_TAG::$(git describe --tags --exact-match 2>/dev/null)
 
       - run: |
-          ./millw -i show blendedVersion
+          ./millw -i show projectVersion
           echo "GIT TAG = [${{ env.GIT_TAG }}]"
 
       - run: ./millw -i -j 0 __.dockerbuild
