@@ -37,6 +37,15 @@ object GitSupport extends GitModule {
 
 def projectVersion = T { GitSupport.publishVersion() }
 
+def imageVersion = T { 
+  val tag : String = T.env.get("GIT_TAG").getOrElse("").trim()
+  if (tag.isEmpty()) {
+    os.read(projectDir / "version.txt").trim()
+  } else {
+    tag
+  }
+}
+
 /** Configure additional repositories. */
 trait BlendedCoursierModule extends CoursierModule {
   private def zincWorker: ZincWorkerModule = mill.scalalib.ZincWorkerModule
@@ -187,10 +196,6 @@ trait ContainerModule extends BlendedContainerModule with BlendedPublishModule w
 // }
 
 object blended extends Module {
-
-  def version = T.input {
-    os.read(projectDir / "version.txt").trim()
-  }
 
   object launcher extends Module {
     object feature extends Module {
@@ -528,7 +533,7 @@ object blended extends Module {
       )
 
       object docker extends Docker {
-        override def dockerImage = T { s"atooni/blended-node:${blended.version()}"}
+        override def dockerImage = T { s"atooni/blended-node:${imageVersion()}"}
         override def exposedPorts = Seq(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
       }
     }
@@ -560,7 +565,7 @@ object blended extends Module {
 
       object docker extends Docker {
 
-        override def dockerImage = T { s"atooni/blended-mgmt:${blended.version()}"}
+        override def dockerImage = T { s"atooni/blended-mgmt:${imageVersion()}"}
 
         override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
       }
