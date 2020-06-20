@@ -16,9 +16,9 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-alpha1-73-g42730a8a9"
+val coreVersion : String = "3.2-alpha1-77-gff7c9280c"
 val blendedUiVersion : String = "0.6"
-val akkaBundleRevision : String = "844b627"
+val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
