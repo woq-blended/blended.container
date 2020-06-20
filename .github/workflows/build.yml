@@ -54,19 +54,11 @@ jobs:
           name: test-logs
           path: out
 
-      - name: Push docker images (SNAPSHOT)
-        if: ${{ matrix.java-version == env.MAIN_JAVA_VERSION && github.ref == env.PUBLISH_BRANCH && github.event_name == 'push' && env.GIT_TAG == ''}}
+      - name: Push docker images
         run: |
           docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-node:$(cat ./version.txt)
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-mgmt:$(cat ./version.txt)
-
-      - name: Push docker images (TAGGED)
-        if: ${{ matrix.java-version == env.MAIN_JAVA_VERSION && github.ref == env.PUBLISH_BRANCH && github.event_name == 'push' && env.GIT_TAG != ''}}
-        run: |
-          docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-node:${{ env.GIT_TAG }}
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-mgmt:${{ env.GIT_TAG }}
+          docker push ${{ secrets.DOCKERHUB_USER}}/blended-node:$(./millw -i show imageVersion)
+          docker push ${{ secrets.DOCKERHUB_USER}}/blended-mgmt:$(./millw -i show imageVersion)
 
       - name: Upload to simple maven store
         if: ${{ matrix.java-version == env.MAIN_JAVA_VERSION && github.ref == env.PUBLISH_BRANCH && github.event_name == 'push' && env.GIT_TAG == ''}}
