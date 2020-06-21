@@ -23,7 +23,7 @@ val akkaBundleRevision : String = "1"
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.4-SNAPSHOT`
+import $ivy.`de.wayofquality.blended::blended-mill:0.3-7-gc480975`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
