@@ -45,6 +45,8 @@ jobs:
 
       - run: |
           ./millw -i -j 0 __.dockerbuild
+          docker pull ${{ secrets.DOCKERHUB_USER }}/splunk:latest 
+          docker pull ${{ secrets.DOCKERHUB_USER }}/apacheds-alpine:1.0.1
           docker images 
 
       - run: ./millw -i -j 0 __.itest          
