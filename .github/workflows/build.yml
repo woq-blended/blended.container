@@ -44,12 +44,13 @@ jobs:
           echo "GIT TAG = [${{ env.GIT_TAG }}]"
 
       - run: |
-          ./millw -i -j 0 __.dockerbuild
+          ./millw -i __.dockerbuild
+          docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker pull ${{ secrets.DOCKERHUB_USER }}/splunk:latest 
           docker pull ${{ secrets.DOCKERHUB_USER }}/apacheds-alpine:1.0.1
           docker images 
 
-      - run: ./millw -i -j 0 __.itest          
+      - run: ./millw -i __.itest          
 
       - name: Upload Testlogs
         uses: actions/upload-artifact@v2
@@ -60,7 +61,6 @@ jobs:
 
       - name: Push docker images
         run: |
-          docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           docker push ${{ secrets.DOCKERHUB_USER}}/blended-node:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"')
           docker push ${{ secrets.DOCKERHUB_USER}}/blended-mgmt:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"') 
 
