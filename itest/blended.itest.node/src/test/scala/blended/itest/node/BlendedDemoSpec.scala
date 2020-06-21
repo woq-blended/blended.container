@@ -3,7 +3,6 @@ package blended.itest.node
 import java.io.File
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.ssl.ContainerSslContextInfo
@@ -34,7 +33,6 @@ class BlendedDemoSpec(implicit testKit: TestKit)
   with JmsEnvelopeHeader {
 
   implicit val system : ActorSystem = testKit.system
-  implicit val materializer : Materializer = ActorMaterializer()
   implicit val timeOut : FiniteDuration = 30.seconds
   implicit val eCtxt : ExecutionContext = testKit.system.dispatcher
 
@@ -239,7 +237,7 @@ class BlendedDemoSpec(implicit testKit: TestKit)
         ctName = "node_0",
         cmdTimeout = 5.seconds,
         user = "blended",
-        cmd = s"ls -al /opt/$appFolder".split(" "): _*
+        cmd = s"ls -al /opt/$appFolder".split(" ").toIndexedSeq: _*
       ) onComplete {
         case Failure(t) => test.failure(fail(t.getMessage()))
         case Success(r) =>

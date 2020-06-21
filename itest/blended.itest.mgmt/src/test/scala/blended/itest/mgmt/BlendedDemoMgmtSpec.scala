@@ -1,26 +1,20 @@
 package blended.itest.mgmt
 
-import java.io.File
-import java.util.UUID
-
 import akka.testkit.TestKit
 import akka.util.Timeout
-import blended.testsupport.{BlendedTestSupport, TestFile}
+import blended.testsupport.TestFile
 import blended.testsupport.retry.Retry
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.updater.config._
 import blended.updater.config.json.PrickleProtocol._
 import blended.util.logging.Logger
-import com.softwaremill.sttp
-import com.softwaremill.sttp.{HttpURLConnectionBackend, UriContext}
-import com.typesafe.config.ConfigFactory
-import prickle.Pickle
+import sttp.client._
 
-import scala.concurrent.Promise
 import scala.concurrent.duration.DurationInt
 import org.scalatest.DoNotDiscover
 import org.scalatest.matchers.should.Matchers
 import prickle.Unpickle
+import sttp.model.StatusCode
 
 @DoNotDiscover
 class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
@@ -35,259 +29,38 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
 
   private[this] val log = Logger[BlendedDemoMgmtSpec]
 
-  // TODO: Make this generic for cross build
-  private val scalaBinVersion = "2.12"
-
   implicit val backend = HttpURLConnectionBackend()
 
   def mgmtRequest(path: String) = {
     val uri = s"${TestMgmtContainerProxy.mgmtHttp}${path}"
     log.debug(s"Using uri: ${uri}")
-    val request = sttp.sttp.get(uri"${uri}")
+    val request = basicRequest.get(uri"${uri}")
     val response = request.send()
     response
   }
 
-  // Tests written here are expected in order, means, they depend on each other and in the same ordering.
-
   "Reference test: Report Blended mgmt version" in logException {
     val response = mgmtRequest("/mgmt/version")
-    assert(response.code === 200)
+    assert(response.code === StatusCode.Ok)
     assert(response.body.isRight)
   }
 
-  "Mgmt container sees 2 node containers" in logException {
-    val rcs = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
+  "Mgmt container sees 2 node and 1 mgmt container" in logException {
+    val rcs : Seq[RemoteContainerState] = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
       val response = mgmtRequest("/mgmt/container")
-      val body = response.body.right.get
-      val remoteContState = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      log.info(s"remote container states: [${remoteContState}]")
-      // we expect the mgmt container + 2 node containers
-      assert(remoteContState.size >= 3)
-      remoteContState
-    }
-    assert(rcs.count(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.mgmt_${scalaBinVersion}")) == 1)
-    assert(rcs.count(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}")) == 2)
-  }
-
-  "Upload a deployment pack to mgmt node" in logException {
-    log.info(s"Using dir: ${BlendedTestSupport.projectTestOutput}")
-    val packFile = new File(System.getProperty("deploymentpack"))
-    assert(packFile.exists() === true)
-
-    val uploadUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/profile/upload/deploymentpack/artifacts"
-    log.info(s"Uploading to: ${uploadUrl}")
-    val uploadResponse = sttp.sttp.
-      post(uri"${uploadUrl}").
-      auth.basic("itest", "secret").
-      multipartBody(sttp.multipartFile("file", packFile)).
-      send()
-
-    assert(uploadResponse.code === 200)
-
-    val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
-    val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
-    assert(rcs.nonEmpty)
-    assert(rcs.exists(_.name == s"blended.demo.node_${scalaBinVersion}"))
-  }
-
-  "Upload two overlays to mgmt node" in logException {
-
-    val o1 =
-      """name = "jvm-medium"
-        |version = "1"
-        |properties = {
-        |  "blended.launcher.jvm.xms" = "768M"
-        |  "blended.launcher.jvm.xmx" = "768M"
-        |  "amq.systemMemoryLimit" = "500m"
-        |}
-        |""".stripMargin
-    val overlayConfig1 = OverlayConfigCompanion.read(ConfigFactory.parseString(o1)).get
-
-    val o2 =
-      """name = "jvm-large"
-        |version = "1"
-        |properties = {
-        |  "blended.launcher.jvm.xms" = "1024M"
-        |  "blended.launcher.jvm.xmx" = "1024M"
-        |  "amq.systemMemoryLimit" = "600m"
-        |}
-        |""".stripMargin
-    val overlayConfig2 = OverlayConfigCompanion.read(ConfigFactory.parseString(o2)).get
-
-    val uploadUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/overlayConfig"
-    val uploadResponse1 = sttp.sttp.
-      body(Pickle.intoString(overlayConfig1)).
-      header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
-      auth.basic("itest", "secret").
-      post(uri"${uploadUrl}").
-      send()
-    assert(uploadResponse1.code === 200)
-
-    val uploadResponse2 = sttp.sttp.
-      body(Pickle.intoString(overlayConfig2)).
-      header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json).
-      auth.basic("itest", "secret").
-      post(uri"${uploadUrl}").
-      send()
-    assert(uploadResponse2.code === 200)
-
-    val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
-    val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
-    assert(ocs.size >= 2)
-    assert(ocs.exists(_.name == "jvm-medium"))
-    assert(ocs.exists(_.name == "jvm-large"))
-  }
-
-  case class RolloutCtx(profileName: String, profileVersion: String, overlayName: String, overlayVersion: String, containerId: String)
-
-  val rolloutCtx = Promise[RolloutCtx]()
-
-  "Rollout a profile+overlay for one node" in logException {
-    // wait until all containers are present
-    val containers = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
-      val response = mgmtRequest("/mgmt/container")
-      val body = response.body.right.get
-      val remoteContState = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      log.info(s"remote container states: [${remoteContState}]")
+      val body = response.body
+      val remoteContState : Seq[RemoteContainerState] = Unpickle[Seq[RemoteContainerState]].fromString(body.getOrElse("")).get
+      log.info(s"remote container states: [${remoteContState.mkString("\n")}]")
       // we expect the mgmt container + 2 node containers
       assert(remoteContState.size >= 3)
       remoteContState
     }
 
-    // we need 2 node containers
-    val nodeRcs = containers.filter(_.containerInfo.profiles.map(_.name).contains(s"blended.demo.node_${scalaBinVersion}"))
-    val containerIds = nodeRcs.map(_.containerInfo.containerId)
-    assert(containerIds.size === 2)
-    log.info("All node containers: " + dumpProfiles(nodeRcs.map(_.containerInfo)))
+    val ctProfiles : Map[String, Seq[String]] = rcs.map{ s => 
+      s.containerInfo.containerId -> s.containerInfo.profiles.map(_.name)
+    }.toMap
 
-    // pick the first node container
-    val id1 = containerIds.head
-    val overlayName = "jvm-large"
-
-    val rcsJson = mgmtRequest("/mgmt/runtimeConfig").body.right.get
-    val rcs = Unpickle[Seq[RuntimeConfig]].fromString(rcsJson).get
-    assert(rcs.nonEmpty)
-
-    // the new profile to apply
-    val profile = rcs.find(_.name == s"blended.demo.node_${scalaBinVersion}").get
-
-    val ocsJson = mgmtRequest("/mgmt/overlayConfig").body.right.get
-    val ocs = Unpickle[Seq[OverlayConfig]].fromString(ocsJson).get
-    val overlay = ocs.find(_.name == overlayName).get
-
-    rolloutCtx.success(RolloutCtx(profile.name, profile.version, overlayName, overlay.version, id1))
-
-    log.debug(s"Schedule a profile and overlay [${overlay}] update for node ${id1}")
-
-    val rollout = RolloutProfile(
-      profile.name, profile.version,
-      overlays = Set(overlay.overlayRef),
-      containerIds = List(id1)
-    )
-
-    val rolloutUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/rollout/profile"
-    log.info(s"Using rollout uri [${rolloutUrl}] with body [${pp(rollout)}]")
-    val response = sttp.sttp
-      .post(uri"${rolloutUrl}")
-      .auth.basic("itest", "secret")
-      .header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json)
-      .body(Pickle.intoString(rollout))
-      .send()
-    log.debug(s"Rollout request response: ${pp(response)}")
-    assert(response.code === 200)
-
-    log.info("Now wait for node container to report new profile")
-    Retry.unsafeRetry(5.seconds, retries = 60) {
-      log.info(s"We expect the updated node container with ID [${id1}] to appear after some time with the new profile")
-
-      val response = mgmtRequest("/mgmt/container")
-      val body = response.body.right.get
-      val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      // log.info(s"remote container states: [${pp(rcs)}]")
-
-      val updatedNode = rcs.find(_.containerInfo.containerId == id1)
-      assert(updatedNode.isDefined)
-
-      val profiles = updatedNode.get.containerInfo.profiles
-      log.debug(s"profiles of node under test: [${pp(profiles)}]")
-
-      val updatedProfile = profiles.find(p =>
-        p.name == s"blended.demo.node_${scalaBinVersion}" &&
-          p.overlays.exists(o => o.name == overlayName))
-      assert(updatedProfile.isDefined)
-    }
+    assert(ctProfiles.count(_._2.exists(_.startsWith("blended.demo.node_"))) == 2)
+    assert(ctProfiles.count(_._2.exists(_.startsWith("blended.demo.mgmt_"))) == 1)
   }
-
-  "Rolled-out profile gets staged (valid)" in logException {
-    // we depend on a part-result of previous test case
-    assert(rolloutCtx.isCompleted, "Rollout test must complete before this test can run")
-    val rCtx = rolloutCtx.future.value.get.get
-
-    Retry.unsafeRetry(5.seconds, retries = 60) {
-      val response = mgmtRequest("/mgmt/container")
-      val body = response.body.right.get
-      val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      // log.info(s"remote container states: [${pp(rcs)}]")
-
-      val updatedNode = rcs.find(_.containerInfo.containerId == rCtx.containerId)
-      assert(updatedNode.isDefined)
-      val profiles = updatedNode.get.containerInfo.profiles
-      log.debug(s"profiles of node under test: [${pp(profiles)}]")
-      val updatedProfile = profiles.find(p =>
-        p.name == rCtx.profileName && p.state == OverlayState.Valid && p.overlays.exists(o => o.name == rCtx.overlayName))
-      assert(updatedProfile.isDefined)
-    }
-  }
-
-  "Container re-starts with newly rolled-out profile" in logException {
-    // we depend on a part-result of previous test case
-    assert(rolloutCtx.isCompleted, "Rollout test must complete before this test can run")
-    val rCtx = rolloutCtx.future.value.get.get
-
-    val activateProfile = ActivateProfile(
-      id = UUID.randomUUID().toString(),
-      profileName = rCtx.profileName,
-      profileVersion = rCtx.profileVersion,
-      overlays = Set(OverlayRef(name = rCtx.overlayName, version = rCtx.overlayVersion))
-    )
-
-    val activateUrl = s"${TestMgmtContainerProxy.mgmtHttp}/mgmt/container/${rCtx.containerId}/update"
-    log.info(s"Using activate uri [${activateUrl}] with body [${pp(activateProfile)}]")
-    val response = sttp.sttp
-      .post(uri"${activateUrl}")
-      .auth.basic("itest", "secret")
-      .header(sttp.HeaderNames.ContentType, sttp.MediaTypes.Json)
-      .body(Pickle.intoString[UpdateAction](activateProfile))
-      .send()
-    log.debug(s"Activate request response: ${pp(response)}")
-    assert(response.code === 200)
-
-    Retry.unsafeRetry(5.seconds, retries = 60) {
-      val response = mgmtRequest("/mgmt/container")
-      val body = response.body.right.get
-      val rcs = Unpickle[Seq[RemoteContainerState]].fromString(body).get
-      // log.info(s"remote container states: [${pp(rcs)}]")
-
-      val updatedNode = rcs.find(_.containerInfo.containerId == rCtx.containerId)
-      assert(updatedNode.isDefined)
-      val profiles = updatedNode.get.containerInfo.profiles
-      log.debug(s"profiles of node under test: [${pp(profiles)}]")
-      val updatedProfile = profiles.find(p =>
-        p.name == rCtx.profileName && p.state == OverlayState.Active && p.overlays.exists(o => o.name == rCtx.overlayName))
-      assert(updatedProfile.isDefined)
-    }
-  }
-
-  def dumpProfiles(cis: Seq[ContainerInfo]): Seq[String] = {
-    cis.map { ci =>
-      s"Container [${pp(ci.containerId)}] has profiles [${pp(ci.profiles)}]"
-    }
-  }
-
-  def pp(x: Any) = pprint.apply(x, width = 80, height = 1000000)
-
-  // TODO: restart node-container
-  // TODO: check restarted node-container for new profile+overlay
-
 }

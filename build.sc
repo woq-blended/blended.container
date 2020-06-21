@@ -1,4 +1,4 @@
-import $ivy.`com.lihaoyi::mill-contrib-bsp:$MILL_VERSION`
+import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
 
 import mill._
 import mill.scalalib._
@@ -16,14 +16,14 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-alpha1-77-gff7c9280c"
+val coreVersion : String = "3.2-alpha1-80-g675a35b7b"
 val blendedUiVersion : String = "0.6"
 val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.3-4-g312bf5f`
+import $ivy.`de.wayofquality.blended::blended-mill:0.3-6-ge074ebc`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
@@ -96,104 +96,113 @@ trait ContainerModule extends BlendedContainerModule with BlendedPublishModule w
   override def extraPublish : T[Seq[PublishInfo]] = T { super.extraPublish() ++ ctArtifacts() }
 }
 
-// trait BlendedIntegrationTest extends TestModule with CtScalaModule {
+trait CtIntegrationTest extends BlendedBaseModule with BlendedCoursierModule {
 
-//   def dockerhost = T.input { T.env.getOrElse("DOCKERHOST", "unix:///var/run/docker.sock") }
-//   def dockerport = T.input { T.env.getOrElse("DOCKERPORT", "2375") }
+  override type ProjectDeps = BlendedDependencies
+  override def deps : ProjectDeps = BlendedDependencies.Deps_2_13
+  override def baseDir : os.Path = projectDir
 
-//   override def testFrameworks = Seq("org.scalatest.tools.Framework")
+  override def scalaVersion : T[String] = T { deps.scalaVersion }
 
-//   def logResources = T {
-//     val moduleSpec = toString()
-//     val dest = T.ctx().dest
-//     val logConfig =
-//       s"""<configuration>
-//          |
-//          |  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-//          |    <file>${projectDir.toString()}/target/test-${moduleSpec}.log</file>
-//          |
-//          |    <encoder>
-//          |      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%t] %logger : %msg%n</pattern>
-//          |    </encoder>
-//          |  </appender>
-//          |
-//          |  <logger name="blended" level="debug" />
-//          |  <logger name="domino" level="debug" />
-//          |  <logger name="App" level="debug" />
-//          |
-//          |  <root level="INFO">
-//          |    <appender-ref ref="FILE" />
-//          |  </root>
-//          |
-//          |</configuration>
-//          |""".stripMargin
-//     os.write(dest / "logback-test.xml", logConfig)
-//     PathRef(dest)
-//   }
+  def blendedDep : String => Dep = deps.blendedDep(coreVersion)
 
-//   override def runClasspath = T { super.runClasspath() ++ Seq(logResources()) }
+  trait CtTest extends super.BlendedTests {
 
-//   override def sources: Sources = T.sources (
-//     millSourcePath / "src" / "test" / "scala",
-//     millSourcePath / "src" / "test" / "java"
-//   )
+    def dockerhost = T.input { T.env.getOrElse("DOCKERHOST", "unix:///var/run/docker.sock") }
+    def dockerport = T.input { T.env.getOrElse("DOCKERPORT", "2375") }
 
-//   override def resources = T.sources(
-//     millSourcePath / "src" / "test" / "resources"
-//   )
+    def logResources = T {
+      val moduleSpec = toString()
+      val dest = T.ctx().dest
+      val logConfig =
+        s"""<configuration>
+          |
+          |  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+          |    <file>${projectDir.toString()}/target/test-${moduleSpec}.log</file>
+          |
+          |    <encoder>
+          |      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%t] %logger : %msg%n</pattern>
+          |    </encoder>
+          |  </appender>
+          |
+          |  <logger name="blended" level="debug" />
+          |  <logger name="domino" level="debug" />
+          |  <logger name="App" level="debug" />
+          |
+          |  <root level="INFO">
+          |    <appender-ref ref="FILE" />
+          |  </root>
+          |
+          |</configuration>
+          |""".stripMargin
+      os.write(dest / "logback-test.xml", logConfig)
+      PathRef(dest)
+    }
 
-//   override def forkArgs = T { super.forkArgs() ++ Seq(
-//     s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
-//     s"-Ddocker.host=${dockerhost()}",
-//     s"-Ddocker.port=${dockerport()}"
-//   )}
+    override def runClasspath = T { super.runClasspath() ++ Seq(logResources()) }
 
-//   override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
-//     deps.activeMqClient,
-//     deps.scalatest,
-//     deps.slf4j,
-//     deps.akkaActor,
-//     deps.akkaStream,
-//     deps.akkaSlf4j,
-//     deps.logbackClassic,
-//     deps.logbackCore,
-//     deps.geronimoJ2eeMgmtSpec,
-//     deps.geronimoJms11Spec,
+    override def sources: Sources = T.sources (
+      millSourcePath / "src" / "test" / "scala",
+      millSourcePath / "src" / "test" / "java"
+    )
 
-//     deps.dockerJava,
-//     deps.akkaTestkit,
+    override def resources = T.sources(
+      millSourcePath / "src" / "test" / "resources"
+    )
 
-//     blendedDep("blended.util.logging"),
-//     blendedDep("blended.jms.utils"),
-//     blendedDep("blended.util"),
-//     blendedDep("blended.akka"),
-//     blendedDep("blended.security.ssl"),
-//     blendedDep("blended.streams"),
+    override def forkArgs = T { super.forkArgs() ++ Seq(
+      s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
+      s"-Ddocker.host=${dockerhost()}",
+      s"-Ddocker.port=${dockerport()}",
+      s"-Dimage.version=${imageVersion()}"
+    )}
 
-//     blendedDep("blended.testsupport"),
-//     blendedDep("blended.streams.testsupport"),
+    override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
+      deps.activeMqClient,
+      deps.scalatest,
+      deps.slf4j,
+      deps.akkaActor(akkaBundleRevision),
+      deps.akkaStream(akkaBundleRevision),
+      deps.akkaSlf4j(akkaBundleRevision),
+      deps.logbackClassic,
+      deps.logbackCore,
+      deps.geronimoJ2eeMgmtSpec,
+      deps.geronimoJms11Spec,
 
-//     blendedDep("blended.itestsupport")
-//   )}
+      deps.dockerJava,
+      deps.akkaTestkit,
 
-//   /* This is just a workaround to see if it actually works */
-//   def itest() = T.command {
+      blendedDep("util.logging"),
+      blendedDep("jms.utils"),
+      blendedDep("util"),
+      blendedDep("akka"),
+      blendedDep("security.ssl"),
+      blendedDep("streams"),
+      blendedDep("testsupport"),
+      blendedDep("streams.testsupport"),
 
-//     val dir = T.dest
+      blendedDep("itestsupport")
+    )}
 
-//     Jvm.runSubprocess(
-//       mainClass = "org.scalatest.tools.Runner",
-//       classPath = runClasspath().map(_.path),
-//       mainArgs = Seq(
-//         "-R", compile().classes.path.toIO.getAbsolutePath(),
-//         "-o"
-//       ),
-//       jvmArgs = forkArgs()
-//     )
+    /* This is just a workaround to see if it actually works */
+    def itest() = T.command {
 
-//     PathRef(dir)
-//   }
-// }
+      val dir = T.dest
+
+      Jvm.runSubprocess(
+        mainClass = "org.scalatest.tools.Runner",
+        classPath = runClasspath().map(_.path),
+        mainArgs = Seq(
+          "-R", compile().classes.path.toIO.getAbsolutePath(),
+          "-o"
+        ),
+        jvmArgs = forkArgs()
+      )
+
+      PathRef(dir)
+    }
+  }
+}
 
 object blended extends Module {
 
@@ -383,7 +392,8 @@ object blended extends Module {
           blended.launcher.feature.base.common,
           blended.launcher.feature.akka.http.base,
           blended.launcher.feature.security,
-          blended.launcher.feature.persistence
+          blended.launcher.feature.persistence,
+          blended.launcher.feature.streams
         )
 
         override def featureBundles = T { Seq(
@@ -415,7 +425,8 @@ object blended extends Module {
             blended.launcher.feature.ssl,
             blended.launcher.feature.spring,
             blended.launcher.feature.persistence,
-            blended.launcher.feature.login
+            blended.launcher.feature.login,
+            blended.launcher.feature.streams
           )
 
           override def featureBundles = T { Seq(
@@ -497,6 +508,8 @@ object blended extends Module {
         override def featureDeps = Seq(blended.launcher.feature.base.common)
 
         override def featureBundles = T { Seq(
+          FeatureBundle(deps.geronimoJms11Spec),
+          FeatureBundle(blendedDep("jms.utils")),
           FeatureBundle(blendedDep("streams"), 4, true)
         )}
       }
@@ -560,6 +573,7 @@ object blended extends Module {
         blended.launcher.feature.mgmt.client,
         blended.launcher.feature.mgmt.server,
         blended.launcher.feature.akka.http.base,
+        blended.launcher.feature.streams,
         blended.launcher.feature.persistence
       )
 
@@ -572,34 +586,49 @@ object blended extends Module {
     }
   }
 
-  // object itest extends Module {
+  object itest extends Module {
 
-  //   object node extends BlendedIntegrationTest {
+    object node extends CtIntegrationTest {
 
-  //     override def forkArgs: Target[Seq[String]] = T { super.forkArgs() ++ Seq(
-  //       s"-DappFolder=${blended.demo.node.docker.appFolder()}"
-  //     )}
+      object test extends super.CtTest {
 
-  //     override def millSourcePath: Path = projectDir / "itest" / "blended.itest.node"
-  //   }
+        override def ivyDeps : T[Agg[Dep]] = T { 
+          super.ivyDeps()
+        }
 
-  //   object mgmt extends BlendedIntegrationTest {
+        override def forkArgs: Target[Seq[String]] = T { super.forkArgs() ++ Seq(
+          s"-DappFolder=${blended.demo.node.docker.appFolder()}"
+        )}
 
-  //     override def ivyDeps : T[Agg[Dep]] = T { super.ivyDeps() ++ Agg(
-  //       deps.sttp,
-  //       deps.sttpAkka,
-  //       deps.microjson,
-  //       deps.prickle,
-  //       deps.lihaoyiPprint
-  //     )}
+        override def millSourcePath: Path = projectDir / "itest" / "blended.itest.node"
+      }
+    }
+
+    object mgmt extends CtIntegrationTest {
+
+      object test extends super.CtTest {
+
+        override def ivyDeps : T[Agg[Dep]] = T { 
+
+          super.ivyDeps() ++ Agg(
+            deps.sttp,
+            deps.sttpAkka,
+            deps.microjson,
+            deps.prickle,
+            deps.lihaoyiPprint
+          )
+        }
 
 
-  //     override def forkArgs = T { super.forkArgs() ++ Seq(
-  //       s"-Ddeploymentpack=${blended.demo.node.deploymentpack().path.toIO.getAbsolutePath()}"
-  //     )}
+        override def forkArgs = T { super.forkArgs() ++ Seq(
+          s"-Ddeploymentpack=${blended.demo.node.deploymentpack().path.toIO.getAbsolutePath()}"
+        )}
 
-  //     override def millSourcePath: Path = projectDir / "itest" / "blended.itest.mgmt"
-  //   }
-  // }
+        override def millSourcePath: Path = projectDir / "itest" / "blended.itest.mgmt"
+
+      }
+
+    }
+  }
 }
 

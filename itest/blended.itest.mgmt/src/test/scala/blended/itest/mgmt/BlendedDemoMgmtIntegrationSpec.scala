@@ -5,7 +5,7 @@ import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
-import org.scalatest.{Args, BeforeAndAfterAll, Status, TestSuite}
+import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.scalatest.refspec.RefSpec
 
 import scala.collection.immutable.IndexedSeq
@@ -48,9 +48,10 @@ class BlendedDemoMgmtIntegrationSpec
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
+    log.info(s"Container under test are : [${cuts.values.mkString(",")}]")
   }
 
-  override def afterAll() {
+  override def afterAll() : Unit = {
     log.info("Running afterAll...")
 
     // wait a second, to give container logs time to flush
@@ -75,6 +76,6 @@ class BlendedDemoMgmtIntegrationSpec
     writeLog("node1_0", "opt/node/log")
     writeLog("node2_0", "opt/node/log")
 
-    //stopContainers(ctProxy)(timeout, testkit)
+    stopContainers(ctProxy)(timeout, testkit)
   }
 }

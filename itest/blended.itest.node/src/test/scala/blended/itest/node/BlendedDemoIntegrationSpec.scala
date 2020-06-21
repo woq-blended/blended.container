@@ -1,26 +1,20 @@
 package blended.itest.node
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
 import akka.util.Timeout
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
-import blended.jms.utils.{IdAwareConnectionFactory, JmsDestination, JmsQueue}
-import blended.streams.FlowHeaderConfig
-import blended.streams.jms.{JmsProducerSettings, JmsStreamSupport}
-import blended.streams.message.{FlowEnvelope, FlowEnvelopeLogger, FlowMessage}
-import blended.streams.testsupport.{ExpectedBodies, ExpectedHeaders, ExpectedMessageCount, FlowMessageAssertion}
-import blended.testsupport.BlendedTestSupport
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.logging.Logger
-import org.scalactic.Requirements.requireNonNull
-import org.scalatest.events.{InfoProvided, NameInfo}
-import org.scalatest.{Args, BeforeAndAfterAll, CompositeStatus, Resources, Status, SucceededStatus, Suite, SuiteHelpers}
+import blended.testsupport.BlendedTestSupport
+import blended.streams.jms.JmsStreamSupport
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success}
+
+import org.scalatest.{BeforeAndAfterAll, Suite}
 
 class BlendedDemoIntegrationSpec
   extends LoggingFreeSpec
@@ -28,8 +22,8 @@ class BlendedDemoIntegrationSpec
   with BlendedIntegrationTestSupport
   with JmsStreamSupport {
 
+
   private implicit val system : ActorSystem = ActorSystem("Blended")
-  private implicit val materializer : Materializer = ActorMaterializer()
   private implicit val testkit : TestKit = new TestKit(system)
   private implicit val eCtxt : ExecutionContext = system.dispatcher
 
@@ -37,9 +31,6 @@ class BlendedDemoIntegrationSpec
 
   private[this] implicit val timeout : Timeout = Timeout(300.seconds)
   private[this] val ctProxy = system.actorOf(TestContainerProxy.props(timeout.duration))
-
-  private[this] val headerCfg : FlowHeaderConfig = FlowHeaderConfig.create("App")
-  private[this] val envLogger : FlowEnvelopeLogger = FlowEnvelopeLogger.create(headerCfg, log)
 
   /** Even when unused, this one triggers the container start. */
   private[this] val cuts : Map[String, ContainerUnderTest] = {
@@ -49,14 +40,15 @@ class BlendedDemoIntegrationSpec
     Await.result(containerReady(ctProxy)(timeout, testkit), timeout.duration)
   }
 
-  private val intCf : IdAwareConnectionFactory = TestContainerProxy.internalCf
-  private val extCf : IdAwareConnectionFactory = TestContainerProxy.externalCf
-
   override def nestedSuites : IndexedSeq[Suite] = IndexedSeq(
     new BlendedDemoSpec()
   )
 
-  override def beforeAll(): Unit = {}
+  override def beforeAll(): Unit = {
+    log.info(s"Containers under test are : [${cuts.values.mkString(",")}]")
+    log.info(s"Connection Factory [${TestContainerProxy.internalCf.id}] initialized")
+    log.info(s"Connection Factory [${TestContainerProxy.externalCf.id}] initialized")
+  }
 
   override def afterAll(): Unit = {
     log.info("Running afterAll...")
@@ -77,6 +69,6 @@ class BlendedDemoIntegrationSpec
         log.error(e)(s"Could not read container directory [$dir] of container [$ctr]")
     }
 
-    //stopContainers(ctProxy)(timeout, testkit)
+    stopContainers(ctProxy)(timeout, testkit)
   }
 }
