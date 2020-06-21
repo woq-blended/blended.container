@@ -50,7 +50,7 @@ jobs:
           docker pull ${{ secrets.DOCKERHUB_USER }}/apacheds-alpine:1.0.1
           docker images 
 
-      - run: ./millw -i -j 0 __.itest          
+      - run: ./millw -i __.itest          
 
       - name: Upload Testlogs
         uses: actions/upload-artifact@v2
