@@ -1,4 +1,4 @@
-import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
+//import $ivy.`com.lihaoyi::mill-contrib-bloop:$MILL_VERSION`
 
 import mill._
 import mill.scalalib._
@@ -141,6 +141,7 @@ trait CtIntegrationTest extends BlendedBaseModule with BlendedCoursierModule {
 
     override def forkArgs = T { super.forkArgs() ++ Seq(
       s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
+      s"-DlogDir=${(baseDir / "out" / "testlog" / "ctLogs"/ blendedModule).toIO.getAbsolutePath()}",
       s"-Ddocker.host=${dockerhost()}",
       s"-Ddocker.port=${dockerport()}",
       s"-Dimage.version=${imageVersion()}"

@@ -50,7 +50,7 @@ jobs:
           docker pull blended/apacheds-alpine:1.0.1
           docker images
 
-      - run: ./millw -i __.itest
+      - run: ./millw -i -k __.itest
 
       - name: Upload Build logs
         uses: actions/upload-artifact@v2

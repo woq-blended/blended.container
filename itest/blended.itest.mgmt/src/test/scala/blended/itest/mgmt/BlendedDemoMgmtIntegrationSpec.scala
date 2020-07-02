@@ -3,13 +3,14 @@ package blended.itest.mgmt
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.util.Timeout
+import blended.itestsupport.docker.protocol.GetContainerDirectoryResult
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.util.logging.Logger
 import org.scalatest.{BeforeAndAfterAll, TestSuite}
 import org.scalatest.refspec.RefSpec
 
 import scala.collection.immutable.IndexedSeq
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -57,12 +58,16 @@ class BlendedDemoMgmtIntegrationSpec
     // wait a second, to give container logs time to flush
     Thread.sleep(1000)
 
-    def writeLog(ctr: String, dir: String): Unit = {
-      readContainerDirectory(ctProxy, ctr, dir).onComplete {
+    def writeLog(ctr: String, dir: String): Future[GetContainerDirectoryResult] = {
+      val result : Future[GetContainerDirectoryResult] = readContainerDirectory(ctProxy, ctr, dir)
+
+      val logdir : String = System.getProperty("logDir", testOutput)
+
+      result.onComplete {
         case Success(cdr) => cdr.result match {
           case Left(_) =>
           case Right(cd) =>
-            val outputDir = s"$testOutput/testlog/$ctr"
+            val outputDir = s"$logdir/$ctr"
             saveContainerDirectory(outputDir, cd)
             log.info(s"Saved container output to [$outputDir]")
 
@@ -70,12 +75,17 @@ class BlendedDemoMgmtIntegrationSpec
         case Failure(e) =>
           log.error(e)(s"Could not read containder directory [$dir] of container [$ctr]")
       }
+
+      result
     }
 
-    writeLog("mgmt_0", "opt/mgmt/log")
-    writeLog("node1_0", "opt/node/log")
-    writeLog("node2_0", "opt/node/log")
+    val getDirs = Future.sequence(Seq(
+      writeLog("mgmt_0", "opt/blended.demo.mgmt_2.13/log"),
+      writeLog("node1_0", "opt/blended.demo.node_2.13/log"),
+      writeLog("node2_0", "opt/blended.demo.node_2.13/log")
+    ))
 
+    Await.result(getDirs, timeout.duration)
     stopContainers(ctProxy)(timeout, testkit)
   }
 }

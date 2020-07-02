@@ -3,6 +3,7 @@ package blended.itest.node
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.util.Timeout
+import blended.itestsupport.docker.protocol.GetContainerDirectoryResult
 import blended.itestsupport.{BlendedIntegrationTestSupport, ContainerUnderTest}
 import blended.testsupport.scalatest.LoggingFreeSpec
 import blended.util.logging.Logger
@@ -11,9 +12,8 @@ import blended.streams.jms.JmsStreamSupport
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
-
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 class BlendedDemoIntegrationSpec
@@ -54,21 +54,25 @@ class BlendedDemoIntegrationSpec
     log.info("Running afterAll...")
 
     val ctr = "node_0"
-    val dir = "/opt/node/log"
+    val dir = "/opt/blended.demo.node_2.13/log"
 
-    readContainerDirectory(ctProxy, ctr, dir).onComplete {
+    val logdir : String = System.getProperty("logDir", testOutput)
+
+    val f : Future[GetContainerDirectoryResult] = readContainerDirectory(ctProxy, ctr, dir)
+
+    f.onComplete {
       case Success(cdr) => cdr.result match {
         case Left(_) =>
         case Right(cd) =>
-          val outputDir = s"$testOutput/testlog"
+          val outputDir = s"$logdir"
           saveContainerDirectory(outputDir, cd)
           log.info(s"Saved container output to [$outputDir]")
-
       }
       case Failure(e) =>
         log.error(e)(s"Could not read container directory [$dir] of container [$ctr]")
     }
 
+    Await.result(f, timeout.duration)
     stopContainers(ctProxy)(timeout, testkit)
   }
 }
