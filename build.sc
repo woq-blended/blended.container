@@ -16,14 +16,14 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-SNAPSHOT"
+val coreVersion : String = "3.2-alpha1-97-gd5abe8eb3"
 val blendedUiVersion : String = "0.6"
 val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.4-SNAPSHOT`
+import $ivy.`de.wayofquality.blended::blended-mill:0.3-13-g0a07d46`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
@@ -200,7 +200,7 @@ object blended extends Module {
 
       override def description : String = "A simple blended demo container"
 
-      override def debugTool : Boolean = true
+      //override def debugTool : Boolean = true
 
       override def millSourcePath : os.Path = projectDir / "container" / "blended.demo.node"
 
@@ -208,70 +208,70 @@ object blended extends Module {
         FeatureRef(
           dependency = blendedDep("features"),
           names = List(
-            "blended.features.base.felix"// , "base.common", "commons"
+            "blended.features.base.felix",
+            //"blended.features.base.equinox",
+            "blended.features.base.common",
+            "blended.features.commons",
+            "blended.features.spring",
+            "blended.features.ssl",
+            "blended.features.jetty",
+            "blended.features.jolokia",
+            "blended.features.hawtio",
+            "blended.features.activemq",
+            "blended.features.security",
+            "blended.features.login",
+            "blended.features.mgmt.client",
+            "blended.features.akka.http.base",
+            "blended.features.persistence",
+            "blended.features.streams",
+            "blended.features.samples"
           )
         )
       )}
 
-//      override def featureModuleDeps = Seq(
-//        blended.launcher.feature.base.felix,
-//        //blended.launcher.feature.base.equinox,
-//        blended.launcher.feature.base.common,
-//        blended.launcher.feature.commons,
-//        blended.launcher.feature.spring,
-//        blended.launcher.feature.ssl,
-//        blended.launcher.feature.jetty,
-//        blended.launcher.feature.jolokia,
-//        blended.launcher.feature.hawtio,
-//        blended.launcher.feature.activemq,
-//        blended.launcher.feature.security,
-//        blended.launcher.feature.login,
-//        blended.launcher.feature.mgmt.client,
-//        blended.launcher.feature.akka.http.base,
-//        blended.launcher.feature.persistence,
-//        blended.launcher.feature.streams,
-//        blended.launcher.feature.samples
-//      )
-
       object docker extends Docker {
-        override def dockerImage = T { s"atooni/blended-node:${imageVersion()}"}
+        override def dockerImage = T { s"blended/blended-node:${imageVersion()}"}
         override def exposedPorts = Seq(1099, 1883, 1884, 1885, 1886, 8181, 8849, 9191, 9995, 9996)
       }
     }
 
-//    object mgmt extends ContainerModule {
-//
-//      override def description : String = "A simple blended management container"
-//
-//      override def millSourcePath : os.Path = projectDir / "container" / "blended.demo.mgmt"
-//
-//      //override def debugTool = true
-//
-////      override def featureModuleDeps = Seq(
-////        blended.launcher.feature.base.felix,
-////        //blended.launcher.feature.base.equinox,
-////        blended.launcher.feature.base.common,
-////        blended.launcher.feature.commons,
-////        blended.launcher.feature.jetty,
-////        blended.launcher.feature.hawtio,
-////        blended.launcher.feature.spring,
-////        blended.launcher.feature.ssl,
-////        blended.launcher.feature.security,
-////        blended.launcher.feature.login,
-////        blended.launcher.feature.mgmt.client,
-////        blended.launcher.feature.mgmt.server,
-////        blended.launcher.feature.akka.http.base,
-////        blended.launcher.feature.streams,
-////        blended.launcher.feature.persistence
-////      )
-//
-//      object docker extends Docker {
-//
-//        override def dockerImage = T { s"atooni/blended-mgmt:${imageVersion()}"}
-//
-//        override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
-//      }
-//    }
+    object mgmt extends ContainerModule {
+
+      override def description : String = "A simple blended management container"
+
+      override def millSourcePath : os.Path = projectDir / "container" / "blended.demo.mgmt"
+
+      //override def debugTool = true
+
+      override def features : T[Seq[FeatureRef]] = T { Seq(
+        FeatureRef(
+          dependency = blendedDep("features"),
+          names = List(
+            "blended.features.base.felix",
+            //"blended.features.base.equinox",
+            "blended.features.base.common",
+            "blended.features.commons",
+            "blended.features.jetty",
+            "blended.features.hawtio",
+            "blended.features.spring",
+            "blended.features.ssl",
+            "blended.features.security",
+            "blended.features.login",
+            "blended.features.mgmt.client",
+            "blended.features.mgmt.server",
+            "blended.features.akka.http.base",
+            "blended.features.streams",
+            "blended.features.persistence"
+          )
+        )
+      )}
+
+      object docker extends Docker {
+
+        override def dockerImage = T { s"blended/blended-mgmt:${imageVersion()}"}
+        override def exposedPorts = Seq(1099, 1883, 9191, 8849, 9995, 9996)
+      }
+    }
   }
 
   object itest extends Module {
@@ -292,30 +292,30 @@ object blended extends Module {
       }
     }
 
-//    object mgmt extends CtIntegrationTest {
-//
-//      object test extends super.CtTest {
-//
-//        override def ivyDeps : T[Agg[Dep]] = T {
-//
-//          super.ivyDeps() ++ Agg(
-//            deps.sttp,
-//            deps.sttpAkka,
-//            deps.microjson,
-//            deps.prickle,
-//            deps.lihaoyiPprint
-//          )
-//        }
-//
-//
-//        override def forkArgs = T { super.forkArgs() ++ Seq(
-//          s"-Ddeploymentpack=${blended.demo.node.deploymentpack().path.toIO.getAbsolutePath()}"
-//        )}
-//
-//        override def millSourcePath: Path = projectDir / "itest" / "blended.itest.mgmt"
-//
-//      }
-//    }
+    object mgmt extends CtIntegrationTest {
+
+      object test extends super.CtTest {
+
+        override def ivyDeps : T[Agg[Dep]] = T {
+
+          super.ivyDeps() ++ Agg(
+            deps.sttp,
+            deps.sttpAkka,
+            deps.microjson,
+            deps.prickle,
+            deps.lihaoyiPprint
+          )
+        }
+
+
+        override def forkArgs = T { super.forkArgs() ++ Seq(
+          s"-Ddeploymentpack=${blended.demo.node.deploymentpack().path.toIO.getAbsolutePath()}"
+        )}
+
+        override def millSourcePath: Path = projectDir / "itest" / "blended.itest.mgmt"
+
+      }
+    }
   }
 }
 

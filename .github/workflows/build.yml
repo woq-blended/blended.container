@@ -46,23 +46,23 @@ jobs:
       - run: |
           ./millw -i -j 0 __.dockerbuild
           docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker pull ${{ secrets.DOCKERHUB_USER }}/splunk:latest 
-          docker pull ${{ secrets.DOCKERHUB_USER }}/apacheds-alpine:1.0.1
-          docker images 
+          docker pull blended/splunk:latest
+          docker pull blended/apacheds-alpine:1.0.1
+          docker images
 
-      - run: ./millw -i __.itest          
+      - run: ./millw -i __.itest
 
-      - name: Upload Testlogs
+      - name: Upload Build logs
         uses: actions/upload-artifact@v2
-        if: failure()
+        if: always()
         with:
-          name: test-logs
+          name: build-log
           path: out
 
       - name: Push docker images
         run: |
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-node:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"')
-          docker push ${{ secrets.DOCKERHUB_USER}}/blended-mgmt:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"') 
+          docker push blended/blended-node:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"')
+          docker push blended/blended-mgmt:$(./millw -i show imageVersion | tr -d '\n' | tr -d '"')
 
       - name: Upload to simple maven store
         if: ${{ matrix.java-version == env.MAIN_JAVA_VERSION && github.ref == env.PUBLISH_BRANCH && github.event_name == 'push' && env.GIT_TAG == ''}}
