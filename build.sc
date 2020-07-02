@@ -107,7 +107,7 @@ trait CtIntegrationTest extends BlendedBaseModule with BlendedCoursierModule {
         s"""<configuration>
           |
           |  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-          |    <file>${projectDir.toString()}/target/test-${moduleSpec}.log</file>
+          |    <file>${projectDir.toString()}/out/testlog/test-${moduleSpec}.log</file>
           |
           |    <encoder>
           |      <pattern>%d{yyyy-MM-dd-HH:mm.ss.SSS} | %8.8r | %-5level [%t] %logger : %msg%n</pattern>

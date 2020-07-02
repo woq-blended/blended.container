@@ -57,7 +57,7 @@ jobs:
         if: always()
         with:
           name: build-log
-          path: out
+          path: out/testlog
 
       - name: Push docker images
         run: |
