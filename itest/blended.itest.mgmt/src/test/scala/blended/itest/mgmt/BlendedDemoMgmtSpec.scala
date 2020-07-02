@@ -46,7 +46,7 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
   }
 
   "Mgmt container sees 2 node and 1 mgmt container" in logException {
-    val rcs : Seq[RemoteContainerState] = Retry.unsafeRetry(delay = 2.seconds, retries = 20) {
+    val rcs : Seq[RemoteContainerState] = Retry.unsafeRetry(delay = 5.seconds, retries = 24) {
       val response = mgmtRequest("/mgmt/container")
       val body = response.body
       val remoteContState : Seq[RemoteContainerState] = Unpickle[Seq[RemoteContainerState]].fromString(body.getOrElse("")).get
@@ -56,7 +56,7 @@ class BlendedDemoMgmtSpec()(implicit testKit: TestKit)
       remoteContState
     }
 
-    val ctProfiles : Map[String, Seq[String]] = rcs.map{ s => 
+    val ctProfiles : Map[String, Seq[String]] = rcs.map{ s =>
       s.containerInfo.containerId -> s.containerInfo.profiles.map(_.name)
     }.toMap
 
