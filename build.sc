@@ -16,14 +16,14 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-alpha1-97-gd5abe8eb3"
+val coreVersion : String = "3.2-alpha1-99-g7d81b11f0"
 val blendedUiVersion : String = "0.6"
 val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.3-13-g0a07d46`
+import $ivy.`de.wayofquality.blended::blended-mill:0.3-18-g293d5a1`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
@@ -199,7 +199,7 @@ object blended extends Module {
   object demo extends Module {
     object node extends ContainerModule {
 
-      override def description : String = "A simple blended demo container"
+      override def description = "A simple blended demo container"
 
       //override def debugTool : Boolean = true
 
@@ -238,7 +238,7 @@ object blended extends Module {
 
     object mgmt extends ContainerModule {
 
-      override def description : String = "A simple blended management container"
+      override def description = "A simple blended management container"
 
       override def millSourcePath : os.Path = projectDir / "container" / "blended.demo.mgmt"
 
