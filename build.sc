@@ -16,14 +16,14 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-alpha1-100-g94b15b350"
+val coreVersion : String = "3.2-alpha2"
 val blendedUiVersion : String = "0.6"
 val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.3-19-gcb6d5bd`
+import $ivy.`de.wayofquality.blended::blended-mill:0.4`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
@@ -141,7 +141,7 @@ trait CtIntegrationTest extends BlendedBaseModule with BlendedCoursierModule {
 
     override def forkArgs = T { super.forkArgs() ++ Seq(
       s"-DprojectTestOutput=${(millSourcePath / "src" / "test" / "resources").toIO.getAbsolutePath()}",
-      s"-DlogDir=${(baseDir / "out" / "testlog" / "ctLogs"/ blendedModule).toIO.getAbsolutePath()}",
+      s"-DlogDir=${(baseDir / "out" / s"testlog-${System.getProperty("java.version")}-${scalaVersion()}" / "ctLogs"/ blendedModule).toIO.getAbsolutePath()}",
       s"-Ddocker.host=${dockerhost()}",
       s"-Ddocker.port=${dockerport()}",
       s"-Dimage.version=${imageVersion()}"
