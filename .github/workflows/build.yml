@@ -46,7 +46,7 @@ jobs:
       - run: |
           ./millw -i -j 0 __.dockerbuild
           docker login -u ${{ secrets.DOCKERHUB_USER}} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker pull blended/splunk:latest
+          docker pull blended/splunk:8.0.5
           docker pull blended/apacheds-alpine:1.0.1
           docker images
 
