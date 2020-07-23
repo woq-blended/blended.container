@@ -16,14 +16,14 @@ import os.RelPath
 import scala.util.Success
 
 /** The versions of the blended mill plugin, the core and the mgmt ui */
-val coreVersion : String = "3.2-RC1"
+val coreVersion : String = "3.2-RC2"
 val blendedUiVersion : String = "0.6"
 val akkaBundleRevision : String = "1"
 
 /** Project directory. */
 val projectDir: os.Path = build.millSourcePath
 
-import $ivy.`de.wayofquality.blended::blended-mill:0.4`
+import $ivy.`de.wayofquality.blended::blended-mill:0.4.1`
 import de.wayofquality.blended.mill.modules._
 import de.wayofquality.blended.mill.feature._
 import de.wayofquality.blended.mill.utils.{FilterUtil, ZipUtil}
